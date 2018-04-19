@@ -1,0 +1,22 @@
+- id: "rule1"
+  description: "a rule"
+  constraints:
+    field1:
+      op: EQ
+      value: "foo"
+    measure1:
+      op: GT
+      value: 0
+  priority: 0
+  classification: "RED"
+- id: "rule2"
+  description: "another rule"
+  constraints:
+    field1:
+      op: EQ
+      value: "bar"
+    measure1:
+      op: GT
+      value: 1
+  priority: 1
+  classification: "BLUE"

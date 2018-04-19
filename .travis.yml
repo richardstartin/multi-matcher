@@ -1,0 +1,17 @@
+language: java
+sudo: false
+
+jdk:
+  - oraclejdk9
+  - oraclejdk8
+
+# Install silently to ensure all pom are installed and compilation is OK: actual checks will be processed by script:
+install: "mvn -P ci clean install --quiet -DskipTests -Dcheckstyle.skip=true -Dmaven.javadoc.skip=true -Dgpg.skip=true"
+
+branches:
+  only:
+    - master
+
+script: "mvn clean verify"
+after_success:
+  - mvn jacoco:report coveralls:report

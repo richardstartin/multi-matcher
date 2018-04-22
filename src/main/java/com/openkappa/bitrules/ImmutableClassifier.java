@@ -29,28 +29,28 @@ public class ImmutableClassifier<T> implements Classifier<T> {
     this.mask = new RunContainer().add(0, max);
   }
 
-  public static <U> CLassifierBuilder<U> builder() {
-    return new CLassifierBuilder<>();
+  public static <U> ClassifierBuilder<U> builder() {
+    return new ClassifierBuilder<>();
   }
 
   @Override
   public Stream<String> classify(T value) {
-    Container container = select(value);
-    ShortIterator it = container.getReverseShortIterator();
+    Container matches = match(value);
+    ShortIterator it = matches.getReverseShortIterator();
     return IntStream.generate(it::nextAsInt)
-            .limit(container.getCardinality())
+            .limit(matches.getCardinality())
             .mapToObj(classifications::get);
   }
 
   @Override
   public Optional<String> getBestClassification(T value) {
-    Container container = select(value);
+    Container container = match(value);
     return container.isEmpty()
             ? Optional.empty()
             : Optional.of(classifications.get(container.last()));
   }
 
-  private Container select(T value) {
+  private Container match(T value) {
     Container context = mask.clone();
     Iterator<Rule<T>> it = rules.iterator();
     while (it.hasNext() && !context.isEmpty()) {
@@ -59,7 +59,7 @@ public class ImmutableClassifier<T> implements Classifier<T> {
     return context;
   }
 
-  public static class CLassifierBuilder<T> {
+  public static class ClassifierBuilder<T> {
 
     private static ClassifierConfig<?> DEFAULT = new ClassifierConfig();
 
@@ -69,7 +69,7 @@ public class ImmutableClassifier<T> implements Classifier<T> {
 
     private short maxPriority = 0;
 
-    public CLassifierBuilder<T> withConfig(ClassifierConfig<T> config) {
+    public ClassifierBuilder<T> withConfig(ClassifierConfig<T> config) {
       this.config = config;
       return this;
     }

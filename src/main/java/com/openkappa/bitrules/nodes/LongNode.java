@@ -43,8 +43,10 @@ public class LongNode {
   public Container apply(long value, Container context) {
     switch (relation) {
       case GT:
+      case GE:
         return context.iand(checkForwards(value));
       case LT:
+      case LE:
         return context.iand(checkBackwards(value));
       case EQ:
         return context.iand(checkOne(value));
@@ -60,10 +62,10 @@ public class LongNode {
 
   private Container checkAll(long value) {
     Container temp = new ArrayContainer();
-    int c = 0;
-    while (c < count) {
-      if (relation.test(value, thresholds[c])) {
-        temp = temp.ior(containers[c++]);
+    int i = 0;
+    while (i < count) {
+      if (relation.test(value, thresholds[i])) {
+        temp = temp.ior(containers[i++]);
       }
     }
     return temp;

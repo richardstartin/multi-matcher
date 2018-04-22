@@ -61,10 +61,10 @@ public class DoubleNode {
 
   private Container checkAll(double value) {
     Container temp = new ArrayContainer();
-    int c = 0;
-    while (c < count) {
-      if (relation.test(value, thresholds[c])) {
-        temp = temp.ior(containers[c++]);
+    int i = 0;
+    while (i < count) {
+      if (relation.test(value, thresholds[i])) {
+        temp = temp.ior(containers[i++]);
       }
     }
     return temp;

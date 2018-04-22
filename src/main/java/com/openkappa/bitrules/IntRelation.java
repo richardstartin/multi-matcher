@@ -16,22 +16,20 @@ public enum IntRelation implements IntBiPredicate {
   }
 
   public static IntRelation from(Operation operation) {
-    if (null != operation) {
-      switch (operation) {
-        case LE:
-          return LE;
-        case LT:
-          return LT;
-        case GE:
-          return GE;
-        case GT:
-          return GT;
-        case EQ:
-          return EQ;
-        default:
-      }
+    switch (operation) {
+      case LE:
+        return LE;
+      case LT:
+        return LT;
+      case GE:
+        return GE;
+      case GT:
+        return GT;
+      case EQ:
+        return EQ;
+      default:
+        throw new IllegalStateException("Unknown operation " + operation);
     }
-    throw new IllegalStateException();
   }
 
   @Override

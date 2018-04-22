@@ -14,20 +14,16 @@ public enum DoubleRelation implements DoubleBiPredicate {
   }
 
   public static DoubleRelation from(Operation operation) {
-    if (null != operation) {
-      switch (operation) {
-        case LE:
-        case LT:
-          return LT;
-        case GE:
-        case GT:
-          return GT;
-        case EQ:
-          return EQ;
-        default:
-      }
+    switch (operation) {
+      case LT:
+        return LT;
+      case GT:
+        return GT;
+      case EQ:
+        return EQ;
+      default:
+        throw new IllegalStateException("Unknown operation " + operation);
     }
-    throw new IllegalStateException();
   }
 
   @Override

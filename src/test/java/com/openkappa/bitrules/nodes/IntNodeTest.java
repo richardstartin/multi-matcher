@@ -57,9 +57,72 @@ public class IntNodeTest {
     assertEquals(mask.clone().remove((short) 0).remove((short) 1), node.apply(10, mask.clone()));
   }
 
+  @Test
+  public void testGreaterThanRev() {
+    IntNode node = buildRev(100, IntRelation.GT);
+    Container mask = RunContainer.rangeOfOnes(0, 100);
+    assertTrue(node.apply(0, mask.clone()).isEmpty());
+    assertEquals(new ArrayContainer().add((short) 0), node.apply(1, mask.clone()));
+  }
+
+
+  @Test
+  public void testGreaterThanOrEqualRev() {
+    IntNode node = buildRev(100, IntRelation.GE);
+    Container mask = RunContainer.rangeOfOnes(0, 100);
+    assertTrue(node.apply(-1, mask.clone()).isEmpty());
+    assertEquals(new ArrayContainer().add((short) 0), node.apply(0, mask.clone()));
+    assertEquals(new ArrayContainer().add((short) 0).add((short) 1), node.apply(10, mask.clone()));
+  }
+
+  @Test
+  public void testEqualRev() {
+    IntNode node = buildRev(100, IntRelation.EQ);
+    Container mask = RunContainer.rangeOfOnes(0, 100);
+    assertTrue(node.apply(-1, mask.clone()).isEmpty());
+    assertEquals(new ArrayContainer().add((short) 0), node.apply(0, mask.clone()));
+    assertEquals(new ArrayContainer().add((short) 1), node.apply(10, mask.clone()));
+  }
+
+
+  @Test
+  public void testLessThanOrEqualRev() {
+    IntNode node = buildRev(100, IntRelation.LE);
+    Container mask = RunContainer.rangeOfOnes(0, 100);
+    assertTrue(node.apply(1001, mask.clone()).isEmpty());
+    assertEquals(mask, node.apply(0, mask.clone()));
+    assertEquals(mask.remove((short) 0), node.apply(10, mask.clone()));
+  }
+
+  @Test
+  public void testLessThanRev() {
+    IntNode node = buildRev(100, IntRelation.LT);
+    Container mask = RunContainer.rangeOfOnes(0, 100);
+    assertTrue(node.apply(1001, mask.clone()).isEmpty());
+    assertEquals(mask.clone().remove((short) 0), node.apply(0, mask.clone()));
+    assertEquals(mask.clone().remove((short) 0).remove((short) 1), node.apply(10, mask.clone()));
+  }
+
+  @Test
+  public void testBuildNode() {
+    IntNode node = new IntNode(IntRelation.EQ);
+    node.add(0, (short)0);
+    assertEquals(RunContainer.rangeOfOnes(0, 1), node.apply(0, RunContainer.rangeOfOnes(0, 1)));
+    node.add(0, (short)1);
+    assertEquals(RunContainer.rangeOfOnes(0, 2), node.apply(0, RunContainer.rangeOfOnes(0, 2)));
+  }
+
   private IntNode build(int count, IntRelation relation) {
     IntNode node = new IntNode(relation);
     for (int i = 0; i < count; ++i) {
+      node.add(i * 10, (short) i);
+    }
+    return node;
+  }
+
+  private IntNode buildRev(int count, IntRelation relation) {
+    IntNode node = new IntNode(relation);
+    for (int i = count - 1; i >= 0; --i) {
       node.add(i * 10, (short) i);
     }
     return node;

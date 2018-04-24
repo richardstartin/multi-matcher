@@ -51,21 +51,8 @@ public class DoubleNode {
         break;
       default:
     }
+    trim();
     return this;
-  }
-
-  private void reverseRangeEncode() {
-    for (int i = count - 2; i >= 0; --i) {
-      sets[i] = sets[i].ior(sets[i + 1]);
-    }
-  }
-
-  private void rangeEncode() {
-    for (int i = 1; i < count; ++i) {
-      sets[i] = sets[i].ior(sets[i - 1]);
-    }
-    thresholds = Arrays.copyOf(thresholds, count);
-    sets = Arrays.copyOf(sets, count);
   }
 
   public Container apply(double value, Container context) {
@@ -96,6 +83,23 @@ public class DoubleNode {
     int pos = Arrays.binarySearch(thresholds, 0, count, value);
     int index = (pos >= 0 ? pos + 1 : -(pos + 1));
     return index >= 0 && index < count ? sets[index] : EMPTY;
+  }
+
+  private void reverseRangeEncode() {
+    for (int i = count - 2; i >= 0; --i) {
+      sets[i] = sets[i].ior(sets[i + 1]);
+    }
+  }
+
+  private void rangeEncode() {
+    for (int i = 1; i < count; ++i) {
+      sets[i] = sets[i].ior(sets[i - 1]);
+    }
+  }
+
+  private void trim() {
+    thresholds = Arrays.copyOf(thresholds, count);
+    sets = Arrays.copyOf(sets, count);
   }
 
   private void incrementCount() {

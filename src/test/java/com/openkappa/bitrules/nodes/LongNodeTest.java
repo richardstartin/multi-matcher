@@ -117,7 +117,7 @@ public class LongNodeTest {
     for (int i = 0; i < count; ++i) {
       node.add(i * 10, (short)i);
     }
-    return node;
+    return node.optimise();
   }
 
   private LongNode buildRev(int count, LongRelation relation) {
@@ -125,7 +125,7 @@ public class LongNodeTest {
     for (int i = count - 1; i >= 0; --i) {
       node.add(i * 10, (short)i);
     }
-    return node;
+    return node.optimise();
   }
 
 }

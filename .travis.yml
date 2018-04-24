@@ -14,4 +14,4 @@ branches:
 
 script: "mvn clean verify"
 after_success:
-  - mvn jacoco:report coveralls:report
+  - mvn jacoco:report coveralls:report --debug

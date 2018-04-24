@@ -32,4 +32,9 @@ public class IntRule<T> implements Rule<T> {
     node.add(relation, value, priority);
     wildcards = wildcards.remove(priority);
   }
+
+  @Override
+  public void freeze() {
+    node.optimise();
+  }
 }

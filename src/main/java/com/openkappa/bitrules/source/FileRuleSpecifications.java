@@ -3,6 +3,7 @@ package com.openkappa.bitrules.source;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openkappa.bitrules.RuleSpecification;
+import com.openkappa.bitrules.RuleSpecifications;
 
 import java.io.IOException;
 import java.io.InputStream;

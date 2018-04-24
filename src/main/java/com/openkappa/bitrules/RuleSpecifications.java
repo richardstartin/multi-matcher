@@ -1,7 +1,4 @@
-package com.openkappa.bitrules.source;
-
-
-import com.openkappa.bitrules.RuleSpecification;
+package com.openkappa.bitrules;
 
 import java.io.IOException;
 import java.util.List;

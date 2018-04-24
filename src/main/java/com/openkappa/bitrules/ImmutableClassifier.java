@@ -5,7 +5,6 @@ import com.openkappa.bitrules.config.FunctionProvider;
 import com.openkappa.bitrules.config.ClassifierConfig;
 import com.openkappa.bitrules.config.RuleAttributeNotRegistered;
 import com.openkappa.bitrules.nodes.NamedFunctionRule;
-import com.openkappa.bitrules.source.RuleSpecifications;
 import org.roaringbitmap.Container;
 import org.roaringbitmap.RunContainer;
 import org.roaringbitmap.ShortIterator;

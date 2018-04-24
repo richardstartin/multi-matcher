@@ -6,7 +6,6 @@ import com.openkappa.bitrules.config.RuleAttributeNotRegistered;
 import com.openkappa.bitrules.config.ClassifierConfig;
 import com.openkappa.bitrules.config.RuleValueTypeMismatch;
 import com.openkappa.bitrules.source.FileRuleSpecifications;
-import com.openkappa.bitrules.source.RuleSpecifications;
 import org.junit.Test;
 
 import java.io.IOException;

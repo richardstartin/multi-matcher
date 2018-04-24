@@ -24,7 +24,7 @@ public class DynamicRule<T, C> implements Rule<T> {
   }
 
   @Override
-  public Container apply(T value, Container context) {
+  public Container match(T value, Container context) {
     Optional<C> dataContext = dataContextProvider.apply(value);
     Container ctx = context;
     for (BiPredicateWithPriority<T, Optional<C>> pred : predicates) {

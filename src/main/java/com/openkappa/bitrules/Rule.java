@@ -6,9 +6,11 @@ import org.roaringbitmap.Container;
 
 public interface Rule<T> {
 
-  Container apply(T value, Container context);
+  Container match(T value, Container context);
 
   void addConstraint(Constraint constraint, short priority);
+
+  default void freeze() {}
 
   default double mustGetDoubleValue(Constraint constraint) {
     Object value = constraint.getValue();

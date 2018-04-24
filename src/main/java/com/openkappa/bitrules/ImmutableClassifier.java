@@ -27,6 +27,7 @@ public class ImmutableClassifier<T> implements Classifier<T> {
     this.classifications = classifications;
     this.rules = rules;
     this.mask = new RunContainer().add(0, max);
+    rules.forEach(Rule::freeze);
   }
 
   public static <U> ClassifierBuilder<U> builder() {
@@ -54,7 +55,7 @@ public class ImmutableClassifier<T> implements Classifier<T> {
     Container context = mask.clone();
     Iterator<Rule<T>> it = rules.iterator();
     while (it.hasNext() && !context.isEmpty()) {
-      context = it.next().apply(value, context);
+      context = it.next().match(value, context);
     }
     return context;
   }

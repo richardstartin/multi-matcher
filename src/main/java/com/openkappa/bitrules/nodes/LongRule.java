@@ -22,7 +22,7 @@ public class LongRule<T> implements Rule<T> {
   }
 
   @Override
-  public Container apply(T value, Container context) {
+  public Container match(T value, Container context) {
     Container result = node.apply(accessor.applyAsLong(value), context);
     return context.iand(result.or(wildcards));
   }

@@ -16,7 +16,7 @@ public class StringRule<T> implements Rule<T> {
     this.rules = new StringEqualityNode();
   }
 
-  public Container apply(T value, Container context) {
+  public Container match(T value, Container context) {
     return rules.apply(accessor.apply(value), context);
   }
 

@@ -24,7 +24,7 @@ public class NamedFunctionRule<T> implements Rule<T> {
   }
 
   @Override
-  public Container apply(T value, Container context) {
+  public Container match(T value, Container context) {
     if (!wildcards.contains(context)) {
       Container scope = context.andNot(wildcards);
       for (NamedFunctionNode<T> node : nodes) {

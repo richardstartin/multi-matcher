@@ -25,4 +25,8 @@ public class CompositeDoubleNode {
     return result.iand(temp);
   }
 
+  public void optimise() {
+    components.values().forEach(DoubleNode::optimise);
+  }
+
 }

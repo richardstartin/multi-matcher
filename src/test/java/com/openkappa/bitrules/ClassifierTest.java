@@ -32,7 +32,7 @@ public class ClassifierTest {
                     RuleSpecification.of("rule1", "rule 1",
                             ImmutableMap.of("field1", Constraint.equalTo("foo"),
                                     "measure1", Constraint.lessThan(0D)),
-                            (short) 0, "RED")
+                            0, "RED")
             )
     );
 
@@ -54,11 +54,11 @@ public class ClassifierTest {
                     RuleSpecification.of("rule1", "rule 1",
                             ImmutableMap.of("field1", Constraint.equalTo("foo"),
                                     "measure1", Constraint.lessThan(0D)),
-                            (short) 0, "RED"),
+                            0, "RED"),
                     RuleSpecification.of("rule2", "rule 2",
                             ImmutableMap.of("field1", Constraint.equalTo("bar"),
                                     "measure1", Constraint.greaterThan(0D)),
-                            (short) 0, "BLUE")
+                            0, "BLUE")
             )
     );
 
@@ -80,11 +80,11 @@ public class ClassifierTest {
                     RuleSpecification.of("rule1", "rule 1",
                             ImmutableMap.of("field1", Constraint.equalTo("foo"),
                                     "measure1", Constraint.greaterThan(0D)),
-                            (short) 0, "RED"),
+                            0, "RED"),
                     RuleSpecification.of("rule2", "rule 2",
                             ImmutableMap.of("field1", Constraint.equalTo("foo"),
                                     "measure1", Constraint.greaterThan(1D)),
-                            (short) 1, "BLUE")
+                            1, "BLUE")
             )
     );
     assertFalse(engine.getBestClassification(TestDomainObject.random()).isPresent());
@@ -125,17 +125,17 @@ public class ClassifierTest {
     Classifier<TestDomainObject> engine = buildWithContext(
             () -> Arrays.asList(
                     RuleSpecification.of("rule1", "rule 1",
-                            ImmutableMap.of("field1", Constraint.equalTo("foo")), (short)0, "RED"),
+                            ImmutableMap.of("field1", Constraint.equalTo("foo")), 0, "RED"),
                     RuleSpecification.of("rule2", "rule 2",
-                            ImmutableMap.of("field2", Constraint.equalTo("bar")), (short)1, "BLUE"),
+                            ImmutableMap.of("field2", Constraint.equalTo("bar")), 1, "BLUE"),
                     RuleSpecification.of("rule3", "rule 3",
                             ImmutableMap.of("computed",
                                     Constraint.greaterThan(ImmutableMap.of("factor", -1D), 2)),
-                            (short)2, "YELLOW"),
+                            2, "YELLOW"),
                     RuleSpecification.of("rule3", "rule 3",
                             ImmutableMap.of("measure1",
                                     Constraint.greaterThan(2)),
-                            (short)1, "ORANGE")
+                            3, "ORANGE")
             )
     );
     TestDomainObject value = TestDomainObject.random();
@@ -154,10 +154,10 @@ public class ClassifierTest {
             ).build(() -> Arrays.asList(
                     RuleSpecification.of("rule1", "rule1",
                             ImmutableMap.of("measure2", Constraint.equalTo(999)),
-                            (short)0, "RED"),
+                            0, "RED"),
                     RuleSpecification.of("rule1", "rule1",
                             ImmutableMap.of("measure2", Constraint.lessThan(1000)),
-                            (short)1, "BLUE")
+                            1, "BLUE")
             ));
 
     TestDomainObject test = TestDomainObject.random();
@@ -175,10 +175,10 @@ public class ClassifierTest {
             ).build(() -> Arrays.asList(
                     RuleSpecification.of("rule1", "rule1",
                             ImmutableMap.of("measure3", Constraint.equalTo(999)),
-                            (short)0, "RED"),
+                            0, "RED"),
                     RuleSpecification.of("rule1", "rule1",
                             ImmutableMap.of("measure3", Constraint.lessThan(1000)),
-                            (short)1, "BLUE")
+                            1, "BLUE")
             ));
 
     TestDomainObject test = TestDomainObject.random();
@@ -192,12 +192,12 @@ public class ClassifierTest {
   public void testRangeBasedRules() throws IOException {
     Classifier<TestDomainObject> engine = buildWithContinuousAttributes(() -> Arrays.asList(
         RuleSpecification.of("rule1", "rule 1",
-                ImmutableMap.of("measure1", Constraint.greaterThan(10)), (short)1, "RED"),
+                ImmutableMap.of("measure1", Constraint.greaterThan(10)), 1, "RED"),
             RuleSpecification.of("rule2", "rule 2",
                     ImmutableMap.of("computed", Constraint.lessThan(ImmutableMap.of("factor", 2D), 10)),
-                    (short)2, "BLUE"),
+                    2, "BLUE"),
             RuleSpecification.of("rule3", "rule 3",
-                    ImmutableMap.of("measure1", Constraint.equalTo(5)), (short)3, "YELLOW")
+                    ImmutableMap.of("measure1", Constraint.equalTo(5)), 3, "YELLOW")
     ));
     TestDomainObject value = TestDomainObject.random().setMeasure1(11);
     assertEquals("RED", engine.getBestClassification(value).get());
@@ -210,9 +210,9 @@ public class ClassifierTest {
     Classifier<TestDomainObject> engine = buildWithDataContext(
             () -> Arrays.asList(
                     RuleSpecification.of("rule1", "rule 1",
-                            ImmutableMap.of("measure1", Constraint.greaterThan(200)), (short)0, "RED"),
-                    RuleSpecification.of("rule1", "rule 1",
-                            ImmutableMap.of("dynamic", Constraint.greaterThan(2)), (short)0, "BLUE")
+                            ImmutableMap.of("measure1", Constraint.greaterThan(200)), 0, "RED"),
+                    RuleSpecification.of("rule2", "rule 2",
+                            ImmutableMap.of("dynamic", Constraint.greaterThan(2)), 1, "BLUE")
                     ), tdo -> Optional.of(2D));
     TestDomainObject value = TestDomainObject.random();
     assertFalse(engine.getBestClassification(value).isPresent());
@@ -223,7 +223,7 @@ public class ClassifierTest {
   public void testBuildRuleClassifierUnregisteredAttribute() throws IOException {
     buildSimple(() -> Collections.singletonList(
             RuleSpecification.of("missing", "missing", ImmutableMap.of("missing", Constraint.equalTo("missing")),
-                    (short)0, "MISSING")));
+                    0, "MISSING")));
   }
 
 
@@ -231,7 +231,7 @@ public class ClassifierTest {
   public void testBuildRuleClassifierWithBadTypeConstraint() throws IOException {
     buildSimple(() -> Collections.singletonList(
             RuleSpecification.of("bad type", "bad type", ImmutableMap.of("field1", Constraint.lessThan(0D)),
-                    (short)0, "BAD TYPE")));
+                    0, "BAD TYPE")));
   }
 
   @Test(expected = IOException.class)
@@ -285,10 +285,10 @@ public class ClassifierTest {
                     .withDoubleAttribute("measure1", TestDomainObject::getMeasure1)
                     .withContextualDoubleAttribute("computed", ctx ->
                             value -> (double)ctx.get("factor") * value.getMeasure1())
-                    .withDynamicAttribute("dynamic", dataContextProvider, (rc, v) -> new BiPredicateWithPriority<TestDomainObject, Optional<Double>>() {
+                    .withDynamicAttribute("dynamic", dataContextProvider, (rc, priority) -> new BiPredicateWithPriority<TestDomainObject, Optional<Double>>() {
                       @Override
                       public short priority() {
-                        return 1;
+                        return priority;
                       }
 
                       @Override

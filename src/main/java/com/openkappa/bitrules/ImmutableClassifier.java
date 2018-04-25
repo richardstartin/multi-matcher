@@ -36,7 +36,7 @@ public class ImmutableClassifier<T> implements Classifier<T> {
   @Override
   public Stream<String> classify(T value) {
     Container matches = match(value);
-    ShortIterator it = matches.getReverseShortIterator();
+    ShortIterator it = matches.getShortIterator();
     return IntStream.generate(it::nextAsInt)
             .limit(matches.getCardinality())
             .mapToObj(classifications::get);
@@ -47,7 +47,7 @@ public class ImmutableClassifier<T> implements Classifier<T> {
     Container container = match(value);
     return container.isEmpty()
             ? Optional.empty()
-            : Optional.of(classifications.get(container.last()));
+            : Optional.of(classifications.get(container.first()));
   }
 
   private Container match(T value) {
@@ -83,7 +83,7 @@ public class ImmutableClassifier<T> implements Classifier<T> {
       PrimitiveIterator.OfInt seq = IntStream.iterate(0, i -> i + 1).iterator();
       source.get()
             .stream()
-            .sorted(Comparator.comparingInt(rd -> rd.getPriority() & 0xFFFF))
+            .sorted(Comparator.comparingInt(rd -> (1 << 16) - rd.getPriority() - 1))
             .forEach(rule -> addRuleData(rule, (short) seq.nextInt()));
       maxPriority = (short) seq.nextInt();
     }

@@ -10,7 +10,7 @@ public class RuleSpecification {
   public static RuleSpecification of(String id,
                                      String description,
                                      Map<String, Constraint> constraints,
-                                     short priority,
+                                     int priority,
                                      String classification) {
     return new RuleSpecification(id, description, constraints, priority, classification);
   }
@@ -22,14 +22,14 @@ public class RuleSpecification {
   @JsonProperty("constraints")
   private Map<String, Constraint> constraints;
   @JsonProperty("priority")
-  private short priority;
+  private int priority;
   @JsonProperty("classification")
   private String classification;
 
   public RuleSpecification(String id,
                            String description,
                            Map<String, Constraint> constraints,
-                           short priority,
+                           int priority,
                            String classification) {
     this.id = id;
     this.description = description;
@@ -53,7 +53,7 @@ public class RuleSpecification {
     return constraints;
   }
 
-  public short getPriority() {
+  public int getPriority() {
     return priority;
   }
 

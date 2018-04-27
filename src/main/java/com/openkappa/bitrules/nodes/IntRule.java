@@ -28,7 +28,8 @@ public class IntRule<T> implements Rule<T> {
   @Override
   public void addConstraint(Constraint constraint, short priority) {
     IntRelation relation = IntRelation.from(constraint.getOperation());
-    int value = ((Number) constraint.getValue()).intValue();
+    Number number = coerceValue(constraint);
+    int value = number.intValue();
     node.add(relation, value, priority);
     wildcards = wildcards.remove(priority);
   }

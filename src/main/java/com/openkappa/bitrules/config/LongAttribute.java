@@ -5,11 +5,11 @@ import com.openkappa.bitrules.nodes.LongRule;
 
 import java.util.function.ToLongFunction;
 
-public class ConstrainedLongAttribute<T> implements ConstrainedAttribute<T> {
+public class LongAttribute<T> implements Attribute<T> {
 
   private final ToLongFunction<T> accessor;
 
-  public ConstrainedLongAttribute(ToLongFunction<T> accessor) {
+  public LongAttribute(ToLongFunction<T> accessor) {
     this.accessor = accessor;
   }
 

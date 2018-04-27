@@ -1,18 +1,14 @@
 package com.openkappa.bitrules;
 
 
-import com.openkappa.bitrules.config.FunctionProvider;
 import com.openkappa.bitrules.config.ClassifierConfig;
 import com.openkappa.bitrules.config.RuleAttributeNotRegistered;
-import com.openkappa.bitrules.nodes.NamedFunctionRule;
 import org.roaringbitmap.Container;
 import org.roaringbitmap.RunContainer;
 import org.roaringbitmap.ShortIterator;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.function.Function;
-import java.util.function.ToDoubleFunction;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -92,16 +88,12 @@ public class ImmutableClassifier<T> implements Classifier<T> {
       classifications.add(ruleInfo.getClassification());
       for (Map.Entry<String, Constraint> condition : ruleInfo.getConstraints().entrySet()) {
         Constraint rc = condition.getValue();
-        String key = isNullOrEmpty(rc.getFunction()) ? condition.getKey() : rc.getFunction();
+        String key = condition.getKey();
         final Rule<T> rule;
         if (rules.containsKey(key)) {
           rule = rules.get(key);
         } else if (config.hasAttribute(key)) {
           rule = config.getAttribute(key).toRule();
-          rules.put(key, rule);
-        } else if (config.hasFunction(key)) {
-          Function<Context, ToDoubleFunction<T>> factory = config.getFunction(key);
-          rule = new NamedFunctionRule<>(FunctionProvider.of(factory));
           rules.put(key, rule);
         } else {
           throw new RuleAttributeNotRegistered("No attribute or function [" + key + "] registered.");

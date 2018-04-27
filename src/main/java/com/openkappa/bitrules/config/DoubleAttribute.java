@@ -5,11 +5,11 @@ import com.openkappa.bitrules.nodes.DoubleRule;
 
 import java.util.function.ToDoubleFunction;
 
-class ConstrainedDoubleAttribute<T> implements ConstrainedAttribute<T> {
+class DoubleAttribute<T> implements Attribute<T> {
 
   private final ToDoubleFunction<T> accessor;
 
-  public ConstrainedDoubleAttribute(ToDoubleFunction<T> accessor) {
+  public DoubleAttribute(ToDoubleFunction<T> accessor) {
     this.accessor = accessor;
   }
 

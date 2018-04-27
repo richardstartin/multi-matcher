@@ -30,7 +30,8 @@ public class LongRule<T> implements Rule<T> {
   @Override
   public void addConstraint(Constraint constraint, short priority) {
     LongRelation relation = LongRelation.from(constraint.getOperation());
-    long value = ((Number) constraint.getValue()).longValue();
+    Number number = coerceValue(constraint);
+    long value = number.longValue();
     node.add(relation, value, priority);
     wildcards = wildcards.remove(priority);
   }

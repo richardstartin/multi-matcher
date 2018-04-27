@@ -28,7 +28,8 @@ public class DoubleRule<T> implements Rule<T> {
   @Override
   public void addConstraint(Constraint constraint, short priority) {
     DoubleRelation relation = DoubleRelation.from(constraint.getOperation());
-    double value = ((Number) constraint.getValue()).doubleValue();
+    Number number = coerceValue(constraint);
+    double value = number.doubleValue();
     node.add(relation, value, priority);
     wildcards = wildcards.remove(priority);
   }

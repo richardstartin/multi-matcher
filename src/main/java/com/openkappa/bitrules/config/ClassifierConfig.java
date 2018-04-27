@@ -1,54 +1,47 @@
 package com.openkappa.bitrules.config;
 
 
-import com.openkappa.bitrules.BiPredicateWithPriority;
-import com.openkappa.bitrules.Constraint;
 import com.openkappa.bitrules.Context;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
-import java.util.function.*;
+import java.util.function.Function;
+import java.util.function.ToDoubleFunction;
+import java.util.function.ToIntFunction;
+import java.util.function.ToLongFunction;
 
 public class ClassifierConfig<T> {
 
-  private Map<String, ConstrainedAttribute<T>> rules = new HashMap<>();
+  private Map<String, Attribute<T>> rules = new HashMap<>();
   private Map<String, Function<Context, ToDoubleFunction<T>>> functions = new HashMap<>();
 
   public static <U> ClassifierConfig<U> newInstance() {
     return new ClassifierConfig<>();
   }
 
-  public ClassifierConfig<T> withStringAttribute(String name, Function<T, String> accessor) {
-    rules.put(name, new ConstrainedStringAttribute<>(accessor));
+  public <U> ClassifierConfig<T> withAttribute(String name, Function<T, U> accessor) {
+    rules.put(name, new GenericAttribute<>(accessor));
     return this;
   }
 
-  public ClassifierConfig<T> withDoubleAttribute(String name, ToDoubleFunction<T> accessor) {
-    rules.put(name, new ConstrainedDoubleAttribute<>(accessor));
+  public <U> ClassifierConfig<T> withAttribute(String name, Function<T, U> accessor, Comparator<U> comparator) {
+    rules.put(name, new ComparableAttribute<>(comparator, accessor));
     return this;
   }
 
-  public ClassifierConfig<T> withIntAttribute(String name, ToIntFunction<T> accessor) {
-    rules.put(name, new ConstrainedIntAttribute<>(accessor));
+  public ClassifierConfig<T> withAttribute(String name, ToDoubleFunction<T> accessor) {
+    rules.put(name, new DoubleAttribute<>(accessor));
     return this;
   }
 
-  public ClassifierConfig<T> withLongAttribute(String name, ToLongFunction<T> accessor) {
-    rules.put(name, new ConstrainedLongAttribute<>(accessor));
+  public ClassifierConfig<T> withAttribute(String name, ToIntFunction<T> accessor) {
+    rules.put(name, new IntAttribute<>(accessor));
     return this;
   }
 
-  public ClassifierConfig<T> withContextualDoubleAttribute(String name, Function<Context, ToDoubleFunction<T>> factory) {
-    functions.put(name, factory);
-    return this;
-  }
-
-  public <C> ClassifierConfig<T> withDynamicAttribute(
-          String name,
-          Function<T, Optional<C>> dataContextProvider,
-          BiFunction<Constraint, Short, BiPredicateWithPriority<T, Optional<C>>> predicateProvider) {
-    rules.put(name, new DynamicallyConstrainedAttribute<>(dataContextProvider, predicateProvider));
+  public ClassifierConfig<T> withAttribute(String name, ToLongFunction<T> accessor) {
+    rules.put(name, new LongAttribute<>(accessor));
     return this;
   }
 
@@ -56,7 +49,7 @@ public class ClassifierConfig<T> {
     return rules.containsKey(name);
   }
 
-  public ConstrainedAttribute<T> getAttribute(String name) {
+  public Attribute<T> getAttribute(String name) {
     return rules.get(name);
   }
 

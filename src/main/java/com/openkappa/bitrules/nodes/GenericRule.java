@@ -6,14 +6,14 @@ import org.roaringbitmap.Container;
 
 import java.util.function.Function;
 
-public class StringRule<T> implements Rule<T> {
+public class GenericRule<T, U> implements Rule<T> {
 
-  private final Function<T, String> accessor;
-  private final StringEqualityNode rules;
+  private final Function<T, U> accessor;
+  private final GenericEqualityNode<U> rules;
 
-  public StringRule(Function<T, String> accessor) {
+  public GenericRule(Function<T, U> accessor) {
     this.accessor = accessor;
-    this.rules = new StringEqualityNode();
+    this.rules = new GenericEqualityNode<>();
   }
 
   public Container match(T value, Container context) {
@@ -22,6 +22,6 @@ public class StringRule<T> implements Rule<T> {
 
   @Override
   public void addConstraint(Constraint constraint, short priority) {
-    rules.add(mustGetStringValue(constraint), priority);
+    rules.add((U) constraint.getValue(), priority);
   }
 }

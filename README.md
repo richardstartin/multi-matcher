@@ -11,23 +11,23 @@ Step 1: Build a classification engine
 ```java
     Classifier<Product> classifier = ImmutableClassifier.<Product>builder()
                 .withConfig(ClassifierConfig.<Product>newInstance()
-                        .withStringAttribute("productType", Product::getProductType)
-                        .withDoubleAttribute("productName", Product::getProductName)
-                        .withDoubleAttribute("availability", Product::getAvailability)
-                        .withContextualDoubleAttribute("discountedPrice", ctx ->
-                                value -> (double)ctx.get("discountFactor") * value.getPrice())
+                        .withAttribute("productType", Product::getProductType)
+                        .withAttribute("issueDate", Product::getIssueDate, Comparator.naturalOrder().reversed())
+                        .withAttribute("productName", Product::getProductName)
+                        .withAttribute("availability", Product::getAvailability)
+                        .withAttribute("discountedPrice", value -> 0.2 * value.getPrice())
                 ).build(() -> Arrays.asList(
                     RuleSpecification.of("rule1", "silk is an expensive luxury product",
                             ImmutableMap.of("productType", Constraint.equalTo("silk"),
                                             "discountedPrice", Constraint.greaterThan(1000)),
-                            (short) 0, "EXPENSIVE_LUXURY_PRODUCTS"),
+                            0, "EXPENSIVE_LUXURY_PRODUCTS"),
                     RuleSpecification.of("rule2", "caviar is an expensive luxury product",
                             ImmutableMap.of("productType", Constraint.equalTo("caviar"),
                                             "discountedPrice", Constraint.greaterThan(100)),
-                            (short) 1, "EXPENSIVE_LUXURY_PRODUCTS"),
+                            1, "EXPENSIVE_LUXURY_PRODUCTS"),
                     RuleSpecification.of("rule2", "Baked beans are cheap food",
                             ImmutableMap.of("productName", Constraint.equalTo("baked beans"))
-                            (short) 0, "CHEAP_FOOD")
+                            2, "CHEAP_FOOD")
                 )
             );
 ```

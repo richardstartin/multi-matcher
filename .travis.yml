@@ -12,6 +12,6 @@ branches:
   only:
     - master
 
-script: "mvn clean verify -Dgpg.skip=true"
+script: > mvn clean verify -Dgpg.skip=true
 after_success:
   - mvn jacoco:report coveralls:report --debug

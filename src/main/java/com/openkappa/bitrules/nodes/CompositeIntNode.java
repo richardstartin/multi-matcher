@@ -15,7 +15,7 @@ public class CompositeIntNode {
     children.computeIfAbsent(relation, IntNode::new).add(threshold, priority);
   }
 
-  public Container apply(int value, Container result) {
+  public Container match(int value, Container result) {
     Container temp = new ArrayContainer();
     for (IntNode component : children.values()) {
       temp = temp.ior(component.apply(value, result.clone()));

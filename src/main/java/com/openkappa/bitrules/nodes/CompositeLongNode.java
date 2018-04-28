@@ -15,7 +15,7 @@ public class CompositeLongNode {
     children.computeIfAbsent(relation, LongNode::new).add(threshold, priority);
   }
 
-  public Container apply(long value, Container result) {
+  public Container match(long value, Container result) {
     Container temp = new ArrayContainer();
     for (LongNode component : children.values()) {
       temp = temp.ior(component.apply(value, result.clone()));

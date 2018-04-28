@@ -2,7 +2,8 @@ package com.openkappa.bitrules.nodes;
 
 
 import com.openkappa.bitrules.DoubleRelation;
-import org.roaringbitmap.*;
+import org.roaringbitmap.ArrayContainer;
+import org.roaringbitmap.Container;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -16,10 +17,10 @@ public class CompositeDoubleNode {
               .add(threshold, priority);
   }
 
-  public Container apply(double value, Container result) {
+  public Container match(double value, Container result) {
     Container temp = new ArrayContainer();
     for (DoubleNode component : children.values()) {
-      temp = temp.ior(component.apply(value, result.clone()));
+      temp = temp.ior(component.match(value, result.clone()));
     }
     return result.iand(temp);
   }

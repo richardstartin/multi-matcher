@@ -18,62 +18,62 @@ public class DoubleNodeTest {
   public void testGreaterThan() {
     DoubleNode node = build(100, DoubleRelation.GT);
     Container mask = RunContainer.rangeOfOnes(0, 100);
-    assertTrue(node.apply(0, mask.clone()).isEmpty());
-    assertEquals(ZERO, node.apply(1, mask.clone()));
-    assertEquals(ZERO_OR_ONE, node.apply(11, mask.clone()));
+    assertTrue(node.match(0, mask.clone()).isEmpty());
+    assertEquals(ZERO, node.match(1, mask.clone()));
+    assertEquals(ZERO_OR_ONE, node.match(11, mask.clone()));
   }
 
   @Test
   public void testEqual() {
     DoubleNode node = build(100, DoubleRelation.EQ);
     Container mask = RunContainer.rangeOfOnes(0, 100);
-    assertTrue(node.apply(-1, mask.clone()).isEmpty());
-    assertEquals(ZERO, node.apply(0, mask.clone()));
-    assertEquals(ONE, node.apply(10, mask.clone()));
+    assertTrue(node.match(-1, mask.clone()).isEmpty());
+    assertEquals(ZERO, node.match(0, mask.clone()));
+    assertEquals(ONE, node.match(10, mask.clone()));
   }
 
   @Test
   public void testLessThan() {
     DoubleNode node = build(100, DoubleRelation.LT);
     Container mask = RunContainer.rangeOfOnes(0, 100);
-    assertTrue(node.apply(1001, mask.clone()).isEmpty());
-    assertEquals(mask.andNot(ZERO), node.apply(0, mask.clone()));
-    assertEquals(mask.andNot(ZERO_OR_ONE), node.apply(10, mask.clone()));
+    assertTrue(node.match(1001, mask.clone()).isEmpty());
+    assertEquals(mask.andNot(ZERO), node.match(0, mask.clone()));
+    assertEquals(mask.andNot(ZERO_OR_ONE), node.match(10, mask.clone()));
   }
 
   @Test
   public void testGreaterThanRev() {
     DoubleNode node = buildRev(100, DoubleRelation.GT);
     Container mask = RunContainer.rangeOfOnes(0, 100);
-    assertTrue(node.apply(0, mask.clone()).isEmpty());
-    assertEquals(ZERO, node.apply(1, mask.clone()));
+    assertTrue(node.match(0, mask.clone()).isEmpty());
+    assertEquals(ZERO, node.match(1, mask.clone()));
   }
 
   @Test
   public void testEqualRev() {
     DoubleNode node = buildRev(100, DoubleRelation.EQ);
     Container mask = RunContainer.rangeOfOnes(0, 100);
-    assertTrue(node.apply(-1, mask.clone()).isEmpty());
-    assertEquals(ZERO, node.apply(0, mask.clone()));
-    assertEquals(ONE, node.apply(10, mask.clone()));
+    assertTrue(node.match(-1, mask.clone()).isEmpty());
+    assertEquals(ZERO, node.match(0, mask.clone()));
+    assertEquals(ONE, node.match(10, mask.clone()));
   }
 
   @Test
   public void testLessThanRev() {
     DoubleNode node = buildRev(100, DoubleRelation.LT);
     Container mask = RunContainer.rangeOfOnes(0, 100);
-    assertTrue(node.apply(1001, mask.clone()).isEmpty());
-    assertEquals(mask.andNot(ZERO), node.apply(0, mask.clone()));
-    assertEquals(mask.andNot(ZERO_OR_ONE), node.apply(10, mask.clone()));
+    assertTrue(node.match(1001, mask.clone()).isEmpty());
+    assertEquals(mask.andNot(ZERO), node.match(0, mask.clone()));
+    assertEquals(mask.andNot(ZERO_OR_ONE), node.match(10, mask.clone()));
   }
 
   @Test
   public void testBuildNode() {
     DoubleNode node = new DoubleNode(DoubleRelation.EQ);
     node.add(0, (short)0);
-    assertEquals(RunContainer.rangeOfOnes(0, 1), node.apply(0, RunContainer.rangeOfOnes(0, 1)));
+    assertEquals(RunContainer.rangeOfOnes(0, 1), node.match(0, RunContainer.rangeOfOnes(0, 1)));
     node.add(0, (short)1);
-    assertEquals(RunContainer.rangeOfOnes(0, 2), node.apply(0, RunContainer.rangeOfOnes(0, 2)));
+    assertEquals(RunContainer.rangeOfOnes(0, 2), node.match(0, RunContainer.rangeOfOnes(0, 2)));
   }
 
   private DoubleNode build(int count, DoubleRelation relation) {

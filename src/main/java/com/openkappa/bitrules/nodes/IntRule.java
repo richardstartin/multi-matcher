@@ -21,7 +21,7 @@ public class IntRule<T> implements Rule<T> {
 
   @Override
   public Container match(T value, Container context) {
-    Container result = node.apply(accessor.applyAsInt(value), context);
+    Container result = node.match(accessor.applyAsInt(value), context);
     return context.iand(result.or(wildcards));
   }
 

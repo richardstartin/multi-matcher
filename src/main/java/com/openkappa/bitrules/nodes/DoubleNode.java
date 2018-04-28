@@ -55,7 +55,7 @@ public class DoubleNode {
     return this;
   }
 
-  public Container apply(double value, Container context) {
+  public Container match(double value, Container context) {
     switch (relation) {
       case GT:
         return context.iand(findRangeEncoded(value));

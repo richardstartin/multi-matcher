@@ -1,13 +1,11 @@
 package com.openkappa.bitrules.nodes;
 
 import com.openkappa.bitrules.Constraint;
-import com.openkappa.bitrules.IntRelation;
 import com.openkappa.bitrules.LongRelation;
 import com.openkappa.bitrules.Rule;
 import org.roaringbitmap.Container;
 import org.roaringbitmap.RunContainer;
 
-import java.util.function.ToIntFunction;
 import java.util.function.ToLongFunction;
 
 public class LongRule<T> implements Rule<T> {
@@ -23,7 +21,7 @@ public class LongRule<T> implements Rule<T> {
 
   @Override
   public Container match(T value, Container context) {
-    Container result = node.apply(accessor.applyAsLong(value), context);
+    Container result = node.match(accessor.applyAsLong(value), context);
     return context.iand(result.or(wildcards));
   }
 

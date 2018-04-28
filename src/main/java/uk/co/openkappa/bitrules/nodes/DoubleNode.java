@@ -43,9 +43,11 @@ public class DoubleNode {
   public DoubleNode optimise() {
     switch (relation) {
       case LT:
+      case LE:
         reverseRangeEncode();
         break;
       case GT:
+      case GE:
         rangeEncode();
         break;
       default:
@@ -57,8 +59,10 @@ public class DoubleNode {
   public Container match(double value, Container context) {
     switch (relation) {
       case GT:
+      case GE:
         return context.iand(findRangeEncoded(value));
       case LT:
+      case LE:
         return context.iand(findReverseRangeEncoded(value));
       case EQ:
         return context.iand(findEqualityEncoded(value));

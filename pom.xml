@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.openkappa</groupId>
+    <groupId>uk.co.openkappa</groupId>
     <artifactId>bitrules</artifactId>
     <version>0.1.0-SNAPSHOT</version>
 
@@ -20,6 +20,36 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <scm>
+        <connection>scm:git:git://github.com/richardstartin/bitrules.git</connection>
+        <developerConnection>scm:git:git@github.com:richardstartin/bitrules.git</developerConnection>
+        <url>http://github.com/richardstartin/bitrules</url>
+    </scm>
+
+    <developers>
+        <developer>
+            <name>Richard Startin</name>
+            <email>richard@openkappa.co.uk</email>
+            <organizationUrl>http://openkappa.co.uk</organizationUrl>
+            <organization>OpenKappa Ltd</organization>
+            <timezone>UTC</timezone>
+            <roles>
+                <role>maintainer</role>
+            </roles>
+        </developer>
+    </developers>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>sonatype-nexus-staging</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>sonatype-nexus-staging</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
 
     <dependencyManagement>
         <dependencies>
@@ -125,6 +155,34 @@
 
     <build>
         <plugins>
+
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.7</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -211,11 +269,11 @@
                             <relocations>
                                 <relocation>
                                     <pattern>org.roaringbitmap</pattern>
-                                    <shadedPattern>com.openkappa.roaringbitmap</shadedPattern>
+                                    <shadedPattern>uk.co.openkappa.roaringbitmap</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.apache.commons</pattern>
-                                    <shadedPattern>com.openkappa.commons</shadedPattern>
+                                    <shadedPattern>uk.co.openkappa.commons</shadedPattern>
                                 </relocation>
                             </relocations>
                             <minimizeJar>true</minimizeJar>

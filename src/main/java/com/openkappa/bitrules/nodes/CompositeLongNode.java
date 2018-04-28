@@ -1,6 +1,6 @@
 package com.openkappa.bitrules.nodes;
 
-import com.openkappa.bitrules.LongRelation;
+import com.openkappa.bitrules.Operation;
 import org.roaringbitmap.ArrayContainer;
 import org.roaringbitmap.Container;
 
@@ -9,9 +9,9 @@ import java.util.Map;
 
 public class CompositeLongNode {
 
-  private final Map<LongRelation, LongNode> children = new EnumMap<>(LongRelation.class);
+  private final Map<Operation, LongNode> children = new EnumMap<>(Operation.class);
 
-  public void add(LongRelation relation, long threshold, short priority) {
+  public void add(Operation relation, long threshold, short priority) {
     children.computeIfAbsent(relation, LongNode::new).add(threshold, priority);
   }
 

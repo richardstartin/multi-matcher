@@ -1,8 +1,5 @@
 package com.openkappa.bitrules.config;
 
-
-import com.openkappa.bitrules.Context;
-
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +11,6 @@ import java.util.function.ToLongFunction;
 public class ClassifierConfig<T> {
 
   private Map<String, Attribute<T>> rules = new HashMap<>();
-  private Map<String, Function<Context, ToDoubleFunction<T>>> functions = new HashMap<>();
 
   public static <U> ClassifierConfig<U> newInstance() {
     return new ClassifierConfig<>();
@@ -51,14 +47,6 @@ public class ClassifierConfig<T> {
 
   public Attribute<T> getAttribute(String name) {
     return rules.get(name);
-  }
-
-  public boolean hasFunction(String name) {
-    return functions.containsKey(name);
-  }
-
-  public Function<Context, ToDoubleFunction<T>> getFunction(String name) {
-    return functions.get(name);
   }
 
 }

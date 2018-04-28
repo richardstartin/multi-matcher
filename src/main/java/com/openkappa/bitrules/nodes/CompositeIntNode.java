@@ -1,6 +1,6 @@
 package com.openkappa.bitrules.nodes;
 
-import com.openkappa.bitrules.IntRelation;
+import com.openkappa.bitrules.Operation;
 import org.roaringbitmap.ArrayContainer;
 import org.roaringbitmap.Container;
 
@@ -9,9 +9,9 @@ import java.util.Map;
 
 public class CompositeIntNode {
 
-  private final Map<IntRelation, IntNode> children = new EnumMap<>(IntRelation.class);
+  private final Map<Operation, IntNode> children = new EnumMap<>(Operation.class);
 
-  public void add(IntRelation relation, int threshold, short priority) {
+  public void add(Operation relation, int threshold, short priority) {
     children.computeIfAbsent(relation, IntNode::new).add(threshold, priority);
   }
 

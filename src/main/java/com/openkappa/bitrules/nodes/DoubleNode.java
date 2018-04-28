@@ -1,7 +1,6 @@
 package com.openkappa.bitrules.nodes;
 
-
-import com.openkappa.bitrules.DoubleRelation;
+import com.openkappa.bitrules.Operation;
 import org.roaringbitmap.ArrayContainer;
 import org.roaringbitmap.Container;
 
@@ -11,13 +10,13 @@ public class DoubleNode {
 
   private static final Container EMPTY = new ArrayContainer();
 
-  private final DoubleRelation relation;
+  private final Operation relation;
 
   private double[] thresholds = new double[16];
   private Container[] sets = new Container[16];
   private int count = 0;
 
-  public DoubleNode(DoubleRelation relation) {
+  public DoubleNode(Operation relation) {
     this.relation = relation;
   }
 

@@ -1,6 +1,6 @@
 package com.openkappa.bitrules.nodes;
 
-import com.openkappa.bitrules.IntRelation;
+import com.openkappa.bitrules.Operation;
 import org.roaringbitmap.ArrayContainer;
 import org.roaringbitmap.Container;
 
@@ -10,13 +10,13 @@ public class IntNode {
 
   private static final Container EMPTY = new ArrayContainer();
 
-  private final IntRelation relation;
+  private final Operation relation;
 
   private int[] thresholds = new int[16];
   private Container[] sets = new Container[16];
   private int count = 0;
 
-  public IntNode(IntRelation relation) {
+  public IntNode(Operation relation) {
     this.relation = relation;
   }
 

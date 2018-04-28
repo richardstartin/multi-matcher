@@ -1,7 +1,7 @@
 package com.openkappa.bitrules.nodes;
 
 
-import com.openkappa.bitrules.DoubleRelation;
+import com.openkappa.bitrules.Operation;
 import org.roaringbitmap.ArrayContainer;
 import org.roaringbitmap.Container;
 
@@ -10,9 +10,9 @@ import java.util.Map;
 
 public class CompositeDoubleNode {
 
-  private final Map<DoubleRelation, DoubleNode> children = new EnumMap<>(DoubleRelation.class);
+  private final Map<Operation, DoubleNode> children = new EnumMap<>(Operation.class);
 
-  public void add(DoubleRelation relation, double threshold, short priority) {
+  public void add(Operation relation, double threshold, short priority) {
     children.computeIfAbsent(relation, DoubleNode::new)
               .add(threshold, priority);
   }

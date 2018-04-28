@@ -1,6 +1,6 @@
 package com.openkappa.bitrules.nodes;
 
-import com.openkappa.bitrules.DoubleRelation;
+import com.openkappa.bitrules.Operation;
 import org.junit.Test;
 import org.roaringbitmap.ArrayContainer;
 import org.roaringbitmap.Container;
@@ -16,7 +16,7 @@ public class DoubleNodeTest {
 
   @Test
   public void testGreaterThan() {
-    DoubleNode node = build(100, DoubleRelation.GT);
+    DoubleNode node = build(100, Operation.GT);
     Container mask = RunContainer.rangeOfOnes(0, 100);
     assertTrue(node.match(0, mask.clone()).isEmpty());
     assertEquals(ZERO, node.match(1, mask.clone()));
@@ -25,7 +25,7 @@ public class DoubleNodeTest {
 
   @Test
   public void testEqual() {
-    DoubleNode node = build(100, DoubleRelation.EQ);
+    DoubleNode node = build(100, Operation.EQ);
     Container mask = RunContainer.rangeOfOnes(0, 100);
     assertTrue(node.match(-1, mask.clone()).isEmpty());
     assertEquals(ZERO, node.match(0, mask.clone()));
@@ -34,7 +34,7 @@ public class DoubleNodeTest {
 
   @Test
   public void testLessThan() {
-    DoubleNode node = build(100, DoubleRelation.LT);
+    DoubleNode node = build(100, Operation.LT);
     Container mask = RunContainer.rangeOfOnes(0, 100);
     assertTrue(node.match(1001, mask.clone()).isEmpty());
     assertEquals(mask.andNot(ZERO), node.match(0, mask.clone()));
@@ -43,7 +43,7 @@ public class DoubleNodeTest {
 
   @Test
   public void testGreaterThanRev() {
-    DoubleNode node = buildRev(100, DoubleRelation.GT);
+    DoubleNode node = buildRev(100, Operation.GT);
     Container mask = RunContainer.rangeOfOnes(0, 100);
     assertTrue(node.match(0, mask.clone()).isEmpty());
     assertEquals(ZERO, node.match(1, mask.clone()));
@@ -51,7 +51,7 @@ public class DoubleNodeTest {
 
   @Test
   public void testEqualRev() {
-    DoubleNode node = buildRev(100, DoubleRelation.EQ);
+    DoubleNode node = buildRev(100, Operation.EQ);
     Container mask = RunContainer.rangeOfOnes(0, 100);
     assertTrue(node.match(-1, mask.clone()).isEmpty());
     assertEquals(ZERO, node.match(0, mask.clone()));
@@ -60,7 +60,7 @@ public class DoubleNodeTest {
 
   @Test
   public void testLessThanRev() {
-    DoubleNode node = buildRev(100, DoubleRelation.LT);
+    DoubleNode node = buildRev(100, Operation.LT);
     Container mask = RunContainer.rangeOfOnes(0, 100);
     assertTrue(node.match(1001, mask.clone()).isEmpty());
     assertEquals(mask.andNot(ZERO), node.match(0, mask.clone()));
@@ -69,14 +69,14 @@ public class DoubleNodeTest {
 
   @Test
   public void testBuildNode() {
-    DoubleNode node = new DoubleNode(DoubleRelation.EQ);
+    DoubleNode node = new DoubleNode(Operation.EQ);
     node.add(0, (short)0);
     assertEquals(RunContainer.rangeOfOnes(0, 1), node.match(0, RunContainer.rangeOfOnes(0, 1)));
     node.add(0, (short)1);
     assertEquals(RunContainer.rangeOfOnes(0, 2), node.match(0, RunContainer.rangeOfOnes(0, 2)));
   }
 
-  private DoubleNode build(int count, DoubleRelation relation) {
+  private DoubleNode build(int count, Operation relation) {
     DoubleNode node = new DoubleNode(relation);
     for (int i = 0; i < count; ++i) {
       node.add(i * 10, (short) i);
@@ -84,7 +84,7 @@ public class DoubleNodeTest {
     return node.optimise();
   }
 
-  private DoubleNode buildRev(int count, DoubleRelation relation) {
+  private DoubleNode buildRev(int count, Operation relation) {
     DoubleNode node = new DoubleNode(relation);
     for (int i = count - 1; i >= 0; --i) {
       node.add(i * 10, (short) i);

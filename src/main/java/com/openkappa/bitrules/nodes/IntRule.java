@@ -1,7 +1,6 @@
 package com.openkappa.bitrules.nodes;
 
 import com.openkappa.bitrules.Constraint;
-import com.openkappa.bitrules.IntRelation;
 import com.openkappa.bitrules.Rule;
 import org.roaringbitmap.Container;
 import org.roaringbitmap.RunContainer;
@@ -27,10 +26,9 @@ public class IntRule<T> implements Rule<T> {
 
   @Override
   public void addConstraint(Constraint constraint, short priority) {
-    IntRelation relation = IntRelation.from(constraint.getOperation());
     Number number = coerceValue(constraint);
     int value = number.intValue();
-    node.add(relation, value, priority);
+    node.add(constraint.getOperation(), value, priority);
     wildcards = wildcards.remove(priority);
   }
 

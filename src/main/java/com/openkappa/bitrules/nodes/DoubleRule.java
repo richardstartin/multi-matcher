@@ -1,7 +1,6 @@
 package com.openkappa.bitrules.nodes;
 
 import com.openkappa.bitrules.Constraint;
-import com.openkappa.bitrules.DoubleRelation;
 import com.openkappa.bitrules.Rule;
 import org.roaringbitmap.Container;
 import org.roaringbitmap.RunContainer;
@@ -27,10 +26,9 @@ public class DoubleRule<T> implements Rule<T> {
 
   @Override
   public void addConstraint(Constraint constraint, short priority) {
-    DoubleRelation relation = DoubleRelation.from(constraint.getOperation());
     Number number = coerceValue(constraint);
     double value = number.doubleValue();
-    node.add(relation, value, priority);
+    node.add(constraint.getOperation(), value, priority);
     wildcards = wildcards.remove(priority);
   }
 

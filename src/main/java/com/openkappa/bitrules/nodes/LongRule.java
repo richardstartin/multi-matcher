@@ -1,7 +1,6 @@
 package com.openkappa.bitrules.nodes;
 
 import com.openkappa.bitrules.Constraint;
-import com.openkappa.bitrules.LongRelation;
 import com.openkappa.bitrules.Rule;
 import org.roaringbitmap.Container;
 import org.roaringbitmap.RunContainer;
@@ -27,10 +26,9 @@ public class LongRule<T> implements Rule<T> {
 
   @Override
   public void addConstraint(Constraint constraint, short priority) {
-    LongRelation relation = LongRelation.from(constraint.getOperation());
     Number number = coerceValue(constraint);
     long value = number.longValue();
-    node.add(relation, value, priority);
+    node.add(constraint.getOperation(), value, priority);
     wildcards = wildcards.remove(priority);
   }
 

@@ -1,6 +1,6 @@
 package com.openkappa.bitrules.nodes;
 
-import com.openkappa.bitrules.LongRelation;
+import com.openkappa.bitrules.Operation;
 import org.junit.Test;
 import org.roaringbitmap.ArrayContainer;
 import org.roaringbitmap.Container;
@@ -13,7 +13,7 @@ public class LongNodeTest {
 
   @Test
   public void testGreaterThan() {
-    LongNode node = build(100, LongRelation.GT);
+    LongNode node = build(100, Operation.GT);
     Container mask = RunContainer.rangeOfOnes(0, 100);
     assertTrue(node.apply(0L, mask.clone()).isEmpty());
     assertEquals(new ArrayContainer().add((short)0), node.apply(1L, mask.clone()));
@@ -22,7 +22,7 @@ public class LongNodeTest {
 
   @Test
   public void testGreaterThanOrEqual() {
-    LongNode node = build(100, LongRelation.GE);
+    LongNode node = build(100, Operation.GE);
     Container mask = RunContainer.rangeOfOnes(0, 100);
     assertTrue(node.apply(-1L, mask.clone()).isEmpty());
     assertEquals(new ArrayContainer().add((short)0), node.apply(0L, mask.clone()));
@@ -31,7 +31,7 @@ public class LongNodeTest {
 
   @Test
   public void testEqual() {
-    LongNode node = build(100, LongRelation.EQ);
+    LongNode node = build(100, Operation.EQ);
     Container mask = RunContainer.rangeOfOnes(0, 100);
     assertTrue(node.apply(-1L, mask.clone()).isEmpty());
     assertEquals(new ArrayContainer().add((short)0), node.apply(0L, mask.clone()));
@@ -41,7 +41,7 @@ public class LongNodeTest {
 
   @Test
   public void testLessThanOrEqual() {
-    LongNode node = build(100, LongRelation.LE);
+    LongNode node = build(100, Operation.LE);
     Container mask = RunContainer.rangeOfOnes(0, 100);
     assertTrue(node.apply(1001, mask.clone()).isEmpty());
     assertEquals(mask, node.apply(0L, mask.clone()));
@@ -50,7 +50,7 @@ public class LongNodeTest {
 
   @Test
   public void testLessThan() {
-    LongNode node = build(100, LongRelation.LT);
+    LongNode node = build(100, Operation.LT);
     Container mask = RunContainer.rangeOfOnes(0, 100);
     assertTrue(node.apply(1001, mask.clone()).isEmpty());
     assertEquals(mask.clone().remove((short)0), node.apply(0L, mask.clone()));
@@ -59,7 +59,7 @@ public class LongNodeTest {
 
   @Test
   public void testGreaterThanRev() {
-    LongNode node = buildRev(100, LongRelation.GT);
+    LongNode node = buildRev(100, Operation.GT);
     Container mask = RunContainer.rangeOfOnes(0, 100);
     assertTrue(node.apply(0L, mask.clone()).isEmpty());
     assertEquals(new ArrayContainer().add((short)0), node.apply(1L, mask.clone()));
@@ -67,7 +67,7 @@ public class LongNodeTest {
 
   @Test
   public void testBuildNode() {
-    LongNode node = new LongNode(LongRelation.EQ);
+    LongNode node = new LongNode(Operation.EQ);
     node.add(0, (short)0);
     assertEquals(RunContainer.rangeOfOnes(0, 1), node.apply(0, RunContainer.rangeOfOnes(0, 1)));
     node.add(0, (short)1);
@@ -76,7 +76,7 @@ public class LongNodeTest {
 
   @Test
   public void testGreaterThanOrEqualRev() {
-    LongNode node = buildRev(100, LongRelation.GE);
+    LongNode node = buildRev(100, Operation.GE);
     Container mask = RunContainer.rangeOfOnes(0, 100);
     assertTrue(node.apply(-1L, mask.clone()).isEmpty());
     assertEquals(new ArrayContainer().add((short)0), node.apply(0L, mask.clone()));
@@ -85,7 +85,7 @@ public class LongNodeTest {
 
   @Test
   public void testEqualRev() {
-    LongNode node = buildRev(100, LongRelation.EQ);
+    LongNode node = buildRev(100, Operation.EQ);
     Container mask = RunContainer.rangeOfOnes(0, 100);
     assertTrue(node.apply(-1L, mask.clone()).isEmpty());
     assertEquals(new ArrayContainer().add((short)0), node.apply(0L, mask.clone()));
@@ -95,7 +95,7 @@ public class LongNodeTest {
 
   @Test
   public void testLessThanOrEqualRev() {
-    LongNode node = buildRev(100, LongRelation.LE);
+    LongNode node = buildRev(100, Operation.LE);
     Container mask = RunContainer.rangeOfOnes(0, 100);
     assertTrue(node.apply(1001, mask.clone()).isEmpty());
     assertEquals(mask, node.apply(0L, mask.clone()));
@@ -104,7 +104,7 @@ public class LongNodeTest {
 
   @Test
   public void testLessThanRev() {
-    LongNode node = buildRev(100, LongRelation.LT);
+    LongNode node = buildRev(100, Operation.LT);
     Container mask = RunContainer.rangeOfOnes(0, 100);
     assertTrue(node.apply(1001, mask.clone()).isEmpty());
     assertEquals(mask.clone().remove((short)0), node.apply(0L, mask.clone()));
@@ -112,7 +112,7 @@ public class LongNodeTest {
   }
 
 
-  private LongNode build(int count, LongRelation relation) {
+  private LongNode build(int count, Operation relation) {
     LongNode node = new LongNode(relation);
     for (int i = 0; i < count; ++i) {
       node.add(i * 10, (short)i);
@@ -120,7 +120,7 @@ public class LongNodeTest {
     return node.optimise();
   }
 
-  private LongNode buildRev(int count, LongRelation relation) {
+  private LongNode buildRev(int count, Operation relation) {
     LongNode node = new LongNode(relation);
     for (int i = count - 1; i >= 0; --i) {
       node.add(i * 10, (short)i);

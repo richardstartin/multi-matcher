@@ -1,6 +1,6 @@
 package com.openkappa.bitrules.nodes;
 
-import com.openkappa.bitrules.LongRelation;
+import com.openkappa.bitrules.Operation;
 import org.roaringbitmap.ArrayContainer;
 import org.roaringbitmap.Container;
 
@@ -10,13 +10,13 @@ public class LongNode {
 
   private static final Container EMPTY = new ArrayContainer();
 
-  private final LongRelation relation;
+  private final Operation relation;
 
   private long[] thresholds = new long[16];
   private Container[] sets = new Container[16];
   private int count = 0;
 
-  public LongNode(LongRelation relation) {
+  public LongNode(Operation relation) {
     this.relation = relation;
   }
 

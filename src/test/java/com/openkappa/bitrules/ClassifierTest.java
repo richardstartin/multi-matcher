@@ -4,7 +4,6 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.google.common.collect.ImmutableMap;
 import com.openkappa.bitrules.config.RuleAttributeNotRegistered;
 import com.openkappa.bitrules.config.ClassifierConfig;
-import com.openkappa.bitrules.source.FileRuleSpecifications;
 import org.junit.Test;
 
 import java.io.IOException;

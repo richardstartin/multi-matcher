@@ -1,4 +1,4 @@
-package com.openkappa.bitrules.source;
+package com.openkappa.bitrules;
 
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;

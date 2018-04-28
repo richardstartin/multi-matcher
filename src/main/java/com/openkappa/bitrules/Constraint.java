@@ -1,7 +1,5 @@
 package com.openkappa.bitrules;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public class Constraint {
 
   public static Constraint equalTo(String value) {
@@ -30,9 +28,7 @@ public class Constraint {
     return rc;
   }
 
-  @JsonProperty("op")
   private Operation operation;
-  @JsonProperty("value")
   private Object value;
 
   public Constraint() {

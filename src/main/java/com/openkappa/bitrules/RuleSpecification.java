@@ -1,7 +1,5 @@
 package com.openkappa.bitrules;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.Map;
 
 
@@ -15,15 +13,10 @@ public class RuleSpecification {
     return new RuleSpecification(id, description, constraints, priority, classification);
   }
 
-  @JsonProperty("id")
   private String id;
-  @JsonProperty("description")
   private String description;
-  @JsonProperty("constraints")
   private Map<String, Constraint> constraints;
-  @JsonProperty("priority")
   private int priority;
-  @JsonProperty("classification")
   private String classification;
 
   public RuleSpecification(String id,

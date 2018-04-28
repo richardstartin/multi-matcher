@@ -2,10 +2,10 @@
   description: "a rule"
   constraints:
     field1:
-      op: EQ
+      operation: EQ
       value: "foo"
     measure1:
-      op: GT
+      operation: GT
       value: 0
   priority: 0
   classification: "RED"
@@ -13,10 +13,10 @@
   description: "another rule"
   constraints:
     field1:
-      op: EQ
+      operation: EQ
       value: "bar"
     measure1:
-      op: GT
+      operation: GT
       value: 1
   priority: 1
   classification: "BLUE"

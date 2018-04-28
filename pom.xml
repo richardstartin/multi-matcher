@@ -12,8 +12,7 @@
     <properties>
         <junit.version>4.12</junit.version>
         <guava.version>19.0</guava.version>
-        <jmh.version>1.15</jmh.version>
-        <RoaringBitmap.version>0.7.9</RoaringBitmap.version>
+        <RoaringBitmap.version>0.7.10</RoaringBitmap.version>
         <jackson.dataformat.version>2.6.1</jackson.dataformat.version>
         <jackson.version>2.9.2</jackson.version>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -58,13 +57,6 @@
                 <groupId>org.roaringbitmap</groupId>
                 <artifactId>RoaringBitmap</artifactId>
                 <version>${RoaringBitmap.version}</version>
-                <scope>compile</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-collections4</artifactId>
-                <version>4.1</version>
                 <scope>compile</scope>
             </dependency>
 
@@ -139,11 +131,6 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-collections4</artifactId>
         </dependency>
 
         <dependency>
@@ -266,18 +253,30 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
+                            <minimizeJar>true</minimizeJar>
+                            <createSourcesJar>true</createSourcesJar>
+                            <filters>
+                                <filter>
+                                    <artifact>org.roaringbitmap:RoaringBitmap</artifact>
+                                    <includes>
+                                        <include>org/roaringbitmap/Container*</include>
+                                        <include>org/roaringbitmap/ArrayContainer*</include>
+                                        <include>org/roaringbitmap/BitmapContainer*</include>
+                                        <include>org/roaringbitmap/RunContainer*</include>
+                                        <include>org/roaringbitmap/Util*</include>
+                                        <include>org/roaringbitmap/ShortIterator*</include>
+                                        <include>org/roaringbitmap/ArrayContainerShortIterator*</include>
+                                        <include>org/roaringbitmap/BitmapContainerShortIterator*</include>
+                                        <include>org/roaringbitmap/RUnContainerShortIterator*</include>
+                                    </includes>
+                                </filter>
+                            </filters>
                             <relocations>
                                 <relocation>
                                     <pattern>org.roaringbitmap</pattern>
                                     <shadedPattern>uk.co.openkappa.roaringbitmap</shadedPattern>
                                 </relocation>
-                                <relocation>
-                                    <pattern>org.apache.commons</pattern>
-                                    <shadedPattern>uk.co.openkappa.commons</shadedPattern>
-                                </relocation>
                             </relocations>
-                            <minimizeJar>true</minimizeJar>
-                            <finalName>bitrules</finalName>
                         </configuration>
                     </execution>
                 </executions>

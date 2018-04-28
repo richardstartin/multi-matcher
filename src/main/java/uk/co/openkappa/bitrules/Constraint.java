@@ -2,26 +2,19 @@ package uk.co.openkappa.bitrules;
 
 public class Constraint {
 
-  public static Constraint equalTo(String value) {
-    Constraint rc = new Constraint();
-    rc.operation = Operation.EQ;
-    rc.value = value;
-    return rc;
+  public static Constraint lessThan(Object value) {
+    return condition(Operation.LT, value);
   }
 
-  public static Constraint lessThan(Number value) {
-    return numericCondition(Operation.LT, value);
+  public static Constraint equalTo(Object value) {
+    return condition(Operation.EQ, value);
   }
 
-  public static Constraint equalTo(Number value) {
-    return numericCondition(Operation.EQ, value);
+  public static Constraint greaterThan(Object value) {
+    return condition(Operation.GT, value);
   }
 
-  public static Constraint greaterThan(Number value) {
-    return numericCondition(Operation.GT, value);
-  }
-
-  private static Constraint numericCondition(Operation op, Number value) {
+  private static Constraint condition(Operation op, Object value) {
     Constraint rc = new Constraint();
     rc.operation = op;
     rc.value = value;

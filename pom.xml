@@ -7,6 +7,18 @@
     <groupId>uk.co.openkappa</groupId>
     <artifactId>bitrules</artifactId>
     <version>0.1.0-SNAPSHOT</version>
+    <name>bitrules</name>
+    <url>https://github.com/richardstartin/bitrules</url>
+    <description>Rule based classification with explicit support for ambiguity resolution</description>
+
+    <licenses>
+        <license>
+            <name>Apache 2</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+            <comments>A business-friendly OSS license</comments>
+        </license>
+    </licenses>
 
 
     <properties>

@@ -14,15 +14,16 @@ import java.util.stream.Stream;
 
 /**
  * Immutable classifier. A new instance must be built if rules are updated.
- * @param <T> the type of the classified objects
+ * @param <Input> the type of the classified objects
+ * @param <Input> the type of the resultant classification
  */
-public class ImmutableClassifier<T> implements Classifier<T> {
+public class ImmutableClassifier<Input, Classification> implements Classifier<Input, Classification> {
 
-  private final List<String> classifications;
-  private final Collection<Rule<T>> rules;
+  private final List<Classification> classifications;
+  private final Collection<Rule<Input>> rules;
   private final Container mask;
 
-  ImmutableClassifier(List<String> classifications, Collection<Rule<T>> rules, short max) {
+  ImmutableClassifier(List<Classification> classifications, Collection<Rule<Input>> rules, short max) {
     this.classifications = classifications;
     this.rules = rules;
     this.mask = new RunContainer().add(0, max);
@@ -34,12 +35,13 @@ public class ImmutableClassifier<T> implements Classifier<T> {
    * @param <U> the type of the clasified objects
    * @return a new builder
    */
-  public static <U> ClassifierBuilder<U> builder() {
-    return new ClassifierBuilder<>();
+  public static <U, Classification> ClassifierBuilder<U, Classification> forSchema(
+          AttributeRegistry<U> schema) {
+    return new ClassifierBuilder<>(schema);
   }
 
   @Override
-  public Stream<String> classify(T value) {
+  public Stream<Classification> classify(Input value) {
     Container matches = match(value);
     ShortIterator it = matches.getShortIterator();
     return IntStream.generate(it::nextAsInt)
@@ -48,40 +50,32 @@ public class ImmutableClassifier<T> implements Classifier<T> {
   }
 
   @Override
-  public Optional<String> getBestClassification(T value) {
+  public Optional<Classification> getBestClassification(Input value) {
     Container container = match(value);
     return container.isEmpty()
             ? Optional.empty()
             : Optional.of(classifications.get(container.first()));
   }
 
-  private Container match(T value) {
+  private Container match(Input value) {
     Container context = mask.clone();
-    Iterator<Rule<T>> it = rules.iterator();
+    Iterator<Rule<Input>> it = rules.iterator();
     while (it.hasNext() && !context.isEmpty()) {
       context = it.next().match(value, context);
     }
     return context;
   }
 
-  public static class ClassifierBuilder<T> {
+  public static class ClassifierBuilder<Input, Classification> {
 
-    private static AttributeRegistry<?> DEFAULT = new AttributeRegistry();
-
-    private AttributeRegistry<T> registry = (AttributeRegistry<T>) DEFAULT;
-    private Map<String, Rule<T>> rules = new HashMap<>();
-    private List<String> classifications = new ArrayList<>();
+    private final AttributeRegistry<Input> registry;
+    private Map<String, Rule<Input>> rules = new HashMap<>();
+    private List<Classification> classifications = new ArrayList<>();
 
     private short maxPriority = 0;
 
-    /**
-     * Essentiail: supply an attribute registry for rules to refer to.
-     * @param registry the registry of attributes to be used for classification
-     * @return the builder
-     */
-    public ClassifierBuilder<T> withRegistry(AttributeRegistry<T> registry) {
+    public ClassifierBuilder(AttributeRegistry<Input> registry) {
       this.registry = registry;
-      return this;
     }
 
     /**
@@ -90,7 +84,7 @@ public class ImmutableClassifier<T> implements Classifier<T> {
      * @return the classifier built from the current snapshot of the repository and attribute registry
      * @throws IOException if the repository throws
      */
-    public ImmutableClassifier<T> build(RuleSpecifications repository) throws IOException {
+    public ImmutableClassifier<Input, Classification> build(RuleSpecifications repository) throws IOException {
       PrimitiveIterator.OfInt sequence = IntStream.iterate(0, i -> i + 1).iterator();
       repository.get()
               .stream()
@@ -100,11 +94,11 @@ public class ImmutableClassifier<T> implements Classifier<T> {
       return new ImmutableClassifier<>(classifications, rules.values(), maxPriority);
     }
 
-    private void addRuleData(RuleSpecification ruleInfo, short priority) {
+    private void addRuleData(RuleSpecification<Classification> ruleInfo, short priority) {
       classifications.add(ruleInfo.getClassification());
       for (Map.Entry<String, Constraint> condition : ruleInfo.getConstraints().entrySet()) {
         String key = condition.getKey();
-        final Rule<T> rule;
+        final Rule<Input> rule;
         if (rules.containsKey(key)) {
           rule = rules.get(key);
         } else if (registry.hasAttribute(key)) {

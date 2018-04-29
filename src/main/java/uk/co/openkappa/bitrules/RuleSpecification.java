@@ -3,24 +3,24 @@ package uk.co.openkappa.bitrules;
 import java.util.Map;
 
 
-public class RuleSpecification {
+public class RuleSpecification<C> {
 
-  public static RuleSpecification of(String id,
+  public static <C> RuleSpecification of(String id,
                                      Map<String, Constraint> constraints,
                                      int priority,
-                                     String classification) {
+                                     C classification) {
     return new RuleSpecification(id, constraints, priority, classification);
   }
 
   private String id;
   private Map<String, Constraint> constraints;
   private int priority;
-  private String classification;
+  private C classification;
 
   public RuleSpecification(String id,
                            Map<String, Constraint> constraints,
                            int priority,
-                           String classification) {
+                           C classification) {
     this.id = id;
     this.constraints = constraints;
     this.priority = priority;
@@ -42,7 +42,7 @@ public class RuleSpecification {
     return priority;
   }
 
-  public String getClassification() {
+  public C getClassification() {
     return classification;
   }
 }

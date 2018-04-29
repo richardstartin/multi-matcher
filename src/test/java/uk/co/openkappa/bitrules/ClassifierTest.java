@@ -17,13 +17,13 @@ public class ClassifierTest {
 
   @Test
   public void testBuildClassifierEmptyRepo() throws IOException {
-    Classifier<TestDomainObject> engine = buildSimple(ArrayList::new);
+    Classifier<TestDomainObject, String> engine = buildSimple(ArrayList::new);
     assertFalse(engine.getBestClassification(TestDomainObject.random()).isPresent());
   }
 
   @Test
   public void testBuildClassifierOneRule() throws IOException {
-    Classifier<TestDomainObject> engine = buildSimple(
+    Classifier<TestDomainObject, String> engine = buildSimple(
             () -> Collections.singletonList(
                     RuleSpecification.of("rule1",
                             ImmutableMap.of("field1", Constraint.equalTo("foo"),
@@ -45,7 +45,7 @@ public class ClassifierTest {
 
   @Test
   public void testBuildClassifierTwoDisjointRules() throws IOException {
-    Classifier<TestDomainObject> engine = buildSimple(
+    Classifier<TestDomainObject, String> engine = buildSimple(
             () -> Arrays.asList(
                     RuleSpecification.of("rule1",
                             ImmutableMap.of("field1", Constraint.equalTo("foo"),
@@ -71,7 +71,7 @@ public class ClassifierTest {
 
   @Test
   public void testBuildClassifierTwoOverlappingRules() throws IOException {
-    Classifier<TestDomainObject> engine = buildSimple(
+    Classifier<TestDomainObject, String> engine = buildSimple(
             () -> Arrays.asList(
                     RuleSpecification.of("rule1",
                             ImmutableMap.of("field1", Constraint.equalTo("foo"),
@@ -102,7 +102,7 @@ public class ClassifierTest {
 
   @Test
   public void testBuildClassifierWithRulesOnDifferentAttributes() throws IOException {
-    Classifier<TestDomainObject> engine = buildSimple(
+    Classifier<TestDomainObject, String> engine = buildSimple(
             () -> Arrays.asList(
                     RuleSpecification.of("rule1",
                             ImmutableMap.of("field1", Constraint.equalTo("foo")), (short)0, "RED"),
@@ -118,7 +118,7 @@ public class ClassifierTest {
 
   @Test
   public void testBuildClassifierComparableAttributes() throws IOException {
-    Classifier<TestDomainObject> engine = buildComparable(
+    Classifier<TestDomainObject, String> engine = buildComparable(
             () -> Arrays.asList(
                     RuleSpecification.of("rule1",
                             ImmutableMap.of("field1", Constraint.equalTo("foo")), (short)0, "RED"),
@@ -134,8 +134,8 @@ public class ClassifierTest {
 
   @Test
   public void testIntegerRules() throws IOException {
-    Classifier<TestDomainObject> classifier = ImmutableClassifier.<TestDomainObject>builder()
-            .withRegistry(AttributeRegistry.<TestDomainObject>newInstance()
+    Classifier<TestDomainObject, String> classifier =
+            ImmutableClassifier.<TestDomainObject, String>forSchema(AttributeRegistry.<TestDomainObject>newInstance()
                   .withAttribute("measure2", TestDomainObject::getMeasure2)
             ).build(() -> Arrays.asList(
                     RuleSpecification.of("rule1",
@@ -155,8 +155,8 @@ public class ClassifierTest {
 
   @Test
   public void testLongRules() throws IOException {
-    Classifier<TestDomainObject> classifier = ImmutableClassifier.<TestDomainObject>builder()
-            .withRegistry(AttributeRegistry.<TestDomainObject>newInstance()
+    Classifier<TestDomainObject, String> classifier = ImmutableClassifier.<TestDomainObject, String>
+            forSchema(AttributeRegistry.<TestDomainObject>newInstance()
                     .withAttribute("measure3", TestDomainObject::getMeasure3)
             ).build(() -> Arrays.asList(
                     RuleSpecification.of("rule1",
@@ -176,7 +176,7 @@ public class ClassifierTest {
 
   @Test
   public void testRangeBasedRules() throws IOException {
-    Classifier<TestDomainObject> engine = buildWithContinuousAttributes(() -> Arrays.asList(
+    Classifier<TestDomainObject, String> engine = buildWithContinuousAttributes(() -> Arrays.asList(
         RuleSpecification.of("rule1",
                 ImmutableMap.of("measure1", Constraint.greaterThan(10)), 1, "RED"),
             RuleSpecification.of("rule2",
@@ -207,8 +207,7 @@ public class ClassifierTest {
 
   @Test(expected = IOException.class)
   public void testBuildRuleClassifierFromInvalidYAML() throws IOException {
-    ImmutableClassifier.<TestDomainObject>builder()
-            .withRegistry(AttributeRegistry.newInstance())
+    ImmutableClassifier.<TestDomainObject, String>forSchema(AttributeRegistry.newInstance())
             .build(new FileRuleSpecifications("invalid.yaml", new YAMLMapper()));
   }
 
@@ -225,9 +224,8 @@ public class ClassifierTest {
   }
 
 
-  private Classifier<TestDomainObject> buildSimple(RuleSpecifications repo) throws IOException {
-    return ImmutableClassifier.<TestDomainObject>builder()
-            .withRegistry(AttributeRegistry.<TestDomainObject>newInstance()
+  private Classifier<TestDomainObject, String> buildSimple(RuleSpecifications repo) throws IOException {
+    return ImmutableClassifier.<TestDomainObject, String>forSchema(AttributeRegistry.<TestDomainObject>newInstance()
                     .withAttribute("field1", TestDomainObject::getField1)
                     .withAttribute("field2", TestDomainObject::getField2)
                     .withAttribute("measure1", TestDomainObject::getMeasure1)
@@ -235,17 +233,15 @@ public class ClassifierTest {
   }
 
 
-  private Classifier<TestDomainObject> buildComparable(RuleSpecifications repo) throws IOException {
-    return ImmutableClassifier.<TestDomainObject>builder()
-            .withRegistry(AttributeRegistry.<TestDomainObject>newInstance()
+  private Classifier<TestDomainObject, String> buildComparable(RuleSpecifications repo) throws IOException {
+    return ImmutableClassifier.<TestDomainObject, String>forSchema(AttributeRegistry.<TestDomainObject>newInstance()
                     .withAttribute("field1", TestDomainObject::getField1, Comparator.naturalOrder())
                     .withAttribute("field2", TestDomainObject::getField2, Comparator.naturalOrder())
             ).build(repo);
   }
 
-  private Classifier<TestDomainObject> buildWithContinuousAttributes(RuleSpecifications repo) throws IOException {
-    return ImmutableClassifier.<TestDomainObject>builder()
-            .withRegistry(AttributeRegistry.<TestDomainObject>newInstance()
+  private Classifier<TestDomainObject, String> buildWithContinuousAttributes(RuleSpecifications repo) throws IOException {
+    return ImmutableClassifier.<TestDomainObject, String>forSchema(AttributeRegistry.<TestDomainObject>newInstance()
                     .withAttribute("measure1", TestDomainObject::getMeasure1)
                     .withAttribute("measure2", TestDomainObject::getMeasure2)
                     .withAttribute("measure3", TestDomainObject::getMeasure3)

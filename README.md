@@ -10,8 +10,8 @@ I have often needed to implement tedious classification logic in data processing
 
 Step 1: Build a classification engine
 ```java
-    Classifier<Product> classifier = ImmutableClassifier.<Product>builder()
-                .withAttributeRegistry(AttributeRegistry.<Product>newInstance()
+    Classifier<Product, String> classifier = ImmutableClassifier.<String, Product, String>definedBy(
+                Schema.<String, Product, String>newInstance()
                         .withAttribute("productType", Product::getProductType)
                         .withAttribute("issueDate", Product::getIssueDate, Comparator.naturalOrder().reversed())
                         .withAttribute("productName", Product::getProductName)

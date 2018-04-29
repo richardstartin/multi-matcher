@@ -136,7 +136,7 @@ public class ClassifierTest {
   @Test
   public void testIntegerRules() throws IOException {
     Classifier<TestDomainObject, String> classifier =
-            ImmutableClassifier.<String, TestDomainObject, String>forSchema(Schema.<String, TestDomainObject>newInstance()
+            ImmutableClassifier.<String, TestDomainObject, String>definedBy(Schema.<String, TestDomainObject>newInstance()
                     .withAttribute("measure2", TestDomainObject::getMeasure2)
             ).build(() -> Arrays.asList(
                     RuleSpecification.of("rule1",
@@ -157,7 +157,7 @@ public class ClassifierTest {
   @Test
   public void testLongRules() throws IOException {
     Classifier<TestDomainObject, String> classifier = ImmutableClassifier.<String, TestDomainObject, String>
-            forSchema(Schema.<String, TestDomainObject>newInstance()
+            definedBy(Schema.<String, TestDomainObject>newInstance()
             .withAttribute("measure3", TestDomainObject::getMeasure3)
     ).build(() -> Arrays.asList(
             RuleSpecification.of("rule1",
@@ -208,7 +208,7 @@ public class ClassifierTest {
 
   @Test(expected = IOException.class)
   public void testBuildRuleClassifierFromInvalidYAML() throws IOException {
-    ImmutableClassifier.<String, TestDomainObject, String>forSchema(Schema.newInstance())
+    ImmutableClassifier.<String, TestDomainObject, String>definedBy(Schema.newInstance())
             .build(new FileRuleSpecifications("invalid.yaml", new YAMLMapper()));
   }
 
@@ -227,7 +227,7 @@ public class ClassifierTest {
   @Test
   public void testBuildFromEnumSchema() throws IOException {
     Classifier<TestDomainObject, Duration> classifier =
-            ImmutableClassifier.<TestDomainObject.Fields, TestDomainObject, Duration>forSchema(Schema.<TestDomainObject.Fields, TestDomainObject>newInstance(TestDomainObject.Fields.class)
+            ImmutableClassifier.<TestDomainObject.Fields, TestDomainObject, Duration>definedBy(Schema.<TestDomainObject.Fields, TestDomainObject>newInstance(TestDomainObject.Fields.class)
                     .withAttribute(TestDomainObject.Fields.FIELD1, TestDomainObject::getField1)
                     .withAttribute(TestDomainObject.Fields.MEASURE1, TestDomainObject::getMeasure1))
                     .build(() -> Arrays.asList(
@@ -250,7 +250,7 @@ public class ClassifierTest {
 
 
   private Classifier<TestDomainObject, String> buildSimple(RuleSpecifications repo) throws IOException {
-    return ImmutableClassifier.<String, TestDomainObject, String>forSchema(Schema.<String, TestDomainObject>newInstance()
+    return ImmutableClassifier.<String, TestDomainObject, String>definedBy(Schema.<String, TestDomainObject>newInstance()
             .withAttribute("field1", TestDomainObject::getField1)
             .withAttribute("field2", TestDomainObject::getField2)
             .withAttribute("measure1", TestDomainObject::getMeasure1)
@@ -259,14 +259,14 @@ public class ClassifierTest {
 
 
   private Classifier<TestDomainObject, String> buildComparable(RuleSpecifications repo) throws IOException {
-    return ImmutableClassifier.<String, TestDomainObject, String>forSchema(Schema.<String, TestDomainObject>newInstance()
+    return ImmutableClassifier.<String, TestDomainObject, String>definedBy(Schema.<String, TestDomainObject>newInstance()
             .withAttribute("field1", TestDomainObject::getField1, Comparator.naturalOrder())
             .withAttribute("field2", TestDomainObject::getField2, Comparator.naturalOrder())
     ).build(repo);
   }
 
   private Classifier<TestDomainObject, String> buildWithContinuousAttributes(RuleSpecifications repo) throws IOException {
-    return ImmutableClassifier.<String, TestDomainObject, String>forSchema(Schema.<String, TestDomainObject>newInstance()
+    return ImmutableClassifier.<String, TestDomainObject, String>definedBy(Schema.<String, TestDomainObject>newInstance()
             .withAttribute("measure1", TestDomainObject::getMeasure1)
             .withAttribute("measure2", TestDomainObject::getMeasure2)
             .withAttribute("measure3", TestDomainObject::getMeasure3)

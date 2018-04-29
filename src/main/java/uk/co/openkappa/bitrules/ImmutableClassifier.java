@@ -38,7 +38,7 @@ public class ImmutableClassifier<Input, Classification> implements Classifier<In
    * @param <Classification> the classification type
    * @return a new builder
    */
-  public static <Key, Input, Classification> ClassifierBuilder<Key, Input, Classification> forSchema(
+  public static <Key, Input, Classification> ClassifierBuilder<Key, Input, Classification> definedBy(
           Schema<Key, Input> schema) {
     return new ClassifierBuilder<>(schema);
   }

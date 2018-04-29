@@ -23,4 +23,11 @@ public class GenericEqualityNode<T> {
   public Container apply(T value, Container result) {
     return result.iand(segments.getOrDefault(value, EMPTY).or(wildcard));
   }
+
+  public void optimise() {
+    for (Map.Entry<T, Container> segment: segments.entrySet()) {
+      segments.put(segment.getKey(), segment.getValue().runOptimize());
+    }
+    wildcard = wildcard.runOptimize();
+  }
 }

@@ -24,4 +24,9 @@ public class GenericRule<T, U> implements Rule<T> {
   public void addConstraint(Constraint constraint, short priority) {
     rules.add((U) constraint.getValue(), priority);
   }
+
+  @Override
+  public void freeze() {
+    rules.optimise();
+  }
 }

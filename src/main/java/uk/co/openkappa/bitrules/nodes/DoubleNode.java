@@ -90,13 +90,13 @@ public class DoubleNode {
 
   private void reverseRangeEncode() {
     for (int i = count - 2; i >= 0; --i) {
-      sets[i] = sets[i].ior(sets[i + 1]);
+      sets[i] = sets[i].ior(sets[i + 1]).runOptimize();
     }
   }
 
   private void rangeEncode() {
     for (int i = 1; i < count; ++i) {
-      sets[i] = sets[i].ior(sets[i - 1]);
+      sets[i] = sets[i].ior(sets[i - 1]).runOptimize();
     }
   }
 

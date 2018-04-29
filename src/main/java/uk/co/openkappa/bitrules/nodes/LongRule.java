@@ -35,5 +35,6 @@ public class LongRule<T> implements Rule<T> {
   @Override
   public void freeze() {
     node.optimise();
+    wildcards = wildcards.runOptimize();
   }
 }

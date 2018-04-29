@@ -32,4 +32,10 @@ public class ComparableRule<T, U> implements Rule<T> {
     node.add(constraint.getOperation(), (U)constraint.getValue(), priority);
     wildcards = wildcards.remove(priority);
   }
+
+  @Override
+  public void freeze() {
+    node.optimise();
+    wildcards = wildcards.runOptimize();
+  }
 }

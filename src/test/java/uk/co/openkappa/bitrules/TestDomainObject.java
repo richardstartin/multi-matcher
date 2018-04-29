@@ -5,6 +5,11 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class TestDomainObject {
 
+  public enum Fields {
+    FIELD1,
+    MEASURE1
+  }
+
   public static TestDomainObject random() {
     return new TestDomainObject(UUID.randomUUID().toString(),
             UUID.randomUUID().toString(),

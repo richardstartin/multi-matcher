@@ -11,7 +11,7 @@ I have often needed to implement tedious classification logic in data processing
 Step 1: Build a classification engine
 ```java
     Classifier<Product> classifier = ImmutableClassifier.<Product>builder()
-                .withConfig(ClassifierConfig.<Product>newInstance()
+                .withAttributeRegistry(AttributeRegistry.<Product>newInstance()
                         .withAttribute("productType", Product::getProductType)
                         .withAttribute("issueDate", Product::getIssueDate, Comparator.naturalOrder().reversed())
                         .withAttribute("productName", Product::getProductName)

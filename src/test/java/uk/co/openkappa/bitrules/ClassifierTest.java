@@ -3,7 +3,7 @@ package uk.co.openkappa.bitrules;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.google.common.collect.ImmutableMap;
 import uk.co.openkappa.bitrules.config.RuleAttributeNotRegistered;
-import uk.co.openkappa.bitrules.config.ClassifierConfig;
+import uk.co.openkappa.bitrules.config.AttributeRegistry;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -135,7 +135,7 @@ public class ClassifierTest {
   @Test
   public void testIntegerRules() throws IOException {
     Classifier<TestDomainObject> classifier = ImmutableClassifier.<TestDomainObject>builder()
-            .withConfig(ClassifierConfig.<TestDomainObject>newInstance()
+            .withRegistry(AttributeRegistry.<TestDomainObject>newInstance()
                   .withAttribute("measure2", TestDomainObject::getMeasure2)
             ).build(() -> Arrays.asList(
                     RuleSpecification.of("rule1", "rule1",
@@ -156,7 +156,7 @@ public class ClassifierTest {
   @Test
   public void testLongRules() throws IOException {
     Classifier<TestDomainObject> classifier = ImmutableClassifier.<TestDomainObject>builder()
-            .withConfig(ClassifierConfig.<TestDomainObject>newInstance()
+            .withRegistry(AttributeRegistry.<TestDomainObject>newInstance()
                     .withAttribute("measure3", TestDomainObject::getMeasure3)
             ).build(() -> Arrays.asList(
                     RuleSpecification.of("rule1", "rule1",
@@ -208,7 +208,7 @@ public class ClassifierTest {
   @Test(expected = IOException.class)
   public void testBuildRuleClassifierFromInvalidYAML() throws IOException {
     ImmutableClassifier.<TestDomainObject>builder()
-            .withConfig(ClassifierConfig.newInstance())
+            .withRegistry(AttributeRegistry.newInstance())
             .build(new FileRuleSpecifications("invalid.yaml", new YAMLMapper()));
   }
 
@@ -227,7 +227,7 @@ public class ClassifierTest {
 
   private Classifier<TestDomainObject> buildSimple(RuleSpecifications repo) throws IOException {
     return ImmutableClassifier.<TestDomainObject>builder()
-            .withConfig(ClassifierConfig.<TestDomainObject>newInstance()
+            .withRegistry(AttributeRegistry.<TestDomainObject>newInstance()
                     .withAttribute("field1", TestDomainObject::getField1)
                     .withAttribute("field2", TestDomainObject::getField2)
                     .withAttribute("measure1", TestDomainObject::getMeasure1)
@@ -237,7 +237,7 @@ public class ClassifierTest {
 
   private Classifier<TestDomainObject> buildComparable(RuleSpecifications repo) throws IOException {
     return ImmutableClassifier.<TestDomainObject>builder()
-            .withConfig(ClassifierConfig.<TestDomainObject>newInstance()
+            .withRegistry(AttributeRegistry.<TestDomainObject>newInstance()
                     .withAttribute("field1", TestDomainObject::getField1, Comparator.naturalOrder())
                     .withAttribute("field2", TestDomainObject::getField2, Comparator.naturalOrder())
             ).build(repo);
@@ -245,7 +245,7 @@ public class ClassifierTest {
 
   private Classifier<TestDomainObject> buildWithContinuousAttributes(RuleSpecifications repo) throws IOException {
     return ImmutableClassifier.<TestDomainObject>builder()
-            .withConfig(ClassifierConfig.<TestDomainObject>newInstance()
+            .withRegistry(AttributeRegistry.<TestDomainObject>newInstance()
                     .withAttribute("measure1", TestDomainObject::getMeasure1)
                     .withAttribute("measure2", TestDomainObject::getMeasure2)
                     .withAttribute("measure3", TestDomainObject::getMeasure3)

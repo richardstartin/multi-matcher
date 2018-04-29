@@ -1,7 +1,7 @@
 package uk.co.openkappa.bitrules;
 
 
-import uk.co.openkappa.bitrules.config.ClassifierConfig;
+import uk.co.openkappa.bitrules.config.AttributeRegistry;
 import uk.co.openkappa.bitrules.config.RuleAttributeNotRegistered;
 import org.roaringbitmap.Container;
 import org.roaringbitmap.RunContainer;
@@ -12,6 +12,10 @@ import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+/**
+ * Immutable classifier. A new instance must be built if rules are updated.
+ * @param <T> the type of the classified objects
+ */
 public class ImmutableClassifier<T> implements Classifier<T> {
 
   private final List<String> classifications;
@@ -25,6 +29,11 @@ public class ImmutableClassifier<T> implements Classifier<T> {
     rules.forEach(Rule::freeze);
   }
 
+  /**
+   * Gets a new builder for a classifier
+   * @param <U> the type of the clasified objects
+   * @return a new builder
+   */
   public static <U> ClassifierBuilder<U> builder() {
     return new ClassifierBuilder<>();
   }
@@ -57,53 +66,55 @@ public class ImmutableClassifier<T> implements Classifier<T> {
 
   public static class ClassifierBuilder<T> {
 
-    private static ClassifierConfig<?> DEFAULT = new ClassifierConfig();
+    private static AttributeRegistry<?> DEFAULT = new AttributeRegistry();
 
-    private ClassifierConfig<T> config = (ClassifierConfig<T>) DEFAULT;
+    private AttributeRegistry<T> registry = (AttributeRegistry<T>) DEFAULT;
     private Map<String, Rule<T>> rules = new HashMap<>();
     private List<String> classifications = new ArrayList<>();
 
     private short maxPriority = 0;
 
-    public ClassifierBuilder<T> withConfig(ClassifierConfig<T> config) {
-      this.config = config;
+    /**
+     * Essentiail: supply an attribute registry for rules to refer to.
+     * @param registry the registry of attributes to be used for classification
+     * @return the builder
+     */
+    public ClassifierBuilder<T> withRegistry(AttributeRegistry<T> registry) {
+      this.registry = registry;
       return this;
     }
 
+    /**
+     * Build a classifier from some rules
+     * @param repository the container of rules
+     * @return the classifier built from the current snapshot of the repository and attribute registry
+     * @throws IOException if the repository throws
+     */
     public ImmutableClassifier<T> build(RuleSpecifications repository) throws IOException {
-      buildFromRepository(repository);
+      PrimitiveIterator.OfInt sequence = IntStream.iterate(0, i -> i + 1).iterator();
+      repository.get()
+              .stream()
+              .sorted(Comparator.comparingInt(rd -> (1 << 16) - rd.getPriority() - 1))
+              .forEach(rule -> addRuleData(rule, (short) sequence.nextInt()));
+      maxPriority = (short) sequence.nextInt();
       return new ImmutableClassifier<>(classifications, rules.values(), maxPriority);
     }
 
-    private void buildFromRepository(RuleSpecifications source) throws IOException {
-      PrimitiveIterator.OfInt seq = IntStream.iterate(0, i -> i + 1).iterator();
-      source.get()
-            .stream()
-            .sorted(Comparator.comparingInt(rd -> (1 << 16) - rd.getPriority() - 1))
-            .forEach(rule -> addRuleData(rule, (short) seq.nextInt()));
-      maxPriority = (short) seq.nextInt();
-    }
-
-    private void addRuleData(RuleSpecification ruleInfo, short salience) {
+    private void addRuleData(RuleSpecification ruleInfo, short priority) {
       classifications.add(ruleInfo.getClassification());
       for (Map.Entry<String, Constraint> condition : ruleInfo.getConstraints().entrySet()) {
-        Constraint rc = condition.getValue();
         String key = condition.getKey();
         final Rule<T> rule;
         if (rules.containsKey(key)) {
           rule = rules.get(key);
-        } else if (config.hasAttribute(key)) {
-          rule = config.getAttribute(key).toRule();
+        } else if (registry.hasAttribute(key)) {
+          rule = registry.getAttribute(key).toRule();
           rules.put(key, rule);
         } else {
-          throw new RuleAttributeNotRegistered("No attribute or function [" + key + "] registered.");
+          throw new RuleAttributeNotRegistered("No attribute " + key + " registered.");
         }
-        rule.addConstraint(condition.getValue(), salience);
+        rule.addConstraint(condition.getValue(), priority);
       }
-    }
-
-    private static boolean isNullOrEmpty(String s) {
-      return null == s || s.length() == 0;
     }
   }
 

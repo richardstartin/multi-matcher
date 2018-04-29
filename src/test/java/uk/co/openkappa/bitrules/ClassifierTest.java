@@ -25,7 +25,7 @@ public class ClassifierTest {
   public void testBuildClassifierOneRule() throws IOException {
     Classifier<TestDomainObject> engine = buildSimple(
             () -> Collections.singletonList(
-                    RuleSpecification.of("rule1", "rule 1",
+                    RuleSpecification.of("rule1",
                             ImmutableMap.of("field1", Constraint.equalTo("foo"),
                                     "measure1", Constraint.lessThan(0D)),
                             0, "RED")
@@ -47,11 +47,11 @@ public class ClassifierTest {
   public void testBuildClassifierTwoDisjointRules() throws IOException {
     Classifier<TestDomainObject> engine = buildSimple(
             () -> Arrays.asList(
-                    RuleSpecification.of("rule1", "rule 1",
+                    RuleSpecification.of("rule1",
                             ImmutableMap.of("field1", Constraint.equalTo("foo"),
                                     "measure1", Constraint.lessThan(0D)),
                             0, "RED"),
-                    RuleSpecification.of("rule2", "rule 2",
+                    RuleSpecification.of("rule2",
                             ImmutableMap.of("field1", Constraint.equalTo("bar"),
                                     "measure1", Constraint.greaterThan(0D)),
                             0, "BLUE")
@@ -73,11 +73,11 @@ public class ClassifierTest {
   public void testBuildClassifierTwoOverlappingRules() throws IOException {
     Classifier<TestDomainObject> engine = buildSimple(
             () -> Arrays.asList(
-                    RuleSpecification.of("rule1", "rule 1",
+                    RuleSpecification.of("rule1",
                             ImmutableMap.of("field1", Constraint.equalTo("foo"),
                                     "measure1", Constraint.greaterThan(0D)),
                             0, "RED"),
-                    RuleSpecification.of("rule2", "rule 2",
+                    RuleSpecification.of("rule2",
                             ImmutableMap.of("field1", Constraint.equalTo("foo"),
                                     "measure1", Constraint.greaterThan(1D)),
                             1, "BLUE")
@@ -104,9 +104,9 @@ public class ClassifierTest {
   public void testBuildClassifierWithRulesOnDifferentAttributes() throws IOException {
     Classifier<TestDomainObject> engine = buildSimple(
             () -> Arrays.asList(
-                    RuleSpecification.of("rule1", "rule 1",
+                    RuleSpecification.of("rule1",
                             ImmutableMap.of("field1", Constraint.equalTo("foo")), (short)0, "RED"),
-                    RuleSpecification.of("rule2", "rule 2",
+                    RuleSpecification.of("rule2",
                             ImmutableMap.of("field2", Constraint.equalTo("bar")), (short)1, "BLUE")
             )
     );
@@ -120,9 +120,9 @@ public class ClassifierTest {
   public void testBuildClassifierComparableAttributes() throws IOException {
     Classifier<TestDomainObject> engine = buildComparable(
             () -> Arrays.asList(
-                    RuleSpecification.of("rule1", "rule 1",
+                    RuleSpecification.of("rule1",
                             ImmutableMap.of("field1", Constraint.equalTo("foo")), (short)0, "RED"),
-                    RuleSpecification.of("rule2", "rule 2",
+                    RuleSpecification.of("rule2",
                             ImmutableMap.of("field2", Constraint.equalTo("bar")), (short)1, "BLUE")
             )
     );
@@ -138,10 +138,10 @@ public class ClassifierTest {
             .withRegistry(AttributeRegistry.<TestDomainObject>newInstance()
                   .withAttribute("measure2", TestDomainObject::getMeasure2)
             ).build(() -> Arrays.asList(
-                    RuleSpecification.of("rule1", "rule1",
+                    RuleSpecification.of("rule1",
                             ImmutableMap.of("measure2", Constraint.equalTo(999)),
                             0, "RED"),
-                    RuleSpecification.of("rule1", "rule1",
+                    RuleSpecification.of("rule1",
                             ImmutableMap.of("measure2", Constraint.lessThan(1000)),
                             1, "BLUE")
             ));
@@ -159,10 +159,10 @@ public class ClassifierTest {
             .withRegistry(AttributeRegistry.<TestDomainObject>newInstance()
                     .withAttribute("measure3", TestDomainObject::getMeasure3)
             ).build(() -> Arrays.asList(
-                    RuleSpecification.of("rule1", "rule1",
+                    RuleSpecification.of("rule1",
                             ImmutableMap.of("measure3", Constraint.equalTo(999)),
                             0, "RED"),
-                    RuleSpecification.of("rule1", "rule1",
+                    RuleSpecification.of("rule1",
                             ImmutableMap.of("measure3", Constraint.lessThan(1000)),
                             1, "BLUE")
             ));
@@ -177,11 +177,11 @@ public class ClassifierTest {
   @Test
   public void testRangeBasedRules() throws IOException {
     Classifier<TestDomainObject> engine = buildWithContinuousAttributes(() -> Arrays.asList(
-        RuleSpecification.of("rule1", "rule 1",
+        RuleSpecification.of("rule1",
                 ImmutableMap.of("measure1", Constraint.greaterThan(10)), 1, "RED"),
-            RuleSpecification.of("rule2", "rule 2",
+            RuleSpecification.of("rule2",
                     ImmutableMap.of("measure1", Constraint.lessThan(8)), 2, "BLUE"),
-            RuleSpecification.of("rule3", "rule 3",
+            RuleSpecification.of("rule3",
                     ImmutableMap.of("measure1", Constraint.equalTo(5)), 3, "YELLOW")
     ));
     TestDomainObject value = TestDomainObject.random().setMeasure1(11);
@@ -193,7 +193,7 @@ public class ClassifierTest {
   @Test(expected = RuleAttributeNotRegistered.class)
   public void testBuildRuleClassifierUnregisteredAttribute() throws IOException {
     buildSimple(() -> Collections.singletonList(
-            RuleSpecification.of("missing", "missing", ImmutableMap.of("missing", Constraint.equalTo("missing")),
+            RuleSpecification.of("missing", ImmutableMap.of("missing", Constraint.equalTo("missing")),
                     0, "MISSING")));
   }
 
@@ -201,7 +201,7 @@ public class ClassifierTest {
   @Test(expected = ClassCastException.class)
   public void testBuildRuleClassifierWithBadTypeConstraint() throws IOException {
     buildSimple(() -> Collections.singletonList(
-            RuleSpecification.of("measure1", "bad type", ImmutableMap.of("measure1", Constraint.equalTo("foo")),
+            RuleSpecification.of("measure1", ImmutableMap.of("measure1", Constraint.equalTo("foo")),
                     0, "BAD TYPE")));
   }
 

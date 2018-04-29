@@ -1,5 +1,4 @@
 - id: "rule1"
-  description: "a rule"
   constraints:
     field1:
       operation: EQ
@@ -10,7 +9,6 @@
   priority: 0
   classification: "RED"
 - id: "rule2"
-  description: "another rule"
   constraints:
     field1:
       operation: EQ

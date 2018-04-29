@@ -25,10 +25,9 @@ public interface Rule<T> {
   void addConstraint(Constraint constraint, short priority);
 
   /**
-   * Freezes the column. DO NOT add constraints after calling this, in case this
-   * is overridden.
+   * Freezes the column. DO NOT add constraints after calling this method.
    */
-  default void freeze() {}
+  void freeze();
 
   default <U> U coerceValue(Constraint constraint) {
     return (U)constraint.getValue();

@@ -11,22 +11,22 @@ I have often needed to implement tedious classification logic in data processing
 Step 1: Build a classification engine
 ```java
     Classifier<Product> classifier = ImmutableClassifier.<Product>builder()
-                .withConfig(ClassifierConfig.<Product>newInstance()
+                .withAttributeRegistry(AttributeRegistry.<Product>newInstance()
                         .withAttribute("productType", Product::getProductType)
                         .withAttribute("issueDate", Product::getIssueDate, Comparator.naturalOrder().reversed())
                         .withAttribute("productName", Product::getProductName)
                         .withAttribute("availability", Product::getAvailability)
                         .withAttribute("discountedPrice", value -> 0.2 * value.getPrice())
                 ).build(() -> Arrays.asList(
-                    RuleSpecification.of("rule1", "silk is an expensive luxury product",
+                    RuleSpecification.of("rule1", 
                             ImmutableMap.of("productType", Constraint.equalTo("silk"),
                                             "discountedPrice", Constraint.greaterThan(1000)),
                             0, "EXPENSIVE_LUXURY_PRODUCTS"),
-                    RuleSpecification.of("rule2", "caviar is an expensive luxury product",
+                    RuleSpecification.of("rule2", 
                             ImmutableMap.of("productType", Constraint.equalTo("caviar"),
                                             "discountedPrice", Constraint.greaterThan(100)),
                             1, "EXPENSIVE_LUXURY_PRODUCTS"),
-                    RuleSpecification.of("rule2", "Baked beans are cheap food",
+                    RuleSpecification.of("rule2", 
                             ImmutableMap.of("productName", Constraint.equalTo("baked beans"))
                             2, "CHEAP_FOOD")
                 )

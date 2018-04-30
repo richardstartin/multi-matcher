@@ -270,22 +270,6 @@
                         <configuration>
                             <minimizeJar>true</minimizeJar>
                             <createSourcesJar>true</createSourcesJar>
-                            <filters>
-                                <filter>
-                                    <artifact>org.roaringbitmap:RoaringBitmap</artifact>
-                                    <includes>
-                                        <include>org/roaringbitmap/Container*</include>
-                                        <include>org/roaringbitmap/ArrayContainer*</include>
-                                        <include>org/roaringbitmap/BitmapContainer*</include>
-                                        <include>org/roaringbitmap/RunContainer*</include>
-                                        <include>org/roaringbitmap/Util*</include>
-                                        <include>org/roaringbitmap/ShortIterator*</include>
-                                        <include>org/roaringbitmap/ArrayContainerShortIterator*</include>
-                                        <include>org/roaringbitmap/BitmapContainerShortIterator*</include>
-                                        <include>org/roaringbitmap/RUnContainerShortIterator*</include>
-                                    </includes>
-                                </filter>
-                            </filters>
                             <relocations>
                                 <relocation>
                                     <pattern>org.roaringbitmap</pattern>

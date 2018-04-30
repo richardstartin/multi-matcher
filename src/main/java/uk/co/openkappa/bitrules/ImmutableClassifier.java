@@ -23,7 +23,7 @@ public class ImmutableClassifier<Input, Classification> implements Classifier<In
   private final Collection<Rule<Input>> rules;
   private final Container mask;
 
-  ImmutableClassifier(List<Classification> classifications, Collection<Rule<Input>> rules, short max) {
+  ImmutableClassifier(List<Classification> classifications, Collection<Rule<Input>> rules, int max) {
     this.classifications = classifications;
     this.rules = rules;
     this.mask = new RunContainer().add(0, max);
@@ -75,7 +75,7 @@ public class ImmutableClassifier<Input, Classification> implements Classifier<In
     private Map<Key, Rule<Input>> rules = new HashMap<>();
     private List<Classification> classifications = new ArrayList<>();
 
-    private short maxPriority = 0;
+    private int maxPriority = 0;
 
     public ClassifierBuilder(Schema<Key, Input> registry) {
       this.registry = registry;
@@ -94,7 +94,7 @@ public class ImmutableClassifier<Input, Classification> implements Classifier<In
               .stream()
               .sorted(Comparator.comparingInt(rd -> (1 << 16) - rd.getPriority() - 1))
               .forEach(rule -> addRuleData(rule, (short) sequence.nextInt()));
-      maxPriority = (short) sequence.nextInt();
+      maxPriority = sequence.nextInt();
       return new ImmutableClassifier<>(classifications, rules.values(), maxPriority);
     }
 

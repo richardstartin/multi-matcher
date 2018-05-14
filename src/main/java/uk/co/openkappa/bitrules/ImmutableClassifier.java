@@ -15,7 +15,7 @@ import java.util.stream.Stream;
  * Immutable classifier. A new instance must be built if rules are updated.
  *
  * @param <Input> the type of the classified objects
- * @param <CLassification> the type of the resultant classification
+ * @param <Classification> the type of the resultant classification
  */
 public class ImmutableClassifier<Input, Classification> implements Classifier<Input, Classification> {
 

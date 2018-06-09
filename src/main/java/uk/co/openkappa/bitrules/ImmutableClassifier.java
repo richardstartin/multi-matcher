@@ -31,12 +31,12 @@ public class ImmutableClassifier<Input, Classification> implements Classifier<In
   }
 
   /**
-   * Gets a new builder for a classifier
+   * Gets a new newRule for a classifier
    *
    * @param <Key>            the schema key type
    * @param <Input>          the type of the classified objects
    * @param <Classification> the classification type
-   * @return a new builder
+   * @return a new newRule
    */
   public static <Key, Input, Classification> ClassifierBuilder<Key, Input, Classification> definedBy(
           Schema<Key, Input> schema) {

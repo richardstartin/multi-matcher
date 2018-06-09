@@ -1,6 +1,5 @@
 package uk.co.openkappa.bitrules;
 
-import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 import uk.co.openkappa.bitrules.config.Schema;
 
@@ -10,6 +9,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertEquals;
+import static uk.co.openkappa.bitrules.RuleSpecification.newRule;
 
 public class LargeClassifierTest {
 
@@ -24,15 +24,8 @@ public class LargeClassifierTest {
                     .withAttribute(4, extract(4))
             ).build(() -> IntStream.range(0, 50000)
             .mapToObj(i ->
-                    RuleSpecification.of("rule" + i,
-                            ImmutableMap.of(
-                                    0, Constraint.equalTo(i),
-                                    1, Constraint.equalTo(i),
-                                    2, Constraint.equalTo(i),
-                                    3, Constraint.equalTo(i),
-                                    4, Constraint.equalTo(i)
-                            ), i, "SEGMENT" + i)
-
+                    newRule("rule" + i).eq(0, i).eq(1, i).eq(2, i).eq(3, i).eq(4, i)
+                            .priority(i).classification("SEGMENT" + i).build()
             )
             .map(x -> (RuleSpecification<Integer, String>) x)
             .collect(Collectors.toList())

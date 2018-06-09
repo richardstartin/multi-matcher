@@ -13,6 +13,7 @@ import java.util.*;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static uk.co.openkappa.bitrules.RuleSpecification.newRule;
 
 public class ClassifierTest {
 
@@ -26,10 +27,12 @@ public class ClassifierTest {
   public void testBuildClassifierOneRule() throws IOException {
     Classifier<TestDomainObject, String> engine = buildSimple(
             () -> Collections.singletonList(
-                    RuleSpecification.of("rule1",
-                            ImmutableMap.of("field1", Constraint.equalTo("foo"),
-                                    "measure1", Constraint.lessThan(0D)),
-                            0, "RED")
+                    newRule("rule1")
+                    .eq("field1", "foo")
+                    .lt("measure1", 0D)
+                    .priority(0)
+                    .classification("RED")
+                    .build()
             )
     );
 
@@ -48,14 +51,18 @@ public class ClassifierTest {
   public void testBuildClassifierTwoDisjointRules() throws IOException {
     Classifier<TestDomainObject, String> engine = buildSimple(
             () -> Arrays.asList(
-                    RuleSpecification.of("rule1",
-                            ImmutableMap.of("field1", Constraint.equalTo("foo"),
-                                    "measure1", Constraint.lessThan(0D)),
-                            0, "RED"),
-                    RuleSpecification.of("rule2",
-                            ImmutableMap.of("field1", Constraint.equalTo("bar"),
-                                    "measure1", Constraint.greaterThan(0D)),
-                            0, "BLUE")
+                    newRule("rule1")
+                            .eq("field1", "foo")
+                            .lt("measure1", 0D)
+                            .priority(0)
+                    .classification("RED")
+                    .build(),
+                    newRule("rule2")
+                            .eq("field1", "bar")
+                            .lt("measure1", 0D)
+                            .priority(0)
+                            .classification("BLUE")
+                    .build()
             )
     );
 
@@ -74,14 +81,18 @@ public class ClassifierTest {
   public void testBuildClassifierTwoOverlappingRules() throws IOException {
     Classifier<TestDomainObject, String> engine = buildSimple(
             () -> Arrays.asList(
-                    RuleSpecification.of("rule1",
-                            ImmutableMap.of("field1", Constraint.equalTo("foo"),
-                                    "measure1", Constraint.greaterThan(0D)),
-                            0, "RED"),
-                    RuleSpecification.of("rule2",
-                            ImmutableMap.of("field1", Constraint.equalTo("foo"),
-                                    "measure1", Constraint.greaterThan(1D)),
-                            1, "BLUE")
+                    newRule("rule1")
+                            .eq("field1", "foo")
+                            .gt("measure1", 0D)
+                            .priority(0)
+                    .classification("RED")
+                    .build(),
+                    newRule("rule2")
+                    .eq("field1", "foo")
+                    .gt("measure1", 1D)
+                    .priority(1)
+                    .classification("BLUE")
+                            .build()
             )
     );
     assertFalse(engine.getBestClassification(TestDomainObject.random()).isPresent());
@@ -105,10 +116,8 @@ public class ClassifierTest {
   public void testBuildClassifierWithRulesOnDifferentAttributes() throws IOException {
     Classifier<TestDomainObject, String> engine = buildSimple(
             () -> Arrays.asList(
-                    RuleSpecification.of("rule1",
-                            ImmutableMap.of("field1", Constraint.equalTo("foo")), (short) 0, "RED"),
-                    RuleSpecification.of("rule2",
-                            ImmutableMap.of("field2", Constraint.equalTo("bar")), (short) 1, "BLUE")
+                    newRule("rule1").eq("field1", "foo").priority(0).classification("RED").build(),
+                    newRule("rule2").eq("field2", "bar").priority(1).classification("BLUE").build()
             )
     );
     TestDomainObject value = TestDomainObject.random();
@@ -121,10 +130,8 @@ public class ClassifierTest {
   public void testBuildClassifierComparableAttributes() throws IOException {
     Classifier<TestDomainObject, String> engine = buildComparable(
             () -> Arrays.asList(
-                    RuleSpecification.of("rule1",
-                            ImmutableMap.of("field1", Constraint.equalTo("foo")), (short) 0, "RED"),
-                    RuleSpecification.of("rule2",
-                            ImmutableMap.of("field2", Constraint.equalTo("bar")), (short) 1, "BLUE")
+                    newRule("rule1").eq("field1", "foo").priority(0).classification("RED").build(),
+                    newRule("rule2").eq("field2", "bar").priority(1).classification("BLUE").build()
             )
     );
     TestDomainObject value = TestDomainObject.random();
@@ -139,12 +146,8 @@ public class ClassifierTest {
             ImmutableClassifier.<String, TestDomainObject, String>definedBy(Schema.<String, TestDomainObject>newInstance()
                     .withAttribute("measure2", TestDomainObject::getMeasure2)
             ).build(() -> Arrays.asList(
-                    RuleSpecification.of("rule1",
-                            ImmutableMap.of("measure2", Constraint.equalTo(999)),
-                            0, "RED"),
-                    RuleSpecification.of("rule1",
-                            ImmutableMap.of("measure2", Constraint.lessThan(1000)),
-                            1, "BLUE")
+                    newRule("rule1").eq("measure2", 999).priority(0).classification("RED").build(),
+                    newRule("rule1").lt("measure2", 1000).priority(1).classification("BLUE").build()
             ));
 
     TestDomainObject test = TestDomainObject.random();
@@ -160,12 +163,8 @@ public class ClassifierTest {
             definedBy(Schema.<String, TestDomainObject>newInstance()
             .withAttribute("measure3", TestDomainObject::getMeasure3)
     ).build(() -> Arrays.asList(
-            RuleSpecification.of("rule1",
-                    ImmutableMap.of("measure3", Constraint.equalTo(999)),
-                    0, "RED"),
-            RuleSpecification.of("rule1",
-                    ImmutableMap.of("measure3", Constraint.lessThan(1000)),
-                    1, "BLUE")
+            newRule("rule1").eq("measure3", 999).priority(0).classification("RED").build(),
+            newRule("rule1").lt("measure3", 1000).priority(1).classification("BLUE").build()
     ));
 
     TestDomainObject test = TestDomainObject.random();
@@ -178,12 +177,9 @@ public class ClassifierTest {
   @Test
   public void testRangeBasedRules() throws IOException {
     Classifier<TestDomainObject, String> engine = buildWithContinuousAttributes(() -> Arrays.asList(
-            RuleSpecification.of("rule1",
-                    ImmutableMap.of("measure1", Constraint.greaterThan(10)), 1, "RED"),
-            RuleSpecification.of("rule2",
-                    ImmutableMap.of("measure1", Constraint.lessThan(8)), 2, "BLUE"),
-            RuleSpecification.of("rule3",
-                    ImmutableMap.of("measure1", Constraint.equalTo(5)), 3, "YELLOW")
+            newRule("rule1").gt("measure1", 10).priority(1).classification("RED").build(),
+            newRule("rule2").lt("measure1", 8).priority(2).classification("BLUE").build(),
+            newRule("rule3").eq("measure1", 5).priority(3).classification("YELLOW").build()
     ));
     TestDomainObject value = TestDomainObject.random().setMeasure1(11);
     assertEquals("RED", engine.getBestClassification(value).get());
@@ -194,16 +190,16 @@ public class ClassifierTest {
   @Test(expected = RuleAttributeNotRegistered.class)
   public void testBuildRuleClassifierUnregisteredAttribute() throws IOException {
     buildSimple(() -> Collections.singletonList(
-            RuleSpecification.of("missing", ImmutableMap.of("missing", Constraint.equalTo("missing")),
-                    0, "MISSING")));
+            newRule("missing").eq("missing", "missing")
+                    .priority(0).classification("MISSING").build()));
   }
 
 
   @Test(expected = ClassCastException.class)
   public void testBuildRuleClassifierWithBadTypeConstraint() throws IOException {
     buildSimple(() -> Collections.singletonList(
-            RuleSpecification.of("measure1", ImmutableMap.of("measure1", Constraint.equalTo("foo")),
-                    0, "BAD TYPE")));
+            newRule("measure1").eq("measure1", "foo")
+                    .priority(0).classification("BAD TYPE").build()));
   }
 
   @Test(expected = IOException.class)

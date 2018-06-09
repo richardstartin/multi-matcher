@@ -31,17 +31,23 @@ Build a generic classification engine
                         .withAttribute("availability", Product::getAvailability)
                         .withAttribute("discountedPrice", value -> 0.2 * value.getPrice())
                 ).build(() -> Arrays.asList(
-                    RuleSpecification.of("rule1", 
-                            ImmutableMap.of("productType", Constraint.equalTo("silk"),
-                                            "discountedPrice", Constraint.greaterThan(1000)),
-                            0, "EXPENSIVE_LUXURY_PRODUCTS"),
-                    RuleSpecification.of("rule2", 
-                            ImmutableMap.of("productType", Constraint.equalTo("caviar"),
-                                            "discountedPrice", Constraint.greaterThan(100)),
-                            1, "EXPENSIVE_LUXURY_PRODUCTS"),
-                    RuleSpecification.of("rule2", 
-                            ImmutableMap.of("productName", Constraint.equalTo("baked beans"))
-                            2, "CHEAP_FOOD")
+                    newRule("rule1") 
+                            .eq("productType", "silk")
+                            .gt("discountedPrice", 1000)
+                            .priority(0)
+                            .classification("EXPENSIVE_LUXURY_PRODUCTS")
+                            .build(),
+                    newRule("rule2")
+                            .eq("productType", "caviar")
+                            .gt("discountedPrice", 100)
+                            .priority(1)
+                            .classification("EXPENSIVE_LUXURY_PRODUCTS")
+                            .build(),
+                    newRule("rule3")
+                            .eq("productName", "baked beans")
+                            .priority(2)
+                            .classification("CHEAP_FOOD")
+                            .build()
                 )
             );
 ```

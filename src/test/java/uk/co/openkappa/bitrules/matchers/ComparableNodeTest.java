@@ -1,27 +1,29 @@
-package uk.co.openkappa.bitrules.nodes;
+package uk.co.openkappa.bitrules.matchers;
 
-import uk.co.openkappa.bitrules.Operation;
 import org.junit.Test;
-import org.roaringbitmap.ArrayContainer;
-import org.roaringbitmap.Container;
 import org.roaringbitmap.RunContainer;
+import uk.co.openkappa.bitrules.ContainerMask;
+import uk.co.openkappa.bitrules.Operation;
 
 import java.time.LocalDate;
 import java.util.Comparator;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static uk.co.openkappa.bitrules.ContainerMask.contiguous;
+import static uk.co.openkappa.bitrules.Mask.with;
+import static uk.co.openkappa.bitrules.Masks.singleton;
 
 public class ComparableNodeTest {
 
-  private static final Container ZERO = new ArrayContainer().add((short) 0);
-  private static final Container ONE = new ArrayContainer().add((short) 1);
-  private static final Container ZERO_OR_ONE = ZERO.or(ONE);
+  private static final ContainerMask ZERO = with(new ContainerMask(), 0);
+  private static final ContainerMask ONE = with(new ContainerMask(), 1);
+  private static final ContainerMask ZERO_OR_ONE = ZERO.or(ONE);
 
   @Test
   public void testGreaterThan() {
-    ComparableNode<LocalDate> node = build(100, Operation.GT);
-    Container mask = RunContainer.rangeOfOnes(0, 100);
+    ComparableNode<LocalDate, ContainerMask> node = build(100, Operation.GT);
+    ContainerMask mask = contiguous(100);
     assertTrue(node.match(LocalDate.ofEpochDay(0), mask.clone()).isEmpty());
     assertEquals(ZERO, node.match(LocalDate.ofEpochDay(1), mask.clone()));
     assertEquals(ZERO_OR_ONE, node.match(LocalDate.ofEpochDay(11), mask.clone()));
@@ -29,8 +31,8 @@ public class ComparableNodeTest {
 
   @Test
   public void testEqual() {
-    ComparableNode<LocalDate> node = build(100, Operation.EQ);
-    Container mask = RunContainer.rangeOfOnes(0, 100);
+    ComparableNode<LocalDate, ContainerMask> node = build(100, Operation.EQ);
+    ContainerMask mask = contiguous(100);
     assertTrue(node.match(LocalDate.ofEpochDay((1)), mask.clone()).isEmpty());
     assertEquals(ZERO, node.match(LocalDate.ofEpochDay(0), mask.clone()));
     assertEquals(ONE, node.match(LocalDate.ofEpochDay(10), mask.clone()));
@@ -38,8 +40,8 @@ public class ComparableNodeTest {
 
   @Test
   public void testLessThan() {
-    ComparableNode<LocalDate> node = build(100, Operation.LT);
-    Container mask = RunContainer.rangeOfOnes(0, 100);
+    ComparableNode<LocalDate, ContainerMask> node = build(100, Operation.LT);
+    ContainerMask mask = contiguous(100);
     assertTrue(node.match(LocalDate.ofEpochDay(1001), mask.clone()).isEmpty());
     assertEquals(mask.andNot(ZERO), node.match(LocalDate.ofEpochDay(0), mask.clone()));
     assertEquals(mask.andNot(ZERO_OR_ONE), node.match(LocalDate.ofEpochDay(10), mask.clone()));
@@ -47,16 +49,16 @@ public class ComparableNodeTest {
 
   @Test
   public void testGreaterThanRev() {
-    ComparableNode<LocalDate> node = buildRev(100, Operation.GT);
-    Container mask = RunContainer.rangeOfOnes(0, 100);
+    ComparableNode<LocalDate, ContainerMask> node = buildRev(100, Operation.GT);
+    ContainerMask mask = contiguous(100);
     assertTrue(node.match(LocalDate.ofEpochDay(0), mask.clone()).isEmpty());
     assertEquals(ZERO, node.match(LocalDate.ofEpochDay(1), mask.clone()));
   }
 
   @Test
   public void testEqualRev() {
-    ComparableNode<LocalDate> node = buildRev(100, Operation.EQ);
-    Container mask = RunContainer.rangeOfOnes(0, 100);
+    ComparableNode<LocalDate, ContainerMask> node = buildRev(100, Operation.EQ);
+    ContainerMask mask = contiguous(100);
     assertTrue(node.match(LocalDate.ofEpochDay(1), mask.clone()).isEmpty());
     assertEquals(ZERO, node.match(LocalDate.ofEpochDay(0), mask.clone()));
     assertEquals(ONE, node.match(LocalDate.ofEpochDay(10), mask.clone()));
@@ -64,8 +66,8 @@ public class ComparableNodeTest {
 
   @Test
   public void testLessThanRev() {
-    ComparableNode<LocalDate> node = buildRev(100, Operation.LT);
-    Container mask = RunContainer.rangeOfOnes(0, 100);
+    ComparableNode<LocalDate, ContainerMask> node = buildRev(100, Operation.LT);
+    ContainerMask mask = contiguous(100);
     assertTrue(node.match(LocalDate.ofEpochDay(1001), mask.clone()).isEmpty());
     assertEquals(mask.andNot(ZERO), node.match(LocalDate.ofEpochDay(0), mask.clone()));
     assertEquals(mask.andNot(ZERO_OR_ONE), node.match(LocalDate.ofEpochDay(10), mask.clone()));
@@ -73,23 +75,23 @@ public class ComparableNodeTest {
 
   @Test
   public void testBuildNode() {
-    DoubleNode node = new DoubleNode(Operation.EQ);
+    DoubleNode<ContainerMask> node = new DoubleNode<>(Operation.EQ, new ContainerMask());
     node.add(0, (short)0);
-    assertEquals(RunContainer.rangeOfOnes(0, 1), node.match(0, RunContainer.rangeOfOnes(0, 1)));
+    assertEquals(contiguous(1), node.match(0, contiguous(1)));
     node.add(0, (short)1);
-    assertEquals(RunContainer.rangeOfOnes(0, 2), node.match(0, RunContainer.rangeOfOnes(0, 2)));
+    assertEquals(contiguous(2), node.match(0, contiguous(2)));
   }
 
-  private ComparableNode<LocalDate> build(int count, Operation operation) {
-    ComparableNode<LocalDate> node = new ComparableNode<>(Comparator.<LocalDate>naturalOrder(), operation);
+  private ComparableNode<LocalDate, ContainerMask> build(int count, Operation operation) {
+    ComparableNode<LocalDate, ContainerMask> node = new ComparableNode<>(Comparator.<LocalDate>naturalOrder(), operation, singleton(ContainerMask.class));
     for (int i = 0; i < count; ++i) {
       node.add(LocalDate.ofEpochDay(i * 10), (short) i);
     }
     return node.optimise();
   }
 
-  private ComparableNode<LocalDate> buildRev(int count, Operation operation) {
-    ComparableNode<LocalDate> node = new ComparableNode<>(Comparator.<LocalDate>naturalOrder(), operation);
+  private ComparableNode<LocalDate, ContainerMask> buildRev(int count, Operation operation) {
+    ComparableNode<LocalDate, ContainerMask> node = new ComparableNode<>(Comparator.<LocalDate>naturalOrder(), operation, singleton(ContainerMask.class));
     for (int i = count - 1; i >= 0; --i) {
       node.add(LocalDate.ofEpochDay(i * 10), (short) i);
     }

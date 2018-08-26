@@ -3,7 +3,7 @@ package uk.co.openkappa.bitrules;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
-import uk.co.openkappa.bitrules.config.RuleAttributeNotRegistered;
+import uk.co.openkappa.bitrules.config.AttributeNotRegistered;
 import uk.co.openkappa.bitrules.config.Schema;
 
 import java.io.IOException;
@@ -13,7 +13,7 @@ import java.util.*;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static uk.co.openkappa.bitrules.RuleSpecification.newRule;
+import static uk.co.openkappa.bitrules.MatchingConstraint.newRule;
 
 public class ClassifierTest {
 
@@ -187,7 +187,7 @@ public class ClassifierTest {
     assertEquals("BLUE", engine.getBestClassification(value.setMeasure1(2.5)).get());
   }
 
-  @Test(expected = RuleAttributeNotRegistered.class)
+  @Test(expected = AttributeNotRegistered.class)
   public void testBuildRuleClassifierUnregisteredAttribute() throws IOException {
     buildSimple(() -> Collections.singletonList(
             newRule("missing").eq("missing", "missing")
@@ -216,8 +216,8 @@ public class ClassifierTest {
   @Test
   public void testBuildSpecFromYAML() throws IOException {
     RuleSpecifications<String, String> specs = new FileRuleSpecifications("test.yaml", new YAMLMapper());
-    assertEquals("rule1", specs.get("rule1").get().getId());
-    assertEquals(2, specs.get().size());
+    assertEquals("rule1", specs.specification("rule1").get().getId());
+    assertEquals(2, specs.specifications().size());
   }
 
   @Test
@@ -227,11 +227,11 @@ public class ClassifierTest {
                     .withAttribute(TestDomainObject.Fields.FIELD1, TestDomainObject::getField1)
                     .withAttribute(TestDomainObject.Fields.MEASURE1, TestDomainObject::getMeasure1))
                     .build(() -> Arrays.asList(
-                            new RuleSpecification<>("rule1",
+                            new MatchingConstraint<>("rule1",
                                     ImmutableMap.of(TestDomainObject.Fields.MEASURE1, Constraint.greaterThan(10)),
                                     0, Duration.ofDays(1)
                             ),
-                            new RuleSpecification<>("rule2",
+                            new MatchingConstraint<>("rule2",
                                     ImmutableMap.of(
                                             TestDomainObject.Fields.FIELD1, Constraint.equalTo("foo"),
                                             TestDomainObject.Fields.MEASURE1, Constraint.greaterThan(10)),

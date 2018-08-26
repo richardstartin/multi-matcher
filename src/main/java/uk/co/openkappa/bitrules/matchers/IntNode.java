@@ -1,26 +1,27 @@
-package uk.co.openkappa.bitrules.nodes;
+package uk.co.openkappa.bitrules.matchers;
 
+import uk.co.openkappa.bitrules.Mask;
 import uk.co.openkappa.bitrules.Operation;
-import org.roaringbitmap.ArrayContainer;
-import org.roaringbitmap.Container;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
 
-public class LongNode {
-
-  private static final Container EMPTY = new ArrayContainer();
+public class IntNode<MaskType extends Mask<MaskType>> {
 
   private final Operation relation;
+  private final MaskType empty;
 
-  private long[] thresholds = new long[16];
-  private Container[] sets = new Container[16];
+  private int[] thresholds = new int[16];
+  private MaskType[] sets;
   private int count = 0;
 
-  public LongNode(Operation relation) {
+  public IntNode(Operation relation, MaskType empty) {
     this.relation = relation;
+    this.empty = empty;
+    this.sets = (MaskType[]) Array.newInstance(empty.getClass(), 16);
   }
 
-  public void add(long value, short priority) {
+  public void add(int value, int priority) {
     int position = Arrays.binarySearch(thresholds, 0, count, value);
     int insertionPoint = -(position + 1);
     if (position < 0 && insertionPoint < count) {
@@ -29,35 +30,35 @@ public class LongNode {
         sets[i] = sets[i - 1];
         thresholds[i] = thresholds[i - 1];
       }
-      sets[insertionPoint] = new ArrayContainer().add(priority);
+      sets[insertionPoint] = maskWith(priority);
       thresholds[insertionPoint] = value;
     } else if (position < 0) {
-      sets[count] = new ArrayContainer().add(priority);
+      sets[count] = maskWith(priority);
       thresholds[count] = value;
       incrementCount();
     } else {
-      sets[position] = sets[position].add(priority);
+      sets[position].add(priority);
     }
   }
 
-  public Container apply(long value, Container context) {
+  public MaskType apply(int value, MaskType context) {
     switch (relation) {
       case GT:
-        return context.iand(findRangeEncoded(value));
+        return context.inPlaceAnd(findRangeEncoded(value));
       case GE:
-        return context.iand(findRangeEncodedInclusive(value));
+        return context.inPlaceAnd(findRangeEncodedInclusive(value));
       case LT:
-        return context.iand(findReverseRangeEncoded(value));
+        return context.inPlaceAnd(findReverseRangeEncoded(value));
       case LE:
-        return context.iand(findReverseRangeEncodedInclusive(value));
+        return context.inPlaceAnd(findReverseRangeEncodedInclusive(value));
       case EQ:
-        return context.iand(findEqualityEncoded(value));
+        return context.inPlaceAnd(findEqualityEncoded(value));
       default:
         return context;
     }
   }
 
-  public LongNode optimise() {
+  public IntNode<MaskType> optimise() {
     switch (relation) {
       case GE:
       case GT:
@@ -73,44 +74,44 @@ public class LongNode {
     return this;
   }
 
-  private Container findEqualityEncoded(long value) {
+  private MaskType findEqualityEncoded(int value) {
     int index = Arrays.binarySearch(thresholds, 0, count, value);
-    return index >= 0 ? sets[index] : EMPTY;
+    return index >= 0 ? sets[index] : empty;
   }
 
-  private Container findRangeEncoded(long value) {
+  private MaskType findRangeEncoded(int value) {
     int pos = Arrays.binarySearch(thresholds, 0, count, value);
     int index = (pos >= 0 ? pos : -(pos + 1)) - 1;
-    return index >= 0 && index < count ? sets[index] : EMPTY;
+    return index >= 0 && index < count ? sets[index] : empty;
   }
 
-  private Container findRangeEncodedInclusive(long value) {
+  private MaskType findRangeEncodedInclusive(int value) {
     int pos = Arrays.binarySearch(thresholds, 0, count, value);
     int index = (pos >= 0 ? pos : -(pos + 1) - 1);
-    return index >= 0 && index < count ? sets[index] : EMPTY;
+    return index >= 0 && index < count ? sets[index] : empty;
   }
 
-  private Container findReverseRangeEncoded(long value) {
+  private MaskType findReverseRangeEncoded(int value) {
     int pos = Arrays.binarySearch(thresholds, 0, count, value);
     int index = (pos >= 0 ? pos + 1 : -(pos + 1));
-    return index >= 0 && index < count ? sets[index] : EMPTY;
+    return index >= 0 && index < count ? sets[index] : empty;
   }
 
-  private Container findReverseRangeEncodedInclusive(long value) {
+  private MaskType findReverseRangeEncodedInclusive(int value) {
     int pos = Arrays.binarySearch(thresholds, 0, count, value);
     int index = (pos >= 0 ? pos : -(pos + 1));
-    return index >= 0 && index < count ? sets[index] : EMPTY;
+    return index >= 0 && index < count ? sets[index] : empty;
   }
 
   private void reverseRangeEncode() {
     for (int i = count - 2; i >= 0; --i) {
-      sets[i] = sets[i].ior(sets[i + 1]).runOptimize();
+      sets[i].inPlaceOr(sets[i + 1]).optimise();
     }
   }
 
   private void rangeEncode() {
     for (int i = 1; i < count; ++i) {
-      sets[i] = sets[i].ior(sets[i - 1]).runOptimize();
+      sets[i].inPlaceOr(sets[i - 1]).optimise();
     }
   }
 
@@ -125,5 +126,18 @@ public class LongNode {
       sets = Arrays.copyOf(sets, count * 2);
       thresholds = Arrays.copyOf(thresholds, count * 2);
     }
+  }
+
+  private MaskType maskWith(int value) {
+    MaskType mask = empty.clone();
+    mask.add(value);
+    return mask;
+  }
+
+  @Override
+  public String toString() {
+    return Nodes.toString(count, relation,
+            Arrays.stream(thresholds).boxed().iterator(),
+            Arrays.stream(sets).iterator());
   }
 }

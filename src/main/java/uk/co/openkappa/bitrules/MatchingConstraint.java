@@ -7,7 +7,7 @@ import java.util.TreeMap;
 import static java.util.Objects.requireNonNull;
 
 
-public class RuleSpecification<Key, Classification> {
+public class MatchingConstraint<Key, Classification> {
 
   public static <K, C> Builder<K, C> newRule(String ruleId) {
     return new Builder<>(ruleId);
@@ -63,11 +63,11 @@ public class RuleSpecification<Key, Classification> {
     }
 
 
-    public RuleSpecification<K, C> build() {
+    public MatchingConstraint<K, C> build() {
       if (constraints.isEmpty()) {
         throw new IllegalStateException("Unconstrained rule");
       }
-      return new RuleSpecification<>(id, constraints, priority, requireNonNull(classification));
+      return new MatchingConstraint<>(id, constraints, priority, requireNonNull(classification));
     }
   }
 
@@ -76,17 +76,17 @@ public class RuleSpecification<Key, Classification> {
   private int priority;
   private Classification classification;
 
-  public RuleSpecification(String id,
-                           Map<Key, Constraint> constraints,
-                           int priority,
-                           Classification classification) {
+  public MatchingConstraint(String id,
+                            Map<Key, Constraint> constraints,
+                            int priority,
+                            Classification classification) {
     this.id = id;
     this.constraints = constraints;
     this.priority = priority;
     this.classification = classification;
   }
 
-  public RuleSpecification() {
+  public MatchingConstraint() {
   }
 
   public String getId() {
@@ -109,7 +109,7 @@ public class RuleSpecification<Key, Classification> {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    RuleSpecification<?, ?> that = (RuleSpecification<?, ?>) o;
+    MatchingConstraint<?, ?> that = (MatchingConstraint<?, ?>) o;
     return priority == that.priority &&
             Objects.equals(id, that.id) &&
             Objects.equals(constraints, that.constraints) &&
@@ -118,7 +118,16 @@ public class RuleSpecification<Key, Classification> {
 
   @Override
   public int hashCode() {
-
     return Objects.hash(id, constraints, priority, classification);
+  }
+
+  @Override
+  public String toString() {
+    return "MatchingConstraint{" +
+            "id='" + id + '\'' +
+            ", constraints=" + constraints +
+            ", priority=" + priority +
+            ", classification=" + classification +
+            '}';
   }
 }

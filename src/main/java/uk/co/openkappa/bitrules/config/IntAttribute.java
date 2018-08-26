@@ -1,7 +1,8 @@
 package uk.co.openkappa.bitrules.config;
 
-import uk.co.openkappa.bitrules.Rule;
-import uk.co.openkappa.bitrules.nodes.IntRule;
+import uk.co.openkappa.bitrules.Mask;
+import uk.co.openkappa.bitrules.Matcher;
+import uk.co.openkappa.bitrules.matchers.IntMatcher;
 
 import java.util.function.ToIntFunction;
 
@@ -18,7 +19,7 @@ public class IntAttribute<T> implements Attribute<T> {
   }
 
   @Override
-  public Rule<T> toRule() {
-    return new IntRule<>(accessor);
+  public <MaskType extends Mask<MaskType>> Matcher<T, MaskType> toMatcher(Class<MaskType> type) {
+    return new IntMatcher<>(accessor, type);
   }
 }

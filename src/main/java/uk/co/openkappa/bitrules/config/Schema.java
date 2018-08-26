@@ -110,7 +110,7 @@ public class Schema<Key, T> {
   public Attribute<T> getAttribute(Key key) {
     Attribute<T> attribute = rules.get(key);
     if (null == attribute) {
-      throw new RuleAttributeNotRegistered("No attribute " + key + " registered.");
+      throw new AttributeNotRegistered("No attribute " + key + " registered.");
     }
     return attribute;
   }

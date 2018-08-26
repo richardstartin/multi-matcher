@@ -18,9 +18,9 @@ public class FileRuleSpecifications implements RuleSpecifications<String, String
   }
 
   @Override
-  public List<RuleSpecification<String, String>> get() throws IOException {
+  public List<MatchingConstraint<String, String>> specifications() throws IOException {
     try (InputStream in = ClassLoader.getSystemResourceAsStream(filename);
-         MappingIterator<RuleSpecification<String, String>> it = mapper.readerFor(RuleSpecification.class).readValues(in)) {
+         MappingIterator<MatchingConstraint<String, String>> it = mapper.readerFor(MatchingConstraint.class).readValues(in)) {
       return it.readAll();
     }
   }

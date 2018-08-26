@@ -1,7 +1,8 @@
 package uk.co.openkappa.bitrules.config;
 
-import uk.co.openkappa.bitrules.Rule;
-import uk.co.openkappa.bitrules.nodes.DoubleRule;
+import uk.co.openkappa.bitrules.Mask;
+import uk.co.openkappa.bitrules.Matcher;
+import uk.co.openkappa.bitrules.matchers.DoubleMatcher;
 
 import java.util.function.ToDoubleFunction;
 
@@ -18,7 +19,7 @@ class DoubleAttribute<T> implements Attribute<T> {
   }
 
   @Override
-  public Rule<T> toRule() {
-    return new DoubleRule<>(accessor);
+  public <MaskType extends Mask<MaskType>> Matcher<T, MaskType> toMatcher(Class<MaskType> type) {
+    return new DoubleMatcher<>(accessor, type);
   }
 }

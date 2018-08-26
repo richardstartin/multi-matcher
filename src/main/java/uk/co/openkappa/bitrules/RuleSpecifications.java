@@ -6,10 +6,10 @@ import java.util.Optional;
 
 public interface RuleSpecifications<Key, Classification> {
 
-  List<RuleSpecification<Key, Classification>> get() throws IOException;
+  List<MatchingConstraint<Key, Classification>> specifications() throws IOException;
 
-  default Optional<RuleSpecification<Key, Classification>> get(String ruleId) throws IOException {
-    return get().stream()
+  default Optional<MatchingConstraint<Key, Classification>> specification(String ruleId) throws IOException {
+    return specifications().stream()
             .filter(rule -> rule.getId().equals(ruleId))
             .findFirst();
   }

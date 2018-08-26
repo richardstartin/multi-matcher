@@ -1,7 +1,8 @@
 package uk.co.openkappa.bitrules.config;
 
-import uk.co.openkappa.bitrules.Rule;
-import uk.co.openkappa.bitrules.nodes.LongRule;
+import uk.co.openkappa.bitrules.Mask;
+import uk.co.openkappa.bitrules.Matcher;
+import uk.co.openkappa.bitrules.matchers.LongMatcher;
 
 import java.util.function.ToLongFunction;
 
@@ -18,7 +19,7 @@ public class LongAttribute<T> implements Attribute<T> {
   }
 
   @Override
-  public Rule<T> toRule() {
-    return new LongRule<>(accessor);
+  public <MaskType extends Mask<MaskType>> Matcher<T, MaskType> toMatcher(Class<MaskType> type) {
+    return new LongMatcher<>(accessor, type);
   }
 }

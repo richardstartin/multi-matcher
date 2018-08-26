@@ -3,9 +3,9 @@ package uk.co.openkappa.bitrules.config;
 /**
  * Thrown if a rule is specified on an attribute not found in the attribute registry.
  */
-public class RuleAttributeNotRegistered extends RuntimeException {
+public class AttributeNotRegistered extends RuntimeException {
 
-  RuleAttributeNotRegistered(String message) {
+  AttributeNotRegistered(String message) {
     super(message);
   }
 }

@@ -13,12 +13,12 @@ I have often needed to implement tedious classification logic in data processing
 <dependency>
     <groupId>uk.co.openkappa</groupId>
     <artifactId>bitrules</artifactId>
-    <version>0.1.5</version>
+    <version>0.1.6</version>
 </dependency>
 ```
 # gradle
 ```groovy 
-group='uk.co.openkappa', module='bitrules', version='0.1.5'
+group='uk.co.openkappa', module='bitrules', version='0.1.6'
 ```
 
 Build a generic classification engine

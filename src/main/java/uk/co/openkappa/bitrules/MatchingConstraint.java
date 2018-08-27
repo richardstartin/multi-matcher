@@ -9,7 +9,7 @@ import static java.util.Objects.requireNonNull;
 
 public class MatchingConstraint<Key, Classification> {
 
-  public static <K, C> Builder<K, C> newRule(String ruleId) {
+  public static <K, C> Builder<K, C> of(String ruleId) {
     return new Builder<>(ruleId);
   }
 
@@ -20,34 +20,31 @@ public class MatchingConstraint<Key, Classification> {
     private int priority;
     private C classification;
 
-    public Builder(String id) {
+    private Builder(String id) {
       this.id = id;
     }
 
-    public Builder eq(K key, Object value) {
+    public Builder<K, C> eq(K key, Object value) {
       return constraint(key, Constraint.equalTo(value));
     }
 
-    public Builder lt(K key, Comparable<?> value) {
+    public Builder<K, C> lt(K key, Comparable<?> value) {
       return constraint(key, Constraint.lessThan(value));
     }
 
-    public Builder le(K key, Comparable<?> value) {
+    public Builder<K, C> le(K key, Comparable<?> value) {
       return constraint(key, Constraint.lessThanOrEqualTo(value));
     }
 
-    public Builder gt(K key, Comparable<?> value) {
+    public Builder<K, C> gt(K key, Comparable<?> value) {
       return constraint(key, Constraint.greaterThan(value));
     }
 
-    public Builder ge(K key, Comparable<?> value) {
+    public Builder<K, C> ge(K key, Comparable<?> value) {
       return constraint(key, Constraint.greaterThanOrEqualTo(value));
     }
 
     public Builder<K, C> priority(int value) {
-      if (value >= 0xFFFF) {
-        throw new IllegalArgumentException("priority " + value + " too high (max: " + 0xFFFF + ")");
-      }
       this.priority = value;
       return this;
     }

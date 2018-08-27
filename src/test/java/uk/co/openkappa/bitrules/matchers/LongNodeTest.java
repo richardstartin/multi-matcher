@@ -70,9 +70,9 @@ public class LongNodeTest {
   @Test
   public void testBuildNode() {
     LongNode<ContainerMask> node = new LongNode<>(Operation.EQ, new ContainerMask());
-    node.add(0, (short)0);
+    node.add(0, 0);
     assertEquals(contiguous(1), node.apply(0, contiguous(1)));
-    node.add(0, (short)1);
+    node.add(0, 1);
     assertEquals(contiguous(2), node.apply(0, contiguous(2)));
   }
 
@@ -117,7 +117,7 @@ public class LongNodeTest {
   private LongNode<ContainerMask> build(int count, Operation relation) {
     LongNode<ContainerMask> node = new LongNode<>(relation, new ContainerMask());
     for (int i = 0; i < count; ++i) {
-      node.add(i * 10, (short)i);
+      node.add(i * 10, i);
     }
     return node.optimise();
   }
@@ -125,7 +125,7 @@ public class LongNodeTest {
   private LongNode<ContainerMask> buildRev(int count, Operation relation) {
     LongNode<ContainerMask> node = new LongNode<>(relation, new ContainerMask());
     for (int i = count - 1; i >= 0; --i) {
-      node.add(i * 10, (short)i);
+      node.add(i * 10, i);
     }
     return node.optimise();
   }

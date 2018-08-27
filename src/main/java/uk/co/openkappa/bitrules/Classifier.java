@@ -14,16 +14,16 @@ public interface Classifier<T, C> {
 
   /**
    * Gets all the classification satisfied by the input value.
-   * @param value the value to classify
+   * @param value the value to classifications
    * @return all matching classifications
    */
-  Stream<C> classify(T value);
+  Stream<C> classifications(T value);
 
   /**
    * Gets the highest priority classification, or none if no constraints are satisfied.
-   * @param value the value to classify.
+   * @param value the value to classifications.
    * @return the best classification, or empty if no constraints are satisfied
    */
-  Optional<C> getBestClassification(T value);
+  Optional<C> classification(T value);
 
 }

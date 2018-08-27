@@ -2,7 +2,6 @@ package uk.co.openkappa.bitrules.matchers;
 
 
 import uk.co.openkappa.bitrules.Mask;
-import uk.co.openkappa.bitrules.Masks;
 import uk.co.openkappa.bitrules.Operation;
 
 import java.util.EnumMap;
@@ -14,7 +13,7 @@ public class CompositeDoubleNode<MaskType extends Mask<MaskType>> {
   private final MaskType empty;
 
   public CompositeDoubleNode(Class<MaskType> type) {
-    this.empty = Masks.create(type);
+    this.empty = Masks.singleton(type);
   }
 
   public void add(Operation relation, double threshold, int priority) {

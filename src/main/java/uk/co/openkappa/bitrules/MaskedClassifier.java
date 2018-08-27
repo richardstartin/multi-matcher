@@ -18,12 +18,12 @@ public class MaskedClassifier<MaskType extends Mask<MaskType>, Input, Classifica
   }
 
   @Override
-  public Stream<Classification> classify(Input value) {
+  public Stream<Classification> classifications(Input value) {
     return match(value).stream().mapToObj(classifications::get);
   }
 
   @Override
-  public Optional<Classification> getBestClassification(Input value) {
+  public Optional<Classification> classification(Input value) {
     MaskType matches = match(value);
     return matches.isEmpty()
             ? Optional.empty()

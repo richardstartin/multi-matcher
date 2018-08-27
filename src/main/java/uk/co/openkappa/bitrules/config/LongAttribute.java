@@ -7,7 +7,7 @@ import uk.co.openkappa.bitrules.matchers.LongMatcher;
 import java.util.function.ToLongFunction;
 
 /**
- * Creates a column of constraints with long semantics
+ * Creates a column of constraints builder long semantics
  * @param <T> the type of the classified objects
  */
 public class LongAttribute<T> implements Attribute<T> {
@@ -19,7 +19,7 @@ public class LongAttribute<T> implements Attribute<T> {
   }
 
   @Override
-  public <MaskType extends Mask<MaskType>> Matcher<T, MaskType> toMatcher(Class<MaskType> type) {
-    return new LongMatcher<>(accessor, type);
+  public <MaskType extends Mask<MaskType>> Matcher<T, MaskType> toMatcher(Class<MaskType> type, int max) {
+    return new LongMatcher<>(accessor, type, max);
   }
 }

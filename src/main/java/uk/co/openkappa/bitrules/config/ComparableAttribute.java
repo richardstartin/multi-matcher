@@ -8,7 +8,7 @@ import java.util.Comparator;
 import java.util.function.Function;
 
 /**
- * Creates a column of constraints with equality and order semantics
+ * Creates a column of constraints builder equality and order semantics
  * @param <T> the type of the classified objects
  * @param <U> the type of the attribute
  */
@@ -23,7 +23,7 @@ public class ComparableAttribute<T, U> implements Attribute<T> {
   }
 
   @Override
-  public <MaskType extends Mask<MaskType>> Matcher<T, MaskType> toMatcher(Class<MaskType> type) {
-    return new ComparableMatcher<>(accessor, comparator, type);
+  public <MaskType extends Mask<MaskType>> Matcher<T, MaskType> toMatcher(Class<MaskType> type, int max) {
+    return new ComparableMatcher<>(accessor, comparator, type, max);
   }
 }

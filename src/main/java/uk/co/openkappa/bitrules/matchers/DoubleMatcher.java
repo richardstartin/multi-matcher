@@ -2,7 +2,6 @@ package uk.co.openkappa.bitrules.matchers;
 
 import uk.co.openkappa.bitrules.Constraint;
 import uk.co.openkappa.bitrules.Mask;
-import uk.co.openkappa.bitrules.Masks;
 import uk.co.openkappa.bitrules.Matcher;
 
 import java.util.function.ToDoubleFunction;
@@ -13,10 +12,10 @@ public class DoubleMatcher<T, MaskType extends Mask<MaskType>> implements Matche
   private final CompositeDoubleNode<MaskType> node;
   private final MaskType wildcards;
 
-  public DoubleMatcher(ToDoubleFunction<T> accessor, Class<MaskType> type) {
+  public DoubleMatcher(ToDoubleFunction<T> accessor, Class<MaskType> type, int max) {
     this.accessor = accessor;
     this.node = new CompositeDoubleNode(type);
-    this.wildcards = Masks.createFull(type);
+    this.wildcards = Masks.createFull(type, max);
   }
 
   @Override

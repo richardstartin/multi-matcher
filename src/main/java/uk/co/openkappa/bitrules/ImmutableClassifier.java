@@ -3,7 +3,6 @@ package uk.co.openkappa.bitrules;
 
 import uk.co.openkappa.bitrules.config.Schema;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -23,26 +22,26 @@ public class ImmutableClassifier<Input, Classification> implements Classifier<In
   }
 
   /**
-   * Gets a new newRule for a classifier
+   * Gets a new builder for a classifier
    *
-   * @param <Key>            the schema key type
+   * @param <Key>            the create key type
    * @param <Input>          the type of the classified objects
    * @param <Classification> the classification type
-   * @return a new newRule
+   * @return a new classifier builder
    */
   public static <Key, Input, Classification>
-  ClassifierBuilder<Key, Input, Classification> definedBy(Schema<Key, Input> schema) {
+  ClassifierBuilder<Key, Input, Classification> builder(Schema<Key, Input> schema) {
     return new ClassifierBuilder<>(schema);
   }
 
   @Override
-  public Stream<Classification> classify(Input input) {
-    return impl.classify(input);
+  public Stream<Classification> classifications(Input input) {
+    return impl.classifications(input);
   }
 
   @Override
-  public Optional<Classification> getBestClassification(Input input) {
-    return impl.getBestClassification(input);
+  public Optional<Classification> classification(Input input) {
+    return impl.classification(input);
   }
 
   public static class ClassifierBuilder<Key, Input, Classification> {
@@ -58,37 +57,43 @@ public class ImmutableClassifier<Input, Classification> implements Classifier<In
     /**
      * Build a classifier from some matchers
      *
-     * @param repository the container of matchers
-     * @return the classifier built from the current snapshot of the repository and attribute registry
-     * @throws IOException if the repository throws
+     * @param constraints the matching constraints
+     * @return the classifier
      */
-    public ImmutableClassifier<Input, Classification> build(RuleSpecifications<Key, Classification> repository) throws IOException {
-      List<MatchingConstraint<Key, Classification>> specs = repository.specifications();
-      int maxPriority = specs.size();
-      return maxPriority < TinyMask.MAX_CAPACITY
-              ? new ImmutableClassifier<>(build(specs, TinyMask.contiguous(maxPriority), TinyMask.class))
-              : new ImmutableClassifier<>(build(specs, ContainerMask.contiguous(maxPriority), ContainerMask.class));
+    public ImmutableClassifier<Input, Classification> build(List<MatchingConstraint<Key, Classification>> constraints) {
+      int maxPriority = constraints.size();
+      return maxPriority < WordMask.MAX_CAPACITY
+              ? new ImmutableClassifier<>(build(constraints, WordMask.contiguous(maxPriority), WordMask.class, maxPriority))
+              : maxPriority < ContainerMask.MAX_CAPACITY
+                ? new ImmutableClassifier<>(build(constraints, ContainerMask.contiguous(maxPriority), ContainerMask.class, maxPriority))
+                : new ImmutableClassifier<>(build(constraints, RoaringBitmapMask.contiguous(maxPriority), RoaringBitmapMask.class, maxPriority));
     }
 
     private <MaskType extends Mask<MaskType>>
-    MaskedClassifier<MaskType, Input, Classification> build(List<MatchingConstraint<Key, Classification>> specs, MaskType mask, Class<MaskType> type) {
+    MaskedClassifier<MaskType, Input, Classification> build(List<MatchingConstraint<Key, Classification>> specs,
+                                                            MaskType mask,
+                                                            Class<MaskType> type,
+                                                            int max) {
       PrimitiveIterator.OfInt sequence = IntStream.iterate(0, i -> i + 1).iterator();
       specs.stream().sorted(Comparator.comparingInt(rd -> order(rd.getPriority())))
-                    .forEach(rule -> addMatchingConstraint(rule, sequence.nextInt(), type));
+                    .forEach(rule -> addMatchingConstraint(rule, sequence.nextInt(), type, max));
       return new MaskedClassifier<>(classifications, freezeMatchers(), mask);
     }
 
     private <MaskType extends Mask<MaskType>>
-    void addMatchingConstraint(MatchingConstraint<Key, Classification> matchInfo, int priority, Class<MaskType> type) {
+    void addMatchingConstraint(MatchingConstraint<Key, Classification> matchInfo,
+                               int priority,
+                               Class<MaskType> type,
+                               int max) {
       classifications.add(matchInfo.getClassification());
       matchInfo.getConstraints()
-              .forEach((key, condition) -> memoisedMatcher(key, type).addConstraint(condition, priority));
+              .forEach((key, condition) -> memoisedMatcher(key, type, max).addConstraint(condition, priority));
     }
 
     private <MaskType extends Mask<MaskType>>
-    Matcher<Input, MaskType> memoisedMatcher(Key key, Class<MaskType> type) {
+    Matcher<Input, MaskType> memoisedMatcher(Key key, Class<MaskType> type, int max) {
       if (!matchers.containsKey(key)) {
-        matchers.put(key, registry.getAttribute(key).toMatcher(type));
+        matchers.put(key, registry.getAttribute(key).toMatcher(type, max));
       }
       return (Matcher<Input, MaskType>) matchers.get(key);
     }

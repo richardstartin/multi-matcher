@@ -7,7 +7,7 @@ import uk.co.openkappa.bitrules.matchers.DoubleMatcher;
 import java.util.function.ToDoubleFunction;
 
 /**
- * Creates a column of constraints with floating point sematics
+ * Creates a column of constraints builder floating point sematics
  * @param <T>
  */
 class DoubleAttribute<T> implements Attribute<T> {
@@ -19,7 +19,7 @@ class DoubleAttribute<T> implements Attribute<T> {
   }
 
   @Override
-  public <MaskType extends Mask<MaskType>> Matcher<T, MaskType> toMatcher(Class<MaskType> type) {
-    return new DoubleMatcher<>(accessor, type);
+  public <MaskType extends Mask<MaskType>> Matcher<T, MaskType> toMatcher(Class<MaskType> type, int max) {
+    return new DoubleMatcher<>(accessor, type, max);
   }
 }

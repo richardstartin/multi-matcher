@@ -71,16 +71,16 @@ public class DoubleNodeTest {
   @Test
   public void testBuildNode() {
     DoubleNode<ContainerMask> node = new DoubleNode<>(Operation.EQ, new ContainerMask());
-    node.add(0, (short)0);
+    node.add(0, 0);
     assertEquals(contiguous(1), node.match(0, contiguous(1)));
-    node.add(0, (short)1);
+    node.add(0, 1);
     assertEquals(contiguous(2), node.match(0, contiguous(2)));
   }
 
   private DoubleNode<ContainerMask> build(int count, Operation relation) {
     DoubleNode<ContainerMask> node = new DoubleNode<>(relation, new ContainerMask());
     for (int i = 0; i < count; ++i) {
-      node.add(i * 10, (short) i);
+      node.add(i * 10,  i);
     }
     return node.optimise();
   }
@@ -88,7 +88,7 @@ public class DoubleNodeTest {
   private DoubleNode<ContainerMask> buildRev(int count, Operation relation) {
     DoubleNode<ContainerMask> node = new DoubleNode<>(relation, new ContainerMask());
     for (int i = count - 1; i >= 0; --i) {
-      node.add(i * 10, (short) i);
+      node.add(i * 10,  i);
     }
     return node.optimise();
   }

@@ -5,25 +5,21 @@ import java.util.Objects;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
-public class TinyMask implements Mask<TinyMask> {
+public class WordMask implements Mask<WordMask> {
 
   public static final int MAX_CAPACITY = 64;
 
-  public static TinyMask contiguous(int to) {
-    return new TinyMask(((1L << to) - 1));
-  }
-
-  public static TinyMask full() {
-    return new TinyMask(-1L);
+  public static WordMask contiguous(int to) {
+    return new WordMask(((1L << to) - 1));
   }
 
   private long mask;
 
-  public TinyMask(long mask) {
+  public WordMask(long mask) {
     this.mask = mask;
   }
 
-  public TinyMask() { }
+  public WordMask() { }
 
   public void add(int bit) {
     mask |= 1L << bit;
@@ -34,25 +30,25 @@ public class TinyMask implements Mask<TinyMask> {
     mask ^= 1L << id;
   }
 
-  public TinyMask and(TinyMask other) {
-    return new TinyMask(this.mask & other.mask);
+  public WordMask and(WordMask other) {
+    return new WordMask(this.mask & other.mask);
   }
 
   @Override
-  public TinyMask andNot(TinyMask other) {
-    return new TinyMask(mask &~ other.mask);
+  public WordMask andNot(WordMask other) {
+    return new WordMask(mask &~ other.mask);
   }
 
-  public TinyMask inPlaceAnd(TinyMask other) {
+  public WordMask inPlaceAnd(WordMask other) {
     this.mask &= other.mask;
     return this;
   }
 
-  public TinyMask or(TinyMask other) {
-    return new TinyMask(this.mask | other.mask);
+  public WordMask or(WordMask other) {
+    return new WordMask(this.mask | other.mask);
   }
 
-  public TinyMask inPlaceOr(TinyMask other) {
+  public WordMask inPlaceOr(WordMask other) {
     this.mask |= other.mask;
     return this;
   }
@@ -73,8 +69,8 @@ public class TinyMask implements Mask<TinyMask> {
   }
 
   @Override
-  public TinyMask clone() {
-    return new TinyMask(mask);
+  public WordMask clone() {
+    return new WordMask(mask);
   }
 
   @Override
@@ -96,7 +92,7 @@ public class TinyMask implements Mask<TinyMask> {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    TinyMask tinyMask = (TinyMask) o;
+    WordMask tinyMask = (WordMask) o;
     return mask == tinyMask.mask;
   }
 

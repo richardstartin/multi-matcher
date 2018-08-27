@@ -1,7 +1,6 @@
 package uk.co.openkappa.bitrules.matchers;
 
 import uk.co.openkappa.bitrules.Mask;
-import uk.co.openkappa.bitrules.Masks;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,8 +13,8 @@ public class GenericEqualityNode<T, MaskType extends Mask<MaskType>> {
   private final MaskType wildcard;
   private final MaskType empty;
 
-  public GenericEqualityNode(Class<MaskType> type, MaskType empty) {
-    this.wildcard = Masks.createFull(type);
+  public GenericEqualityNode(Class<MaskType> type, MaskType empty, int max) {
+    this.wildcard = Masks.createFull(type, max);
     this.empty = empty;
   }
 

@@ -7,7 +7,7 @@ import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.Map;
 
-import static uk.co.openkappa.bitrules.Masks.singleton;
+import static uk.co.openkappa.bitrules.matchers.Masks.singleton;
 
 public class CompositeComparableNode<T, MaskType extends Mask<MaskType>> {
 

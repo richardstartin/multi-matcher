@@ -107,9 +107,9 @@ public class IntNodeTest {
   @Test
   public void testBuildNode() {
     IntNode<ContainerMask> node = new IntNode<>(Operation.EQ, new ContainerMask());
-    node.add(0, (short)0);
+    node.add(0, 0);
     assertEquals(contiguous( 1), node.apply(0, contiguous( 1)));
-    node.add(0, (short)1);
+    node.add(0, 1);
     assertEquals(contiguous( 2), node.apply(0, contiguous( 2)));
   }
 

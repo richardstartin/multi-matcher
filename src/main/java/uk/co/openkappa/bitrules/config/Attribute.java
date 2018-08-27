@@ -9,8 +9,10 @@ import uk.co.openkappa.bitrules.Matcher;
  */
 public interface Attribute<T> {
   /**
-   * Construct a rule from the attribute
-   * @return a new rule instance
+   * Construct a matcher from the attribute
+   * @param maskType the type of mask
+   * @param max the maximum number of constraints supported
+   * @return a new matcher
    */
-  <MaskType extends Mask<MaskType>> Matcher<T, MaskType> toMatcher(Class<MaskType> maskType);
+  <MaskType extends Mask<MaskType>> Matcher<T, MaskType> toMatcher(Class<MaskType> maskType, int max);
 }

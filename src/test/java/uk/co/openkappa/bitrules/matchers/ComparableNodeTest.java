@@ -1,7 +1,6 @@
 package uk.co.openkappa.bitrules.matchers;
 
 import org.junit.Test;
-import org.roaringbitmap.RunContainer;
 import uk.co.openkappa.bitrules.ContainerMask;
 import uk.co.openkappa.bitrules.Operation;
 
@@ -12,7 +11,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static uk.co.openkappa.bitrules.ContainerMask.contiguous;
 import static uk.co.openkappa.bitrules.Mask.with;
-import static uk.co.openkappa.bitrules.Masks.singleton;
+import static uk.co.openkappa.bitrules.matchers.Masks.singleton;
 
 public class ComparableNodeTest {
 
@@ -76,16 +75,16 @@ public class ComparableNodeTest {
   @Test
   public void testBuildNode() {
     DoubleNode<ContainerMask> node = new DoubleNode<>(Operation.EQ, new ContainerMask());
-    node.add(0, (short)0);
+    node.add(0, 0);
     assertEquals(contiguous(1), node.match(0, contiguous(1)));
-    node.add(0, (short)1);
+    node.add(0, 1);
     assertEquals(contiguous(2), node.match(0, contiguous(2)));
   }
 
   private ComparableNode<LocalDate, ContainerMask> build(int count, Operation operation) {
     ComparableNode<LocalDate, ContainerMask> node = new ComparableNode<>(Comparator.<LocalDate>naturalOrder(), operation, singleton(ContainerMask.class));
     for (int i = 0; i < count; ++i) {
-      node.add(LocalDate.ofEpochDay(i * 10), (short) i);
+      node.add(LocalDate.ofEpochDay(i * 10),  i);
     }
     return node.optimise();
   }
@@ -93,7 +92,7 @@ public class ComparableNodeTest {
   private ComparableNode<LocalDate, ContainerMask> buildRev(int count, Operation operation) {
     ComparableNode<LocalDate, ContainerMask> node = new ComparableNode<>(Comparator.<LocalDate>naturalOrder(), operation, singleton(ContainerMask.class));
     for (int i = count - 1; i >= 0; --i) {
-      node.add(LocalDate.ofEpochDay(i * 10), (short) i);
+      node.add(LocalDate.ofEpochDay(i * 10),  i);
     }
     return node.optimise();
   }

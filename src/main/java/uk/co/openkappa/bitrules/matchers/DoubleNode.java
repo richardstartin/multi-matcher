@@ -123,4 +123,11 @@ public class DoubleNode<MaskType extends Mask<MaskType>> {
     return mask;
   }
 
+  @Override
+  public String toString() {
+    return Nodes.toString(count, relation,
+            Arrays.stream(thresholds).boxed().iterator(),
+            Arrays.stream(sets).iterator());
+  }
+
 }

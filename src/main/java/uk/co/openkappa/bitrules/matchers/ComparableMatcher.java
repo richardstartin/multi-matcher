@@ -2,7 +2,6 @@ package uk.co.openkappa.bitrules.matchers;
 
 import uk.co.openkappa.bitrules.Constraint;
 import uk.co.openkappa.bitrules.Mask;
-import uk.co.openkappa.bitrules.Masks;
 import uk.co.openkappa.bitrules.Matcher;
 
 import java.util.Comparator;
@@ -14,10 +13,10 @@ public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements
   private final MaskType wildcards;
   private final CompositeComparableNode<U, MaskType> node;
 
-  public ComparableMatcher(Function<T, U> accessor, Comparator<U> comparator, Class<MaskType> type) {
+  public ComparableMatcher(Function<T, U> accessor, Comparator<U> comparator, Class<MaskType> type, int max) {
     this.accessor = accessor;
     this.node = new CompositeComparableNode<>(comparator, type);
-    this.wildcards = Masks.createFull(type);
+    this.wildcards = Masks.createFull(type, max);
   }
 
   @Override

@@ -10,12 +10,10 @@ import java.util.stream.IntStream;
 
 public class ContainerMask implements Mask<ContainerMask> {
 
+  public static final int MAX_CAPACITY = 1 << 16;
+
   public static ContainerMask contiguous(int to) {
     return new ContainerMask(RunContainer.rangeOfOnes(0, to));
-  }
-
-  public static ContainerMask full() {
-    return new ContainerMask(RunContainer.full());
   }
 
   private Container container;
@@ -27,7 +25,6 @@ public class ContainerMask implements Mask<ContainerMask> {
   public ContainerMask() {
     this(new ArrayContainer());
   }
-
 
   @Override
   public void add(int id) {

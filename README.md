@@ -23,27 +23,27 @@ group='uk.co.openkappa', module='bitrules', version='0.1.6'
 
 Build a generic classification engine
 ```java
-    Classifier<Product, String> classifier = ImmutableClassifier.<String, Product, String>definedBy(
-                Schema.<String, Product, String>newInstance()
+    Classifier<Product, String> classifier = ImmutableClassifier.<String, Product, String>builder(
+                Schema.<String, Product, String>create()
                         .withAttribute("productType", Product::getProductType)
                         .withAttribute("issueDate", Product::getIssueDate, Comparator.naturalOrder().reversed())
                         .withAttribute("productName", Product::getProductName)
                         .withAttribute("availability", Product::getAvailability)
                         .withAttribute("discountedPrice", value -> 0.2 * value.getPrice())
-                ).build(() -> Arrays.asList(
-                    newRule("rule1") 
+                ).build(Arrays.asList(
+                    MatchingConstraint.<String, String>of("rule1") 
                             .eq("productType", "silk")
                             .gt("discountedPrice", 1000)
                             .priority(0)
                             .classification("EXPENSIVE_LUXURY_PRODUCTS")
                             .build(),
-                    newRule("rule2")
+                    MatchingConstraint.<String, String>of("rule2")
                             .eq("productType", "caviar")
                             .gt("discountedPrice", 100)
                             .priority(1)
                             .classification("EXPENSIVE_LUXURY_PRODUCTS")
                             .build(),
-                    newRule("rule3")
+                    MatchingConstraint.<String, String>of("rule3")
                             .eq("productName", "baked beans")
                             .priority(2)
                             .classification("CHEAP_FOOD")
@@ -56,5 +56,5 @@ Classify
 
 ```java
   Product p = getProduct();
-  String classification = classifier.getBestClassification(p).orElse("UNCLASSIFIED");
+  String classification = classifier.classification(p).orElse("UNCLASSIFIED");
 ```

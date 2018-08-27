@@ -46,7 +46,7 @@ public class StringMatcher<Input, MaskType extends Mask<MaskType>> implements Ma
         trie.add(constraint.getValue(), priority);
         break;
       case EQ:
-        GenericEqualityNode<String, MaskType> hash = (GenericEqualityNode<String, MaskType>) nodes.computeIfAbsent(EQ, o -> new GenericEqualityNode<>(empty, wildcards));
+        GenericEqualityNode<String, MaskType> hash = (GenericEqualityNode<String, MaskType>) nodes.computeIfAbsent(EQ, o -> new GenericEqualityNode<>(empty));
         hash.add(constraint.getValue(), priority);
         break;
       default:
@@ -87,7 +87,7 @@ public class StringMatcher<Input, MaskType extends Mask<MaskType>> implements Ma
 
     @Override
     public void optimise() {
-      this.longest = map.keySet().stream().mapToInt(String::hashCode).max().orElse(0);
+      this.longest = map.keySet().stream().mapToInt(String::length).max().orElse(0);
       PatriciaTrie<MaskType> trie = new PatriciaTrie<>();
       trie.putAll(map);
       map.keySet().stream().sorted(Comparator.comparingInt(String::length))

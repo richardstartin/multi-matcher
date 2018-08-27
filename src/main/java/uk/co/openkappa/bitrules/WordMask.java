@@ -13,6 +13,14 @@ public class WordMask implements Mask<WordMask> {
     return new WordMask(((1L << to) - 1));
   }
 
+  public static WordMask of(int... values) {
+    long word = 0L;
+    for (int v : values) {
+      word |= (1L << v);
+    }
+    return new WordMask(word);
+  }
+
   private long mask;
 
   public WordMask(long mask) {
@@ -27,7 +35,7 @@ public class WordMask implements Mask<WordMask> {
 
   @Override
   public void remove(int id) {
-    mask ^= 1L << id;
+    mask ^= (1L << id);
   }
 
   public WordMask and(WordMask other) {

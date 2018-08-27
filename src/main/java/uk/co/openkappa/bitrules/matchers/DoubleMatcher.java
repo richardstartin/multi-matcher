@@ -14,7 +14,7 @@ public class DoubleMatcher<T, MaskType extends Mask<MaskType>> implements Matche
 
   public DoubleMatcher(ToDoubleFunction<T> accessor, Class<MaskType> type, int max) {
     this.accessor = accessor;
-    this.node = new CompositeDoubleNode(type);
+    this.node = new CompositeDoubleNode<>(type);
     this.wildcards = Masks.wildcards(type, max);
   }
 
@@ -26,7 +26,7 @@ public class DoubleMatcher<T, MaskType extends Mask<MaskType>> implements Matche
 
   @Override
   public void addConstraint(Constraint constraint, int priority) {
-    Number number = coerceValue(constraint);
+    Number number = constraint.getValue();
     double value = number.doubleValue();
     node.add(constraint.getOperation(), value, priority);
     wildcards.remove(priority);

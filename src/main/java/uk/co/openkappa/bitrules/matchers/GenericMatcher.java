@@ -10,23 +10,27 @@ public class GenericMatcher<T, U, MaskType extends Mask<MaskType>> implements Ma
 
   private final Function<T, U> accessor;
   private final GenericEqualityNode<U, MaskType> node;
+  private final MaskType wildcard;
 
   public GenericMatcher(Function<T, U> accessor, Class<MaskType> type, int max) {
     this.accessor = accessor;
-    this.node = new GenericEqualityNode<>(type, Masks.singleton(type), max);
+    this.wildcard = Masks.wildcards(type, max);
+    this.node = new GenericEqualityNode<>(Masks.singleton(type));
   }
 
   public MaskType match(T value, MaskType context) {
-    return node.match(accessor.apply(value), context);
+    return node.match(accessor.apply(value), context).inPlaceOr(wildcard);
   }
 
   @Override
   public void addConstraint(Constraint constraint, int priority) {
-    node.add((U) constraint.getValue(), priority);
+    node.add(constraint.getValue(), priority);
+    wildcard.remove(priority);
   }
 
   @Override
   public void freeze() {
     node.optimise();
+    wildcard.optimise();
   }
 }

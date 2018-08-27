@@ -26,7 +26,7 @@ public class LongMatcher<T, MaskType extends Mask<MaskType>> implements Matcher<
 
   @Override
   public void addConstraint(Constraint constraint, int priority) {
-    Number number = coerceValue(constraint);
+    Number number = constraint.getValue();
     long value = number.longValue();
     node.add(constraint.getOperation(), value, priority);
     wildcards.remove(priority);

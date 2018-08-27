@@ -22,6 +22,10 @@ public class Constraint {
     return condition(Operation.GE, value);
   }
 
+  public static Constraint startsWith(String prefix) {
+    return condition(Operation.STARTS_WITH, prefix);
+  }
+
   private static Constraint condition(Operation op, Object value) {
     Constraint rc = new Constraint();
     rc.operation = op;

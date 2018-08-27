@@ -26,7 +26,7 @@ public class IntMatcher<T, MaskType extends Mask<MaskType>> implements Matcher<T
 
   @Override
   public void addConstraint(Constraint constraint, int priority) {
-    Number number = coerceValue(constraint);
+    Number number = constraint.getValue();
     int value = number.intValue();
     node.add(constraint.getOperation(), value, priority);
     wildcards.remove(priority);

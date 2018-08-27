@@ -27,7 +27,4 @@ public interface Matcher<T, MaskType> {
    */
   void freeze();
 
-  default <U> U coerceValue(Constraint constraint) {
-    return (U)constraint.getValue();
-  }
 }

@@ -58,6 +58,18 @@ public class Schema<Key, InputType> {
   }
 
   /**
+   * Registers a string attribute builder equality semantics only
+   * @param key the key of the attribute (rules refer to this)
+   * @param accessor extracts a value of type InputType from the classified object
+   * @param <U> the type of the attribute value
+   * @return an attribute registry containing the attribute
+   */
+  public <U> Schema<Key, InputType> withStringAttribute(Key key, Function<InputType, String> accessor) {
+    rules.put(key, new StringAttribute<>(accessor));
+    return this;
+  }
+
+  /**
    * Registers a generic attribute builder equality and order semantics
    * @param key the key of the attribute (rules refer to this)
    * @param accessor extracts a value of type InputType from the classified object

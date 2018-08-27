@@ -15,7 +15,7 @@ public class IntMatcher<T, MaskType extends Mask<MaskType>> implements Matcher<T
   public IntMatcher(ToIntFunction<T> accessor, Class<MaskType> type, int max) {
     this.accessor = accessor;
     this.node = new CompositeIntNode<>(Masks.singleton(type));
-    this.wildcards = Masks.createFull(type, max);
+    this.wildcards = Masks.wildcards(type, max);
   }
 
   @Override

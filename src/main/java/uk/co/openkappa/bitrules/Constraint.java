@@ -39,8 +39,8 @@ public class Constraint {
     return operation;
   }
 
-  public Object getValue() {
-    return value;
+  public <T> T getValue() {
+    return (T) value;
   }
 
 }

@@ -6,13 +6,13 @@ public enum Operation {
   LE("≤"),
   GE("≥"),
   EQ("="),
-  NE("≠");
-
+  NE("≠"),
+  STARTS_WITH("starts_with");
 
   private final String symbol;
 
-  Operation(String pretty) {
-    this.symbol = pretty;
+  Operation(String symbol) {
+    this.symbol = symbol;
   }
 
   @Override

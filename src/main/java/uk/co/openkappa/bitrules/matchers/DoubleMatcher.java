@@ -15,7 +15,7 @@ public class DoubleMatcher<T, MaskType extends Mask<MaskType>> implements Matche
   public DoubleMatcher(ToDoubleFunction<T> accessor, Class<MaskType> type, int max) {
     this.accessor = accessor;
     this.node = new CompositeDoubleNode(type);
-    this.wildcards = Masks.createFull(type, max);
+    this.wildcards = Masks.wildcards(type, max);
   }
 
   @Override

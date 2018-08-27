@@ -16,7 +16,7 @@ public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements
   public ComparableMatcher(Function<T, U> accessor, Comparator<U> comparator, Class<MaskType> type, int max) {
     this.accessor = accessor;
     this.node = new CompositeComparableNode<>(comparator, type);
-    this.wildcards = Masks.createFull(type, max);
+    this.wildcards = Masks.wildcards(type, max);
   }
 
   @Override

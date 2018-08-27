@@ -25,7 +25,7 @@ class Masks {
     EMPTY.forEach((type, constructor) -> SINGLETONS.put(type, constructor.get()));
   }
 
-  public static <MaskType extends Mask> MaskType createFull(Class<MaskType> type, int limit) {
+  public static <MaskType extends Mask> MaskType wildcards(Class<MaskType> type, int limit) {
     return type.cast(FULL.get(type).apply(limit));
   }
 

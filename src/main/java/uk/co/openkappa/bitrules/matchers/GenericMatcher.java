@@ -19,7 +19,8 @@ public class GenericMatcher<T, U, MaskType extends Mask<MaskType>> implements Ma
   }
 
   public MaskType match(T value, MaskType context) {
-    return node.match(accessor.apply(value), context).inPlaceOr(wildcard);
+    MaskType mask = wildcard.and(context);
+    return node.match(accessor.apply(value), context).inPlaceOr(mask);
   }
 
   @Override

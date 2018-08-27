@@ -86,8 +86,7 @@ public class ImmutableClassifier<Input, Classification> implements Classifier<In
                                Class<MaskType> type,
                                int max) {
       classifications.add(matchInfo.getClassification());
-      matchInfo.getConstraints()
-              .forEach((key, condition) -> memoisedMatcher(key, type, max).addConstraint(condition, priority));
+      matchInfo.getConstraints().forEach((key, condition) -> memoisedMatcher(key, type, max).addConstraint(condition, priority));
     }
 
     private <MaskType extends Mask<MaskType>>

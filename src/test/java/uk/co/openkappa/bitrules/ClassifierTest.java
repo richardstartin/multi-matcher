@@ -140,7 +140,7 @@ public class ClassifierTest {
   }
 
   @Test
-  public void testIntegerRules() throws IOException {
+  public void testIntegerRules() {
     Classifier<TestDomainObject, String> classifier =
             ImmutableClassifier.<String, TestDomainObject, String>builder(Schema.<String, TestDomainObject>create()
                     .withAttribute("measure2", TestDomainObject::getMeasure2)

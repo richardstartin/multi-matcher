@@ -1,11 +1,11 @@
 package uk.co.openkappa.bitrules.matchers;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.co.openkappa.bitrules.WordMask;
 import uk.co.openkappa.bitrules.Operation;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.co.openkappa.bitrules.WordMask.contiguous;
 import static uk.co.openkappa.bitrules.Mask.with;
 import static uk.co.openkappa.bitrules.Mask.without;

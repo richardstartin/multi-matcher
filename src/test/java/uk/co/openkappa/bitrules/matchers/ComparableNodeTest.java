@@ -1,14 +1,15 @@
 package uk.co.openkappa.bitrules.matchers;
 
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 import uk.co.openkappa.bitrules.ContainerMask;
 import uk.co.openkappa.bitrules.Operation;
 
 import java.time.LocalDate;
 import java.util.Comparator;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.co.openkappa.bitrules.ContainerMask.contiguous;
 import static uk.co.openkappa.bitrules.Mask.with;
 import static uk.co.openkappa.bitrules.matchers.Masks.singleton;

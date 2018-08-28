@@ -2,7 +2,7 @@ package uk.co.openkappa.bitrules;
 
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.google.common.collect.ImmutableMap;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.co.openkappa.bitrules.config.AttributeNotRegistered;
 import uk.co.openkappa.bitrules.config.Schema;
 
@@ -11,8 +11,9 @@ import java.time.Duration;
 import java.util.*;
 
 import static java.util.stream.Collectors.toList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ClassifierTest {
 
@@ -186,25 +187,29 @@ public class ClassifierTest {
     assertEquals("BLUE", engine.classification(value.setMeasure1(2.5)).get());
   }
 
-  @Test(expected = AttributeNotRegistered.class)
-  public void testBuildRuleClassifierUnregisteredAttribute() throws IOException {
-    buildSimple(() -> Collections.singletonList(
-            MatchingConstraint.<String, String>of("missing").eq("missing", "missing")
-                    .priority(0).classification("MISSING").build()));
+  @Test
+  public void testBuildRuleClassifierUnregisteredAttribute() {
+    assertThrows(AttributeNotRegistered.class, () ->
+            buildSimple(() -> Collections.singletonList(
+                    MatchingConstraint.<String, String>of("missing").eq("missing", "missing")
+                            .priority(0).classification("MISSING").build()))
+            );
   }
 
 
-  @Test(expected = ClassCastException.class)
-  public void testBuildRuleClassifierWithBadTypeConstraint() throws IOException {
+  @Test
+  public void testBuildRuleClassifierWithBadTypeConstraint() {
+    assertThrows(ClassCastException.class, () ->
     buildSimple(() -> Collections.singletonList(
             MatchingConstraint.<String, String>of("measure1").eq("measure1", "foo")
-                    .priority(0).classification("BAD TYPE").build()));
+                    .priority(0).classification("BAD TYPE").build())));
   }
 
-  @Test(expected = IOException.class)
-  public void testBuildRuleClassifierFromInvalidYAML() throws IOException {
+  @Test
+  public void testBuildRuleClassifierFromInvalidYAML() {
+    assertThrows(IOException.class, () ->
     ImmutableClassifier.<String, TestDomainObject, String>builder(Schema.create())
-            .build(new FileRules("invalid.yaml", new YAMLMapper()).constraints());
+            .build(new FileRules("invalid.yaml", new YAMLMapper()).constraints()));
   }
 
   @Test
@@ -220,7 +225,7 @@ public class ClassifierTest {
   }
 
   @Test
-  public void testBuildFromEnumSchema() throws IOException {
+  public void testBuildFromEnumSchema() {
     Classifier<TestDomainObject, Duration> classifier =
             ImmutableClassifier.<TestDomainObject.Fields, TestDomainObject, Duration>builder(Schema.<TestDomainObject.Fields, TestDomainObject>create(TestDomainObject.Fields.class)
                     .withAttribute(TestDomainObject.Fields.FIELD1, TestDomainObject::getField1)

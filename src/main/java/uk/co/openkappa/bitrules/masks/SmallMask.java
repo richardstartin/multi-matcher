@@ -1,28 +1,34 @@
-package uk.co.openkappa.bitrules;
+package uk.co.openkappa.bitrules.masks;
 
-import org.roaringbitmap.ArrayContainer;
-import org.roaringbitmap.Container;
-import org.roaringbitmap.PeekableShortIterator;
-import org.roaringbitmap.RunContainer;
+import org.roaringbitmap.*;
+import uk.co.openkappa.bitrules.Mask;
 
 import java.util.stream.IntStream;
 
 
-public class ContainerMask implements Mask<ContainerMask> {
+public class SmallMask implements Mask<SmallMask> {
 
   public static final int MAX_CAPACITY = 1 << 16;
 
-  public static ContainerMask contiguous(int to) {
-    return new ContainerMask(RunContainer.rangeOfOnes(0, to));
+  public static SmallMask contiguous(int to) {
+    return new SmallMask(RunContainer.rangeOfOnes(0, to));
+  }
+
+  public static SmallMask of(int... values) {
+    SmallMask mask = new SmallMask(values.length > 4096 ? new BitmapContainer() : new ArrayContainer());
+    for (int v : values) {
+      mask.add(v);
+    }
+    return mask;
   }
 
   private Container container;
 
-  public ContainerMask(Container container) {
+  public SmallMask(Container container) {
     this.container = container;
   }
 
-  public ContainerMask() {
+  public SmallMask() {
     this(new ArrayContainer());
   }
 
@@ -37,28 +43,28 @@ public class ContainerMask implements Mask<ContainerMask> {
   }
 
   @Override
-  public ContainerMask and(ContainerMask other) {
-    return new ContainerMask(container.and(other.container));
+  public SmallMask and(SmallMask other) {
+    return new SmallMask(container.and(other.container));
   }
 
   @Override
-  public ContainerMask andNot(ContainerMask other) {
-    return new ContainerMask(container.andNot(other.container));
+  public SmallMask andNot(SmallMask other) {
+    return new SmallMask(container.andNot(other.container));
   }
 
   @Override
-  public ContainerMask inPlaceAnd(ContainerMask other) {
+  public SmallMask inPlaceAnd(SmallMask other) {
     this.container = container.iand(other.container);
     return this;
   }
 
   @Override
-  public ContainerMask or(ContainerMask other) {
-    return new ContainerMask(container.or(other.container));
+  public SmallMask or(SmallMask other) {
+    return new SmallMask(container.or(other.container));
   }
 
   @Override
-  public ContainerMask inPlaceOr(ContainerMask other) {
+  public SmallMask inPlaceOr(SmallMask other) {
     this.container = container.ior(other.container);
     return this;
   }
@@ -75,8 +81,8 @@ public class ContainerMask implements Mask<ContainerMask> {
   }
 
   @Override
-  public ContainerMask clone() {
-    return new ContainerMask(container.clone());
+  public SmallMask clone() {
+    return new SmallMask(container.clone());
   }
 
   @Override
@@ -101,8 +107,8 @@ public class ContainerMask implements Mask<ContainerMask> {
 
   @Override
   public boolean equals(Object other) {
-    if (other instanceof ContainerMask) {
-      return container.equals(((ContainerMask) other).container);
+    if (other instanceof SmallMask) {
+      return container.equals(((SmallMask) other).container);
     }
     return false;
   }

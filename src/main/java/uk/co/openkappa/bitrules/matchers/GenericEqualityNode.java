@@ -7,7 +7,7 @@ import java.util.Map;
 
 import static uk.co.openkappa.bitrules.Mask.with;
 
-public class GenericEqualityNode<T, MaskType extends Mask<MaskType>> implements Node<T, MaskType> {
+class GenericEqualityNode<T, MaskType extends Mask<MaskType>> implements Node<T, MaskType> {
 
   private final Map<T, MaskType> segments = new HashMap<>();
   private final MaskType empty;

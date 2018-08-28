@@ -2,18 +2,17 @@ package uk.co.openkappa.bitrules;
 
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.google.common.collect.ImmutableMap;
+import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.junit.jupiter.api.Test;
-import uk.co.openkappa.bitrules.config.AttributeNotRegistered;
-import uk.co.openkappa.bitrules.config.Schema;
+import uk.co.openkappa.bitrules.schema.AttributeNotRegistered;
+import uk.co.openkappa.bitrules.schema.Schema;
 
 import java.io.IOException;
 import java.time.Duration;
 import java.util.*;
 
 import static java.util.stream.Collectors.toList;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ClassifierTest {
 
@@ -27,7 +26,7 @@ public class ClassifierTest {
   public void testBuildClassifierOneRule() throws IOException {
     Classifier<TestDomainObject, String> engine = buildSimple(
             () -> Collections.singletonList(
-                    MatchingConstraint.<String, String>of("rule1")
+                    MatchingConstraint.<String, String>named("rule1")
                     .eq("field1", "foo")
                     .lt("measure1", 0D)
                     .priority(0)
@@ -51,13 +50,13 @@ public class ClassifierTest {
   public void testBuildClassifierTwoDisjointRules() throws IOException {
     Classifier<TestDomainObject, String> engine = buildSimple(
             () -> Arrays.asList(
-                    MatchingConstraint.<String, String>of("rule1")
+                    MatchingConstraint.<String, String>named("rule1")
                             .eq("field1", "foo")
                             .lt("measure1", 0D)
                             .priority(0)
                     .classification("RED")
                     .build(),
-                    MatchingConstraint.<String, String>of("rule2")
+                    MatchingConstraint.<String, String>named("rule2")
                             .eq("field1", "bar")
                             .lt("measure1", 0D)
                             .priority(0)
@@ -81,13 +80,13 @@ public class ClassifierTest {
   public void testBuildClassifierTwoOverlappingRules() throws IOException {
     Classifier<TestDomainObject, String> engine = buildSimple(
             () -> Arrays.asList(
-                    MatchingConstraint.<String, String>of("rule1")
+                    MatchingConstraint.<String, String>named("rule1")
                             .eq("field1", "foo")
                             .gt("measure1", 0D)
                             .priority(0)
                     .classification("RED")
                     .build(),
-                    MatchingConstraint.<String, String>of("rule2")
+                    MatchingConstraint.<String, String>named("rule2")
                     .eq("field1", "foo")
                     .gt("measure1", 1D)
                     .priority(1)
@@ -116,8 +115,8 @@ public class ClassifierTest {
   public void testBuildClassifierWithRulesOnDifferentAttributes() throws IOException {
     Classifier<TestDomainObject, String> engine = buildSimple(
             () -> Arrays.asList(
-                    MatchingConstraint.<String, String>of("rule1").eq("field1", "foo").priority(0).classification("RED").build(),
-                    MatchingConstraint.<String, String>of("rule2").eq("field2", "bar").priority(1).classification("BLUE").build()
+                    MatchingConstraint.<String, String>named("rule1").eq("field1", "foo").priority(0).classification("RED").build(),
+                    MatchingConstraint.<String, String>named("rule2").eq("field2", "bar").priority(1).classification("BLUE").build()
             )
     );
     TestDomainObject value = TestDomainObject.random();
@@ -130,8 +129,8 @@ public class ClassifierTest {
   public void testBuildClassifierComparableAttributes() throws IOException {
     Classifier<TestDomainObject, String> engine = buildComparable(
             () -> Arrays.asList(
-                    MatchingConstraint.<String, String>of("rule1").eq("field1", "foo").priority(0).classification("RED").build(),
-                    MatchingConstraint.<String, String>of("rule2").eq("field2", "bar").priority(1).classification("BLUE").build()
+                    MatchingConstraint.<String, String>named("rule1").eq("field1", "foo").priority(0).classification("RED").build(),
+                    MatchingConstraint.<String, String>named("rule2").eq("field2", "bar").priority(1).classification("BLUE").build()
             )
     );
     TestDomainObject value = TestDomainObject.random();
@@ -146,8 +145,8 @@ public class ClassifierTest {
             ImmutableClassifier.<String, TestDomainObject, String>builder(Schema.<String, TestDomainObject>create()
                     .withAttribute("measure2", TestDomainObject::getMeasure2)
             ).build(Arrays.asList(
-                    MatchingConstraint.<String, String>of("rule1").eq("measure2", 999).priority(0).classification("RED").build(),
-                    MatchingConstraint.<String, String>of("rule2").lt("measure2", 1000).priority(1).classification("BLUE").build()
+                    MatchingConstraint.<String, String>named("rule1").eq("measure2", 999).priority(0).classification("RED").build(),
+                    MatchingConstraint.<String, String>named("rule2").lt("measure2", 1000).priority(1).classification("BLUE").build()
             ));
 
     TestDomainObject test = TestDomainObject.random();
@@ -163,8 +162,8 @@ public class ClassifierTest {
             builder(Schema.<String, TestDomainObject>create()
             .withAttribute("measure3", TestDomainObject::getMeasure3)
     ).build(Arrays.asList(
-            MatchingConstraint.<String, String>of("rule1").eq("measure3", 999).priority(0).classification("RED").build(),
-            MatchingConstraint.<String, String>of("rule1").lt("measure3", 1000).priority(1).classification("BLUE").build()
+            MatchingConstraint.<String, String>named("rule1").eq("measure3", 999).priority(0).classification("RED").build(),
+            MatchingConstraint.<String, String>named("rule1").lt("measure3", 1000).priority(1).classification("BLUE").build()
     ));
 
     TestDomainObject test = TestDomainObject.random();
@@ -177,9 +176,9 @@ public class ClassifierTest {
   @Test
   public void testRangeBasedRules() throws IOException {
     Classifier<TestDomainObject, String> engine = buildWithContinuousAttributes(() -> Arrays.asList(
-            MatchingConstraint.<String, String>of("rule1").gt("measure1", 10).priority(1).classification("RED").build(),
-            MatchingConstraint.<String, String>of("rule2").lt("measure1", 8).priority(2).classification("BLUE").build(),
-            MatchingConstraint.<String, String>of("rule3").eq("measure1", 5).priority(3).classification("YELLOW").build()
+            MatchingConstraint.<String, String>named("rule1").gt("measure1", 10).priority(1).classification("RED").build(),
+            MatchingConstraint.<String, String>named("rule2").lt("measure1", 8).priority(2).classification("BLUE").build(),
+            MatchingConstraint.<String, String>named("rule3").eq("measure1", 5).priority(3).classification("YELLOW").build()
     ));
     TestDomainObject value = TestDomainObject.random().setMeasure1(11);
     assertEquals("RED", engine.classification(value).get());
@@ -191,7 +190,7 @@ public class ClassifierTest {
   public void testBuildRuleClassifierUnregisteredAttribute() {
     assertThrows(AttributeNotRegistered.class, () ->
             buildSimple(() -> Collections.singletonList(
-                    MatchingConstraint.<String, String>of("missing").eq("missing", "missing")
+                    MatchingConstraint.<String, String>named("missing").eq("missing", "missing")
                             .priority(0).classification("MISSING").build()))
             );
   }
@@ -201,7 +200,7 @@ public class ClassifierTest {
   public void testBuildRuleClassifierWithBadTypeConstraint() {
     assertThrows(ClassCastException.class, () ->
     buildSimple(() -> Collections.singletonList(
-            MatchingConstraint.<String, String>of("measure1").eq("measure1", "foo")
+            MatchingConstraint.<String, String>named("measure1").eq("measure1", "foo")
                     .priority(0).classification("BAD TYPE").build())));
   }
 
@@ -248,6 +247,18 @@ public class ClassifierTest {
             classifier.classification(TestDomainObject.random().setMeasure1(11).setField1("foo")).get());
   }
 
+  @Ignore
+  @Test
+  public void testStringMatcher() throws IOException {
+    Classifier<TestDomainObject, String> classifier = buildStringMatcher(() ->
+    Arrays.asList(MatchingConstraint.<String, String>anonymous().startsWith("field1", "foo").eq("field3", "bar").priority(0).classification("RED").build(),
+                  MatchingConstraint.<String, String>anonymous().startsWith("field1", "f").priority(1).classification("BLUE").build()));
+    TestDomainObject test = TestDomainObject.random();
+    assertFalse(classifier.classifications(test).findAny().isPresent());
+    assertFalse(classifier.classification(test).isPresent());
+    assertEquals("BLUE", classifier.classification(test.setField1("foo").setField3("bar")).orElse("NONE"));
+    assertEquals(2, classifier.classifications(test.setField1("foo").setField3("bar")).count());
+  }
 
   private Classifier<TestDomainObject, String> buildSimple(RuleSet<String, String> repo) throws IOException {
     return ImmutableClassifier.<String, TestDomainObject, String>builder(Schema.<String, TestDomainObject>create()
@@ -270,6 +281,15 @@ public class ClassifierTest {
             .withAttribute("measure1", TestDomainObject::getMeasure1)
             .withAttribute("measure2", TestDomainObject::getMeasure2)
             .withAttribute("measure3", TestDomainObject::getMeasure3)
+    ).build(repo.constraints());
+  }
+
+
+  private Classifier<TestDomainObject, String> buildStringMatcher(RuleSet<String, String> repo) throws IOException {
+    return ImmutableClassifier.<String, TestDomainObject, String>builder(Schema.<String, TestDomainObject>create()
+            .withStringAttribute("field1", TestDomainObject::getField1)
+            .withStringAttribute("field2", TestDomainObject::getField2)
+            .withStringAttribute("field3", TestDomainObject::getField3)
     ).build(repo.constraints());
   }
 

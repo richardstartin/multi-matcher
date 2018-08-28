@@ -4,7 +4,7 @@ import uk.co.openkappa.bitrules.Operation;
 
 import java.util.Iterator;
 
-public class Nodes {
+class Nodes {
 
   static String toString(int count,
                          Operation op,

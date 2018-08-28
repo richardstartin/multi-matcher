@@ -1,4 +1,4 @@
-package uk.co.openkappa.bitrules.config;
+package uk.co.openkappa.bitrules.schema;
 
 import uk.co.openkappa.bitrules.Mask;
 import uk.co.openkappa.bitrules.Matcher;

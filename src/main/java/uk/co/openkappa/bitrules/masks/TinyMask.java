@@ -1,33 +1,35 @@
-package uk.co.openkappa.bitrules;
+package uk.co.openkappa.bitrules.masks;
+
+import uk.co.openkappa.bitrules.Mask;
 
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
-public class WordMask implements Mask<WordMask> {
+public class TinyMask implements Mask<TinyMask> {
 
   public static final int MAX_CAPACITY = 64;
 
-  public static WordMask contiguous(int to) {
-    return new WordMask(((1L << to) - 1));
+  public static TinyMask contiguous(int to) {
+    return new TinyMask(((1L << to) - 1));
   }
 
-  public static WordMask of(int... values) {
+  public static TinyMask of(int... values) {
     long word = 0L;
     for (int v : values) {
       word |= (1L << v);
     }
-    return new WordMask(word);
+    return new TinyMask(word);
   }
 
   private long mask;
 
-  public WordMask(long mask) {
+  public TinyMask(long mask) {
     this.mask = mask;
   }
 
-  public WordMask() { }
+  public TinyMask() { }
 
   public void add(int bit) {
     mask |= 1L << bit;
@@ -38,25 +40,25 @@ public class WordMask implements Mask<WordMask> {
     mask ^= (1L << id);
   }
 
-  public WordMask and(WordMask other) {
-    return new WordMask(this.mask & other.mask);
+  public TinyMask and(TinyMask other) {
+    return new TinyMask(this.mask & other.mask);
   }
 
   @Override
-  public WordMask andNot(WordMask other) {
-    return new WordMask(mask &~ other.mask);
+  public TinyMask andNot(TinyMask other) {
+    return new TinyMask(mask &~ other.mask);
   }
 
-  public WordMask inPlaceAnd(WordMask other) {
+  public TinyMask inPlaceAnd(TinyMask other) {
     this.mask &= other.mask;
     return this;
   }
 
-  public WordMask or(WordMask other) {
-    return new WordMask(this.mask | other.mask);
+  public TinyMask or(TinyMask other) {
+    return new TinyMask(this.mask | other.mask);
   }
 
-  public WordMask inPlaceOr(WordMask other) {
+  public TinyMask inPlaceOr(TinyMask other) {
     this.mask |= other.mask;
     return this;
   }
@@ -77,8 +79,8 @@ public class WordMask implements Mask<WordMask> {
   }
 
   @Override
-  public WordMask clone() {
-    return new WordMask(mask);
+  public TinyMask clone() {
+    return new TinyMask(mask);
   }
 
   @Override
@@ -100,7 +102,7 @@ public class WordMask implements Mask<WordMask> {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    WordMask tinyMask = (WordMask) o;
+    TinyMask tinyMask = (TinyMask) o;
     return mask == tinyMask.mask;
   }
 

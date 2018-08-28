@@ -3,14 +3,20 @@ package uk.co.openkappa.bitrules;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
+import java.util.UUID;
 
 import static java.util.Objects.requireNonNull;
 
 
 public class MatchingConstraint<Key, Classification> {
 
-  public static <K, C> Builder<K, C> of(String ruleId) {
+  public static <K, C> Builder<K, C> named(String ruleId) {
     return new Builder<>(ruleId);
+  }
+
+
+  public static <K, C> Builder<K, C> anonymous() {
+    return new Builder<>(UUID.randomUUID().toString());
   }
 
   public static class Builder<K, C> {
@@ -42,6 +48,10 @@ public class MatchingConstraint<Key, Classification> {
 
     public Builder<K, C> ge(K key, Comparable<?> value) {
       return constraint(key, Constraint.greaterThanOrEqualTo(value));
+    }
+
+    public Builder<K, C> startsWith(K key, String prefix) {
+      return constraint(key, Constraint.startsWith(prefix));
     }
 
     public Builder<K, C> priority(int value) {

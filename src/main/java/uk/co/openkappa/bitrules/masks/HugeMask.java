@@ -1,26 +1,31 @@
-package uk.co.openkappa.bitrules;
+package uk.co.openkappa.bitrules.masks;
 
 import org.roaringbitmap.IntIterator;
 import org.roaringbitmap.RoaringBitmap;
+import uk.co.openkappa.bitrules.Mask;
 
 import java.util.Objects;
 import java.util.stream.IntStream;
 
-public class RoaringBitmapMask implements Mask<RoaringBitmapMask> {
+public class HugeMask implements Mask<HugeMask> {
 
-  public static RoaringBitmapMask contiguous(int to) {
+  public static HugeMask contiguous(int to) {
     RoaringBitmap range = new RoaringBitmap();
     range.add(0L, to & 0xFFFFFFFFL);
-    return new RoaringBitmapMask(range);
+    return new HugeMask(range);
+  }
+
+  public static HugeMask of(int... values) {
+    return new HugeMask(RoaringBitmap.bitmapOf(values));
   }
 
   private final RoaringBitmap bitmap;
 
-  private RoaringBitmapMask(RoaringBitmap bitmap) {
+  private HugeMask(RoaringBitmap bitmap) {
     this.bitmap = bitmap;
   }
 
-  public RoaringBitmapMask() {
+  public HugeMask() {
     this(new RoaringBitmap());
   }
 
@@ -35,28 +40,28 @@ public class RoaringBitmapMask implements Mask<RoaringBitmapMask> {
   }
 
   @Override
-  public RoaringBitmapMask and(RoaringBitmapMask other) {
-    return new RoaringBitmapMask(RoaringBitmap.and(bitmap, other.bitmap));
+  public HugeMask and(HugeMask other) {
+    return new HugeMask(RoaringBitmap.and(bitmap, other.bitmap));
   }
 
   @Override
-  public RoaringBitmapMask andNot(RoaringBitmapMask other) {
-    return new RoaringBitmapMask(RoaringBitmap.andNot(bitmap, other.bitmap));
+  public HugeMask andNot(HugeMask other) {
+    return new HugeMask(RoaringBitmap.andNot(bitmap, other.bitmap));
   }
 
   @Override
-  public RoaringBitmapMask or(RoaringBitmapMask other) {
-    return new RoaringBitmapMask(RoaringBitmap.or(bitmap, other.bitmap));
+  public HugeMask or(HugeMask other) {
+    return new HugeMask(RoaringBitmap.or(bitmap, other.bitmap));
   }
 
   @Override
-  public RoaringBitmapMask inPlaceAnd(RoaringBitmapMask other) {
+  public HugeMask inPlaceAnd(HugeMask other) {
     bitmap.and(other.bitmap);
     return this;
   }
 
   @Override
-  public RoaringBitmapMask inPlaceOr(RoaringBitmapMask other) {
+  public HugeMask inPlaceOr(HugeMask other) {
     bitmap.or(other.bitmap);
     return this;
   }
@@ -74,8 +79,8 @@ public class RoaringBitmapMask implements Mask<RoaringBitmapMask> {
   }
 
   @Override
-  public RoaringBitmapMask clone() {
-    return new RoaringBitmapMask(bitmap.clone());
+  public HugeMask clone() {
+    return new HugeMask(bitmap.clone());
   }
 
   @Override
@@ -92,7 +97,7 @@ public class RoaringBitmapMask implements Mask<RoaringBitmapMask> {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    RoaringBitmapMask that = (RoaringBitmapMask) o;
+    HugeMask that = (HugeMask) o;
     return Objects.equals(bitmap, that.bitmap);
   }
 

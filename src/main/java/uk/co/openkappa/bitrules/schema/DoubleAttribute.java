@@ -1,4 +1,4 @@
-package uk.co.openkappa.bitrules.config;
+package uk.co.openkappa.bitrules.schema;
 
 import uk.co.openkappa.bitrules.Mask;
 import uk.co.openkappa.bitrules.Matcher;
@@ -7,7 +7,7 @@ import uk.co.openkappa.bitrules.matchers.DoubleMatcher;
 import java.util.function.ToDoubleFunction;
 
 /**
- * Creates a column of constraints builder floating point sematics
+ * Creates a column named constraints builder floating point sematics
  * @param <T>
  */
 class DoubleAttribute<T> implements Attribute<T> {

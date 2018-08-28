@@ -1,4 +1,4 @@
-package uk.co.openkappa.bitrules.config;
+package uk.co.openkappa.bitrules.schema;
 
 import uk.co.openkappa.bitrules.Mask;
 import uk.co.openkappa.bitrules.Matcher;
@@ -7,8 +7,8 @@ import uk.co.openkappa.bitrules.matchers.LongMatcher;
 import java.util.function.ToLongFunction;
 
 /**
- * Creates a column of constraints builder long semantics
- * @param <T> the type of the classified objects
+ * Creates a column named constraints builder long semantics
+ * @param <T> the type named the classified objects
  */
 public class LongAttribute<T> implements Attribute<T> {
 

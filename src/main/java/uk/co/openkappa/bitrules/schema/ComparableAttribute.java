@@ -1,4 +1,4 @@
-package uk.co.openkappa.bitrules.config;
+package uk.co.openkappa.bitrules.schema;
 
 import uk.co.openkappa.bitrules.Mask;
 import uk.co.openkappa.bitrules.Matcher;
@@ -8,9 +8,9 @@ import java.util.Comparator;
 import java.util.function.Function;
 
 /**
- * Creates a column of constraints builder equality and order semantics
- * @param <T> the type of the classified objects
- * @param <U> the type of the attribute
+ * Creates a column named constraints builder equality and order semantics
+ * @param <T> the type named the classified objects
+ * @param <U> the type named the attribute
  */
 public class ComparableAttribute<T, U> implements Attribute<T> {
 

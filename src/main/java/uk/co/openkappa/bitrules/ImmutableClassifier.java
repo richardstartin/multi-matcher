@@ -1,7 +1,10 @@
 package uk.co.openkappa.bitrules;
 
 
-import uk.co.openkappa.bitrules.config.Schema;
+import uk.co.openkappa.bitrules.schema.Schema;
+import uk.co.openkappa.bitrules.masks.HugeMask;
+import uk.co.openkappa.bitrules.masks.SmallMask;
+import uk.co.openkappa.bitrules.masks.TinyMask;
 
 import java.util.*;
 import java.util.stream.IntStream;
@@ -10,8 +13,8 @@ import java.util.stream.Stream;
 /**
  * Immutable classifier. A new instance must be built if matchers are updated.
  *
- * @param <Input> the type of the classified objects
- * @param <Classification> the type of the resultant classification
+ * @param <Input> the type named the classified objects
+ * @param <Classification> the type named the resultant classification
  */
 public class ImmutableClassifier<Input, Classification> implements Classifier<Input, Classification> {
 
@@ -25,7 +28,7 @@ public class ImmutableClassifier<Input, Classification> implements Classifier<In
    * Gets a new builder for a classifier
    *
    * @param <Key>            the create key type
-   * @param <Input>          the type of the classified objects
+   * @param <Input>          the type named the classified objects
    * @param <Classification> the classification type
    * @return a new classifier builder
    */
@@ -62,11 +65,11 @@ public class ImmutableClassifier<Input, Classification> implements Classifier<In
      */
     public ImmutableClassifier<Input, Classification> build(List<MatchingConstraint<Key, Classification>> constraints) {
       int maxPriority = constraints.size();
-      return maxPriority < WordMask.MAX_CAPACITY
-              ? new ImmutableClassifier<>(build(constraints, WordMask.contiguous(maxPriority), WordMask.class, maxPriority))
-              : maxPriority < ContainerMask.MAX_CAPACITY
-                ? new ImmutableClassifier<>(build(constraints, ContainerMask.contiguous(maxPriority), ContainerMask.class, maxPriority))
-                : new ImmutableClassifier<>(build(constraints, RoaringBitmapMask.contiguous(maxPriority), RoaringBitmapMask.class, maxPriority));
+      return maxPriority < TinyMask.MAX_CAPACITY
+              ? new ImmutableClassifier<>(build(constraints, TinyMask.contiguous(maxPriority), TinyMask.class, maxPriority))
+              : maxPriority < SmallMask.MAX_CAPACITY
+                ? new ImmutableClassifier<>(build(constraints, SmallMask.contiguous(maxPriority), SmallMask.class, maxPriority))
+                : new ImmutableClassifier<>(build(constraints, HugeMask.contiguous(maxPriority), HugeMask.class, maxPriority));
     }
 
     private <MaskType extends Mask<MaskType>>

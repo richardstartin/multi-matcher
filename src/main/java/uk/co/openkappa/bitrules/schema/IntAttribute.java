@@ -1,4 +1,4 @@
-package uk.co.openkappa.bitrules.config;
+package uk.co.openkappa.bitrules.schema;
 
 import uk.co.openkappa.bitrules.Mask;
 import uk.co.openkappa.bitrules.Matcher;
@@ -7,8 +7,8 @@ import uk.co.openkappa.bitrules.matchers.IntMatcher;
 import java.util.function.ToIntFunction;
 
 /**
- * Creates a column of constraints builder integer semantics
- * @param <T> the type of the classified objects
+ * Creates a column named constraints builder integer semantics
+ * @param <T> the type named the classified objects
  */
 public class IntAttribute<T> implements Attribute<T> {
 

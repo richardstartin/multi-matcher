@@ -1,9 +1,9 @@
 package uk.co.openkappa.bitrules.matchers;
 
-import uk.co.openkappa.bitrules.ContainerMask;
+import uk.co.openkappa.bitrules.masks.SmallMask;
 import uk.co.openkappa.bitrules.Mask;
-import uk.co.openkappa.bitrules.RoaringBitmapMask;
-import uk.co.openkappa.bitrules.WordMask;
+import uk.co.openkappa.bitrules.masks.HugeMask;
+import uk.co.openkappa.bitrules.masks.TinyMask;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,12 +16,12 @@ class Masks {
   private static final Map<Class<? extends Mask>, IntFunction<? extends Mask>> FULL = new HashMap<>();
   private static final Map<Class<? extends Mask>, Mask> SINGLETONS = new HashMap<>();
   static {
-    EMPTY.put(WordMask.class, WordMask::new);
-    EMPTY.put(ContainerMask.class, ContainerMask::new);
-    EMPTY.put(RoaringBitmapMask.class, RoaringBitmapMask::new);
-    FULL.put(WordMask.class, WordMask::contiguous);
-    FULL.put(ContainerMask.class, ContainerMask::contiguous);
-    FULL.put(RoaringBitmapMask.class, RoaringBitmapMask::contiguous);
+    EMPTY.put(TinyMask.class, TinyMask::new);
+    EMPTY.put(SmallMask.class, SmallMask::new);
+    EMPTY.put(HugeMask.class, HugeMask::new);
+    FULL.put(TinyMask.class, TinyMask::contiguous);
+    FULL.put(SmallMask.class, SmallMask::contiguous);
+    FULL.put(HugeMask.class, HugeMask::contiguous);
     EMPTY.forEach((type, constructor) -> SINGLETONS.put(type, constructor.get()));
   }
 

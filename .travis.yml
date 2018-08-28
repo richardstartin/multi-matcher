@@ -2,7 +2,7 @@ language: java
 sudo: false
 
 jdk:
-  - oraclejdk10
+  - oraclejdk9
   - oraclejdk8
 
 # Install silently to ensure all pom are installed and compilation is OK: actual checks will be processed by script:

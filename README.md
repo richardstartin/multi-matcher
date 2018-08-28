@@ -31,19 +31,20 @@ Build a generic classification engine
                         .withAttribute("availability", Product::getAvailability)
                         .withAttribute("discountedPrice", value -> 0.2 * value.getPrice())
                 ).build(Arrays.asList(
-                    MatchingConstraint.<String, String>of("rule1") 
+                    MatchingConstraint.<String, String>named("rule1") 
                             .eq("productType", "silk")
+                            .startsWith("productName", "luxury")
                             .gt("discountedPrice", 1000)
                             .priority(0)
                             .classification("EXPENSIVE_LUXURY_PRODUCTS")
                             .build(),
-                    MatchingConstraint.<String, String>of("rule2")
+                    MatchingConstraint.<String, String>named("rule2")
                             .eq("productType", "caviar")
                             .gt("discountedPrice", 100)
                             .priority(1)
                             .classification("EXPENSIVE_LUXURY_PRODUCTS")
                             .build(),
-                    MatchingConstraint.<String, String>of("rule3")
+                    MatchingConstraint.<String, String>anonymous()
                             .eq("productName", "baked beans")
                             .priority(2)
                             .classification("CHEAP_FOOD")

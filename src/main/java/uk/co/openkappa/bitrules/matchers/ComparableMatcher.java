@@ -30,7 +30,7 @@ public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements
 
   @Override
   public void addConstraint(Constraint constraint, int priority) {
-    node.add(constraint.getOperation(), (U)constraint.getValue(), priority);
+    node.add(constraint.getOperation(), constraint.getValue(), priority);
     wildcards.remove(priority);
   }
 

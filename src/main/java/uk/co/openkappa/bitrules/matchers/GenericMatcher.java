@@ -15,7 +15,7 @@ public class GenericMatcher<T, U, MaskType extends Mask<MaskType>> implements Ma
   public GenericMatcher(Function<T, U> accessor, Class<MaskType> type, int max) {
     this.accessor = accessor;
     this.wildcard = Masks.wildcards(type, max);
-    this.node = new GenericEqualityNode<>(Masks.singleton(type));
+    this.node = new GenericEqualityNode<>(Masks.singleton(type), wildcard);
   }
 
   public MaskType match(T value, MaskType context) {

@@ -26,7 +26,7 @@ public class IntMatcher<T, MaskType extends Mask<MaskType>> implements Matcher<T
   @Override
   public MaskType match(T value, MaskType context) {
     MaskType result = node.match(accessor.applyAsInt(value), context);
-    return context.inPlaceAnd(result.or(wildcards));
+    return context.inPlaceAnd(result.inPlaceOr(wildcards));
   }
 
   @Override

@@ -2,7 +2,6 @@ package uk.co.openkappa.bitrules;
 
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.google.common.collect.ImmutableMap;
-import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.junit.jupiter.api.Test;
 import uk.co.openkappa.bitrules.schema.AttributeNotRegistered;
 import uk.co.openkappa.bitrules.schema.Schema;
@@ -247,12 +246,20 @@ public class ClassifierTest {
             classifier.classification(TestDomainObject.random().setMeasure1(11).setField1("foo")).get());
   }
 
-  @Ignore
   @Test
   public void testStringMatcher() throws IOException {
     Classifier<TestDomainObject, String> classifier = buildStringMatcher(() ->
-    Arrays.asList(MatchingConstraint.<String, String>anonymous().startsWith("field1", "foo").eq("field3", "bar").priority(0).classification("RED").build(),
-                  MatchingConstraint.<String, String>anonymous().startsWith("field1", "f").priority(1).classification("BLUE").build()));
+    Arrays.asList(MatchingConstraint.<String, String>anonymous()
+                    .startsWith("field1", "foo")
+                    .eq("field3", "bar")
+                    .priority(0)
+                    .classification("RED")
+                    .build(),
+                  MatchingConstraint.<String, String>anonymous()
+                          .startsWith("field1", "fo")
+                          .priority(1)
+                          .classification("BLUE")
+                          .build()));
     TestDomainObject test = TestDomainObject.random();
     assertFalse(classifier.classifications(test).findAny().isPresent());
     assertFalse(classifier.classification(test).isPresent());

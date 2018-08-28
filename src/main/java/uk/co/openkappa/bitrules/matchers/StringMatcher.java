@@ -29,25 +29,27 @@ public class StringMatcher<Input, MaskType extends Mask<MaskType>> implements Ma
   }
 
   @Override
-  public MaskType match(Input value, MaskType context) {
-    String string = accessor.apply(value);
-    MaskType temp = empty.clone();
+  public MaskType match(Input input, MaskType context) {
+    String value = accessor.apply(input);
+    MaskType result = empty.clone();
     for (Node<String, MaskType> component : nodes.values()) {
-      temp = temp.inPlaceOr(component.match(string, context.clone()));
+      result = result.inPlaceOr(component.match(value, context.clone()));
     }
-    return context.and(temp);
+    return result.inPlaceAnd(context.or(wildcards));
   }
 
   @Override
   public void addConstraint(Constraint constraint, int priority) {
     switch (constraint.getOperation()) {
       case STARTS_WITH:
-        PrefixNode<MaskType> trie = (PrefixNode<MaskType>) nodes.computeIfAbsent(STARTS_WITH, o -> new PrefixNode<>(empty));
-        trie.add(constraint.getValue(), priority);
+        PrefixNode<MaskType> prefix = (PrefixNode<MaskType>) nodes.computeIfAbsent(STARTS_WITH,
+                o -> new PrefixNode<>(empty));
+        prefix.add(constraint.getValue(), priority);
         break;
       case EQ:
-        GenericEqualityNode<String, MaskType> hash = (GenericEqualityNode<String, MaskType>) nodes.computeIfAbsent(EQ, o -> new GenericEqualityNode<>(empty));
-        hash.add(constraint.getValue(), priority);
+        GenericEqualityNode<String, MaskType> literal = (GenericEqualityNode<String, MaskType>) nodes.computeIfAbsent(EQ,
+                o -> new GenericEqualityNode<>(empty, wildcards));
+        literal.add(constraint.getValue(), priority);
         break;
       default:
         throw new IllegalStateException("Unsupported for String matching: " + constraint.getOperation());
@@ -82,7 +84,7 @@ public class StringMatcher<Input, MaskType extends Mask<MaskType>> implements Ma
         }
         --position;
       }
-      return context;
+      return context.inPlaceAnd(empty);
     }
 
     @Override

@@ -14,7 +14,7 @@ public class StringMatcherTest {
 
   @Test
   public void test1() {
-    StringMatcher<String, TinyMask> matcher = new StringMatcher<>(Function.identity(), TinyMask.class, 63);
+    StringMatcher<String, TinyMask> matcher = new StringMatcher<>(Function.identity(), TinyMask.class, 4);
     matcher.addConstraint(equalTo("foo"), 0);
     matcher.addConstraint(equalTo("bar"), 1);
     matcher.addConstraint(startsWith("foo"), 2);

@@ -11,9 +11,11 @@ class GenericEqualityNode<T, MaskType extends Mask<MaskType>> implements Node<T,
 
   private final Map<T, MaskType> segments = new HashMap<>();
   private final MaskType empty;
+  private final MaskType wildcard;
 
-  public GenericEqualityNode(MaskType empty) {
+  public GenericEqualityNode(MaskType empty, MaskType wildcard) {
     this.empty = empty;
+    this.wildcard = wildcard;
   }
 
   public void add(T segment, int priority) {
@@ -22,7 +24,7 @@ class GenericEqualityNode<T, MaskType extends Mask<MaskType>> implements Node<T,
 
   @Override
   public MaskType match(T value, MaskType result) {
-    return result.inPlaceAnd(segments.getOrDefault(value, empty));
+    return result.inPlaceAnd(segments.getOrDefault(value, empty).or(wildcard));
   }
 
   @Override

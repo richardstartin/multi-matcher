@@ -26,7 +26,7 @@ public class DoubleMatcher<T, MaskType extends Mask<MaskType>> implements Matche
   @Override
   public MaskType match(T value, MaskType context) {
     MaskType result = node.match(accessor.applyAsDouble(value), context);
-    return context.inPlaceAnd(result.or(wildcards));
+    return context.inPlaceAnd(result.inPlaceOr(wildcards));
   }
 
   @Override

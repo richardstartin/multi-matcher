@@ -26,7 +26,7 @@ public class LongMatcher<T, MaskType extends Mask<MaskType>> implements Matcher<
   @Override
   public MaskType match(T value, MaskType context) {
     MaskType result = node.match(accessor.applyAsLong(value), context);
-    return context.inPlaceAnd(result.or(wildcards));
+    return context.inPlaceAnd(result.inPlaceOr(wildcards));
   }
 
   @Override

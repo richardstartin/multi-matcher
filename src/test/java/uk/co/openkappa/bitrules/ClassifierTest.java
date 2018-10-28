@@ -270,7 +270,7 @@ public class ClassifierTest {
   private Classifier<TestDomainObject, String> buildSimple(RuleSet<String, String> repo) throws IOException {
     return ImmutableClassifier.<String, TestDomainObject, String>builder(Schema.<String, TestDomainObject>create()
             .withAttribute("field1", TestDomainObject::getField1)
-            .withAttribute("field2", TestDomainObject::getField2)
+            .withStringAttribute("field2", TestDomainObject::getField2)
             .withAttribute("measure1", TestDomainObject::getMeasure1)
     ).build(repo.constraints());
   }

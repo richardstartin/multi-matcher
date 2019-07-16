@@ -46,7 +46,7 @@ public class Schema<Key, Input> {
   }
 
   /**
-   * Registers a generic attribute builder equality semantics only
+   * Registers a generic attribute with equality semantics only
    * @param key the key named the attribute (rules refer to this)
    * @param accessor extracts a value named type Input from the classified object
    * @param <U> the type named the attribute value
@@ -69,7 +69,19 @@ public class Schema<Key, Input> {
   }
 
   /**
-   * Registers a generic attribute builder equality and order semantics
+   * Registers an enum attribute with equality semantics only
+   * @param key the key named the attribute (rules refer to this)
+   * @param accessor extracts a value named type Input from the classified object
+   * @param type the enum type
+   * @return an attribute registry containing the attribute
+   */
+  public <E extends Enum<E>> Schema<Key, Input> withEnumAttribute(Key key, Function<Input, E> accessor, Class<E> type) {
+    rules.put(key, new EnumAttribute<>(type, accessor));
+    return this;
+  }
+
+  /**
+   * Registers a generic attribute with equality and order semantics
    * @param key the key named the attribute (rules refer to this)
    * @param accessor extracts a value named type Input from the classified object
    * @param <U> the type named the attribute value
@@ -81,7 +93,7 @@ public class Schema<Key, Input> {
   }
 
   /**
-   * Registers a double attribute builder equality and order semantics
+   * Registers a double attribute with equality and order semantics
    * @param key the key named the attribute (rules refer to this)
    * @param accessor extracts a value named type Input from the classified object
    * @return an attribute registry containing the attribute
@@ -92,7 +104,7 @@ public class Schema<Key, Input> {
   }
 
   /**
-   * Registers an int attribute builder equality and order semantics
+   * Registers an int attribute with equality and order semantics
    * @param key the key named the attribute (rules refer to this)
    * @param accessor extracts a value named type Input from the classified object
    * @return an attribute registry containing the attribute
@@ -103,7 +115,7 @@ public class Schema<Key, Input> {
   }
 
   /**
-   * Registers a long attribute builder equality and order semantics
+   * Registers a long attribute with equality and order semantics
    * @param key the key named the attribute (rules refer to this)
    * @param accessor extracts a value named type Input from the classified object
    * @return an attribute registry containing the attribute

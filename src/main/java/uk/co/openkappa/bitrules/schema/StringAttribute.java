@@ -2,6 +2,7 @@ package uk.co.openkappa.bitrules.schema;
 
 import uk.co.openkappa.bitrules.Mask;
 import uk.co.openkappa.bitrules.Matcher;
+import uk.co.openkappa.bitrules.masks.MaskFactory;
 import uk.co.openkappa.bitrules.matchers.StringMatcher;
 
 import java.util.function.Function;
@@ -15,7 +16,7 @@ public class StringAttribute<Input> implements Attribute<Input> {
   }
 
   @Override
-  public <MaskType extends Mask<MaskType>> Matcher<Input, MaskType> toMatcher(Class<MaskType> maskType, int max) {
-    return new StringMatcher<>(accessor, maskType, max);
+  public <MaskType extends Mask<MaskType>> Matcher<Input, MaskType> toMatcher(MaskFactory<MaskType> maskFactory, int max) {
+    return new StringMatcher<>(accessor, maskFactory, max);
   }
 }

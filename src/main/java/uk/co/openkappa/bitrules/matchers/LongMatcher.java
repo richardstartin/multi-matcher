@@ -4,6 +4,7 @@ import uk.co.openkappa.bitrules.Constraint;
 import uk.co.openkappa.bitrules.Mask;
 import uk.co.openkappa.bitrules.Matcher;
 import uk.co.openkappa.bitrules.Operation;
+import uk.co.openkappa.bitrules.masks.MaskFactory;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
@@ -17,10 +18,10 @@ public class LongMatcher<T, MaskType extends Mask<MaskType>> implements Matcher<
   private final CompositeLongNode<MaskType> node;
   private final MaskType wildcards;
 
-  public LongMatcher(ToLongFunction<T> accessor, Class<MaskType> type, int max) {
+  public LongMatcher(ToLongFunction<T> accessor, MaskFactory<MaskType> maskFactory, int max) {
     this.accessor = accessor;
-    this.node = new CompositeLongNode<>(Masks.singleton(type));
-    this.wildcards = Masks.wildcards(type, max);
+    this.node = new CompositeLongNode<>(maskFactory.emptySingleton());
+    this.wildcards = maskFactory.contiguous(max);
   }
 
   @Override

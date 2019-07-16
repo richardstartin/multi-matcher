@@ -5,8 +5,10 @@ import uk.co.openkappa.bitrules.Constraint;
 import uk.co.openkappa.bitrules.Mask;
 import uk.co.openkappa.bitrules.Matcher;
 import uk.co.openkappa.bitrules.Operation;
+import uk.co.openkappa.bitrules.masks.MaskFactory;
 
 import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -18,20 +20,20 @@ import static uk.co.openkappa.bitrules.Operation.STARTS_WITH;
 
 public class StringMatcher<Input, MaskType extends Mask<MaskType>> implements Matcher<Input, MaskType> {
 
-  private final Map<Operation, Node<String, MaskType>> nodes = new HashMap<>();
+  private final EnumMap<Operation, Node<String, MaskType>> nodes = new EnumMap<>(Operation.class);
   private final Supplier<Map<String, MaskType>> mapSupplier;
   private final Function<Input, String> accessor;
   private final MaskType wildcards;
   private final MaskType empty;
 
-  public StringMatcher(Function<Input, String> accessor, Class<MaskType> type, int max) {
-    this(HashMap::new, accessor, type, max);
+  public StringMatcher(Function<Input, String> accessor, MaskFactory<MaskType> maskFactory, int max) {
+    this(HashMap::new, accessor, maskFactory, max);
   }
 
-  public StringMatcher(Supplier<Map<String, MaskType>> mapSupplier, Function<Input, String> accessor, Class<MaskType> type, int max) {
+  public StringMatcher(Supplier<Map<String, MaskType>> mapSupplier, Function<Input, String> accessor, MaskFactory<MaskType> maskFactory, int max) {
     this.accessor = accessor;
-    this.empty = Masks.singleton(type);
-    this.wildcards = Masks.wildcards(type, max);
+    this.empty = maskFactory.emptySingleton();
+    this.wildcards = maskFactory.contiguous(max);
     this.mapSupplier = mapSupplier;
   }
 

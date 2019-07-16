@@ -1,6 +1,7 @@
 package uk.co.openkappa.bitrules;
 
 
+import uk.co.openkappa.bitrules.masks.MaskFactory;
 import uk.co.openkappa.bitrules.schema.Schema;
 import uk.co.openkappa.bitrules.masks.HugeMask;
 import uk.co.openkappa.bitrules.masks.SmallMask;
@@ -66,38 +67,40 @@ public class ImmutableClassifier<Input, Classification> implements Classifier<In
     public ImmutableClassifier<Input, Classification> build(List<MatchingConstraint<Key, Classification>> constraints) {
       int maxPriority = constraints.size();
       return maxPriority < TinyMask.MAX_CAPACITY
-              ? new ImmutableClassifier<>(build(constraints, TinyMask.contiguous(maxPriority), TinyMask.class, maxPriority))
+              ? new ImmutableClassifier<>(build(constraints, TinyMask.FACTORY.contiguous(maxPriority), TinyMask.FACTORY, maxPriority))
               : maxPriority < SmallMask.MAX_CAPACITY
-                ? new ImmutableClassifier<>(build(constraints, SmallMask.contiguous(maxPriority), SmallMask.class, maxPriority))
-                : new ImmutableClassifier<>(build(constraints, HugeMask.contiguous(maxPriority), HugeMask.class, maxPriority));
+                ? new ImmutableClassifier<>(build(constraints, SmallMask.FACTORY.contiguous(maxPriority), SmallMask.FACTORY, maxPriority))
+                : new ImmutableClassifier<>(build(constraints, HugeMask.FACTORY.contiguous(maxPriority), HugeMask.FACTORY, maxPriority));
     }
 
     private <MaskType extends Mask<MaskType>>
     MaskedClassifier<MaskType, Input, Classification> build(List<MatchingConstraint<Key, Classification>> specs,
                                                             MaskType mask,
-                                                            Class<MaskType> type,
+                                                            MaskFactory<MaskType> maskFactory,
                                                             int max) {
       PrimitiveIterator.OfInt sequence = IntStream.iterate(0, i -> i + 1).iterator();
       specs.stream().sorted(Comparator.comparingInt(rd -> order(rd.getPriority())))
-                    .forEach(rule -> addMatchingConstraint(rule, sequence.nextInt(), type, max));
+                    .forEach(rule -> addMatchingConstraint(rule, sequence.nextInt(), maskFactory, max));
       return new MaskedClassifier<>(classifications, freezeMatchers(), mask);
     }
 
     private <MaskType extends Mask<MaskType>>
     void addMatchingConstraint(MatchingConstraint<Key, Classification> matchInfo,
                                int priority,
-                               Class<MaskType> type,
+                               MaskFactory<MaskType> maskFactory,
                                int max) {
       classifications.add(matchInfo.getClassification());
-      matchInfo.getConstraints().forEach((key, condition) -> memoisedMatcher(key, type, max).addConstraint(condition, priority));
+      matchInfo.getConstraints().forEach((key, condition) -> memoisedMatcher(key, maskFactory, max).addConstraint(condition, priority));
     }
 
     private <MaskType extends Mask<MaskType>>
-    Matcher<Input, MaskType> memoisedMatcher(Key key, Class<MaskType> type, int max) {
-      if (!matchers.containsKey(key)) {
-        matchers.put(key, registry.getAttribute(key).toMatcher(type, max));
+    Matcher<Input, MaskType> memoisedMatcher(Key key, MaskFactory<MaskType> maskFactory, int max) {
+      var matcher = (Matcher<Input, MaskType>)matchers.get(key);
+      if (null == matcher) {
+        matcher = registry.getAttribute(key).toMatcher(maskFactory, max);
+        matchers.put(key, matcher);
       }
-      return (Matcher<Input, MaskType>) matchers.get(key);
+      return matcher;
     }
 
     private <MaskType extends Mask<MaskType>>

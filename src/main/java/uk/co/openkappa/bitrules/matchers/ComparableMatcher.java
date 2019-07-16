@@ -4,11 +4,11 @@ import uk.co.openkappa.bitrules.Constraint;
 import uk.co.openkappa.bitrules.Mask;
 import uk.co.openkappa.bitrules.Matcher;
 import uk.co.openkappa.bitrules.Operation;
+import uk.co.openkappa.bitrules.masks.MaskFactory;
 
 import java.util.*;
 import java.util.function.Function;
 
-import static uk.co.openkappa.bitrules.matchers.Masks.singleton;
 
 public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements Matcher<T, MaskType> {
 
@@ -16,10 +16,10 @@ public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements
   private final MaskType wildcards;
   private final CompositeComparableNode<U, MaskType> node;
 
-  public ComparableMatcher(Function<T, U> accessor, Comparator<U> comparator, Class<MaskType> type, int max) {
+  public ComparableMatcher(Function<T, U> accessor, Comparator<U> comparator, MaskFactory<MaskType> maskFactory, int max) {
     this.accessor = accessor;
-    this.node = new CompositeComparableNode<>(comparator, type);
-    this.wildcards = Masks.wildcards(type, max);
+    this.node = new CompositeComparableNode<>(comparator, maskFactory.emptySingleton());
+    this.wildcards = maskFactory.contiguous(max);
   }
 
   @Override
@@ -123,20 +123,20 @@ public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements
     @Override
     public String toString() {
       return Nodes.toString(sets.size(), operation,
-              sets.entrySet().stream().map(Map.Entry::getKey).iterator(),
-              sets.entrySet().stream().map(Map.Entry::getValue).iterator());
+              sets.keySet().stream().iterator(),
+              sets.values().stream().iterator());
     }
   }
 
   private static class CompositeComparableNode<T, MaskType extends Mask<MaskType>> {
 
     private final Comparator<T> comparator;
-    private final Map<Operation, ComparableNode<T, MaskType>> children = new EnumMap<>(Operation.class);
+    private final EnumMap<Operation, ComparableNode<T, MaskType>> children = new EnumMap<>(Operation.class);
     private final MaskType empty;
 
-    public CompositeComparableNode(Comparator<T> comparator, Class<MaskType> type) {
+    public CompositeComparableNode(Comparator<T> comparator, MaskType empty) {
       this.comparator = comparator;
-      this.empty = singleton(type);
+      this.empty = empty;
     }
 
     public void add(Operation relation, T threshold, int priority) {

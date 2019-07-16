@@ -4,6 +4,7 @@ import uk.co.openkappa.bitrules.Constraint;
 import uk.co.openkappa.bitrules.Mask;
 import uk.co.openkappa.bitrules.Matcher;
 import uk.co.openkappa.bitrules.Operation;
+import uk.co.openkappa.bitrules.masks.MaskFactory;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
@@ -17,10 +18,10 @@ public class DoubleMatcher<T, MaskType extends Mask<MaskType>> implements Matche
   private final CompositeDoubleNode<MaskType> node;
   private final MaskType wildcards;
 
-  public DoubleMatcher(ToDoubleFunction<T> accessor, Class<MaskType> type, int max) {
+  public DoubleMatcher(ToDoubleFunction<T> accessor, MaskFactory<MaskType> maskFactory, int max) {
     this.accessor = accessor;
-    this.node = new CompositeDoubleNode<>(type);
-    this.wildcards = Masks.wildcards(type, max);
+    this.node = new CompositeDoubleNode<>(maskFactory.emptySingleton());
+    this.wildcards = maskFactory.contiguous(max);
   }
 
   @Override
@@ -48,8 +49,8 @@ public class DoubleMatcher<T, MaskType extends Mask<MaskType>> implements Matche
     private final Map<Operation, DoubleNode<MaskType>> children = new EnumMap<>(Operation.class);
     private final MaskType empty;
 
-    public CompositeDoubleNode(Class<MaskType> type) {
-      this.empty = Masks.singleton(type);
+    public CompositeDoubleNode(MaskType empty) {
+      this.empty = empty;
     }
 
     public void add(Operation relation, double threshold, int priority) {

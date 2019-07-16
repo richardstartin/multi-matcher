@@ -4,11 +4,11 @@ import uk.co.openkappa.bitrules.Constraint;
 import uk.co.openkappa.bitrules.Mask;
 import uk.co.openkappa.bitrules.Matcher;
 import uk.co.openkappa.bitrules.Operation;
+import uk.co.openkappa.bitrules.masks.MaskFactory;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.EnumMap;
-import java.util.Map;
 import java.util.function.ToIntFunction;
 
 public class IntMatcher<T, MaskType extends Mask<MaskType>> implements Matcher<T, MaskType> {
@@ -17,10 +17,10 @@ public class IntMatcher<T, MaskType extends Mask<MaskType>> implements Matcher<T
   private final CompositeIntNode<MaskType> node;
   private final MaskType wildcards;
 
-  public IntMatcher(ToIntFunction<T> accessor, Class<MaskType> type, int max) {
+  public IntMatcher(ToIntFunction<T> accessor, MaskFactory<MaskType> maskFactory, int max) {
     this.accessor = accessor;
-    this.node = new CompositeIntNode<>(Masks.singleton(type));
-    this.wildcards = Masks.wildcards(type, max);
+    this.node = new CompositeIntNode<>(maskFactory.emptySingleton());
+    this.wildcards = maskFactory.contiguous(max);
   }
 
   @Override
@@ -45,7 +45,7 @@ public class IntMatcher<T, MaskType extends Mask<MaskType>> implements Matcher<T
 
   public static class CompositeIntNode<MaskType extends Mask<MaskType>> {
 
-    private final Map<Operation, IntNode<MaskType>> children = new EnumMap<>(Operation.class);
+    private final EnumMap<Operation, IntNode<MaskType>> children = new EnumMap<>(Operation.class);
     private final MaskType empty;
 
     public CompositeIntNode(MaskType empty) {

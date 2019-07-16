@@ -2,6 +2,7 @@ package uk.co.openkappa.bitrules.schema;
 
 import uk.co.openkappa.bitrules.Mask;
 import uk.co.openkappa.bitrules.Matcher;
+import uk.co.openkappa.bitrules.masks.MaskFactory;
 import uk.co.openkappa.bitrules.matchers.GenericMatcher;
 
 import java.util.EnumMap;
@@ -18,7 +19,7 @@ public class EnumAttribute<E extends Enum<E>, Input> implements Attribute<Input>
   }
 
   @Override
-  public <MaskType extends Mask<MaskType>> Matcher<Input, MaskType> toMatcher(Class<MaskType> maskType, int max) {
-    return new GenericMatcher<>(() -> new EnumMap<>(type), accessor, maskType, max);
+  public <MaskType extends Mask<MaskType>> Matcher<Input, MaskType> toMatcher(MaskFactory<MaskType> maskFactory, int max) {
+    return new GenericMatcher<>(() -> new EnumMap<>(type), accessor, maskFactory, max);
   }
 }

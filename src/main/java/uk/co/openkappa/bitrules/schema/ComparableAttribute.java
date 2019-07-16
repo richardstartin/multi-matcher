@@ -2,6 +2,7 @@ package uk.co.openkappa.bitrules.schema;
 
 import uk.co.openkappa.bitrules.Mask;
 import uk.co.openkappa.bitrules.Matcher;
+import uk.co.openkappa.bitrules.masks.MaskFactory;
 import uk.co.openkappa.bitrules.matchers.ComparableMatcher;
 
 import java.util.Comparator;
@@ -23,7 +24,7 @@ public class ComparableAttribute<T, U> implements Attribute<T> {
   }
 
   @Override
-  public <MaskType extends Mask<MaskType>> Matcher<T, MaskType> toMatcher(Class<MaskType> type, int max) {
-    return new ComparableMatcher<>(accessor, comparator, type, max);
+  public <MaskType extends Mask<MaskType>> Matcher<T, MaskType> toMatcher(MaskFactory<MaskType> maskFactory, int max) {
+    return new ComparableMatcher<>(accessor, comparator, maskFactory, max);
   }
 }

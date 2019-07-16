@@ -8,18 +8,6 @@
 I have often needed to implement tedious classification logic in data processing projects. The requirements are often ambiguous to the extent that it would be difficult to implement them even in SQL, with aspects such as fallback and overlap. This logic often ends up expressed as large blocks of nested if statements which are hard to read or modify and perform poorly. This small project aims to make such classification logic easier, and improve performance too. 
 
 # usage
-# maven
-```xml
-<dependency>
-    <groupId>uk.co.openkappa</groupId>
-    <artifactId>bitrules</artifactId>
-    <version>0.1.6</version>
-</dependency>
-```
-# gradle
-```groovy 
-group='uk.co.openkappa', module='bitrules', version='0.1.6'
-```
 
 Build a generic classification engine
 ```java

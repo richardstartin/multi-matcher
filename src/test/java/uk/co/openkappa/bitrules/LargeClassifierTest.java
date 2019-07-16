@@ -13,7 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class LargeClassifierTest {
 
   @Test
-  public void testLargeClassifier() {
+  public void testLargeClassifier() throws InterruptedException {
+    Thread.sleep(10000);
     Classifier<int[], String> classifier = ImmutableClassifier.
             <Integer, int[], String>builder(Schema.<Integer, int[]>create()
                     .withAttribute(0, extract(0))
@@ -23,8 +24,14 @@ public class LargeClassifierTest {
                     .withAttribute(4, extract(4))
             ).build(IntStream.range(0, 50000)
             .mapToObj(i ->
-                    MatchingConstraint.<Integer, String>named("rule" + i).eq(0, i).eq(1, i).eq(2, i).eq(3, i).eq(4, i)
-                            .priority(i).classification("SEGMENT" + i).build())
+                    MatchingConstraint.<Integer, String>anonymous()
+                            .eq(0, i)
+                            .eq(1, i)
+                            .eq(2, i)
+                            .eq(3, i)
+                            .eq(4, i)
+                            .classification("SEGMENT" + i)
+                            .build())
 
             .collect(Collectors.toList())
     );

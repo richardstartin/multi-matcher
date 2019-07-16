@@ -95,7 +95,7 @@ public class ImmutableClassifier<Input, Classification> implements Classifier<In
 
     private <MaskType extends Mask<MaskType>>
     Matcher<Input, MaskType> memoisedMatcher(Key key, MaskFactory<MaskType> maskFactory, int max) {
-      var matcher = (Matcher<Input, MaskType>)matchers.get(key);
+      Matcher<Input, MaskType> matcher = (Matcher<Input, MaskType>)matchers.get(key);
       if (null == matcher) {
         matcher = registry.getAttribute(key).toMatcher(maskFactory, max);
         matchers.put(key, matcher);

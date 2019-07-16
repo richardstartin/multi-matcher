@@ -86,22 +86,37 @@ public class IntMatcher<T, MaskType extends Mask<MaskType>> implements Matcher<T
     }
 
     public void add(int value, int priority) {
-      int position = Arrays.binarySearch(thresholds, 0, count, value);
-      int insertionPoint = -(position + 1);
-      if (position < 0 && insertionPoint < count) {
-        incrementCount();
-        for (int i = count; i > insertionPoint; --i) {
-          sets[i] = sets[i - 1];
-          thresholds[i] = thresholds[i - 1];
+      if (count > 0 && value > thresholds[count - 1]) {
+        ensureCapacity();
+        int position = count;
+        MaskType mask = sets[position];
+        if (null == mask) {
+          mask = empty.clone();
         }
-        sets[insertionPoint] = maskWith(priority);
-        thresholds[insertionPoint] = value;
-      } else if (position < 0) {
-        sets[count] = maskWith(priority);
-        thresholds[count] = value;
-        incrementCount();
+        mask.add(priority);
+        thresholds[position] = value;
+        sets[position] = mask;
+        ++count;
       } else {
-        sets[position].add(priority);
+        int position = Arrays.binarySearch(thresholds, 0, count, value);
+        int insertionPoint = -(position + 1);
+        if (position < 0 && insertionPoint < count) {
+          ensureCapacity();
+          for (int i = count; i > insertionPoint; --i) {
+            sets[i] = sets[i - 1];
+            thresholds[i] = thresholds[i - 1];
+          }
+          sets[insertionPoint] = maskWith(priority);
+          thresholds[insertionPoint] = value;
+          ++count;
+        } else if (position < 0) {
+          ensureCapacity();
+          sets[count] = maskWith(priority);
+          thresholds[count] = value;
+          ++count;
+        } else {
+          sets[position].add(priority);
+        }
       }
     }
 
@@ -184,11 +199,11 @@ public class IntMatcher<T, MaskType extends Mask<MaskType>> implements Matcher<T
       thresholds = Arrays.copyOf(thresholds, count);
     }
 
-    private void incrementCount() {
-      ++count;
-      if (count == thresholds.length) {
-        sets = Arrays.copyOf(sets, count * 2);
-        thresholds = Arrays.copyOf(thresholds, count * 2);
+    private void ensureCapacity() {
+      int newCount = count + 1;
+      if (newCount == thresholds.length) {
+        sets = Arrays.copyOf(sets, newCount * 2);
+        thresholds = Arrays.copyOf(thresholds, newCount * 2);
       }
     }
 

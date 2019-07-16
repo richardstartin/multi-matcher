@@ -4,6 +4,7 @@ import uk.co.openkappa.bitrules.Constraint;
 import uk.co.openkappa.bitrules.Mask;
 import uk.co.openkappa.bitrules.Matcher;
 import uk.co.openkappa.bitrules.Operation;
+import uk.co.openkappa.bitrules.masks.MaskFactory;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
@@ -17,10 +18,10 @@ public class DoubleMatcher<T, MaskType extends Mask<MaskType>> implements Matche
   private final CompositeDoubleNode<MaskType> node;
   private final MaskType wildcards;
 
-  public DoubleMatcher(ToDoubleFunction<T> accessor, Class<MaskType> type, int max) {
+  public DoubleMatcher(ToDoubleFunction<T> accessor, MaskFactory<MaskType> maskFactory, int max) {
     this.accessor = accessor;
-    this.node = new CompositeDoubleNode<>(type);
-    this.wildcards = Masks.wildcards(type, max);
+    this.node = new CompositeDoubleNode<>(maskFactory.emptySingleton());
+    this.wildcards = maskFactory.contiguous(max);
   }
 
   @Override
@@ -48,8 +49,8 @@ public class DoubleMatcher<T, MaskType extends Mask<MaskType>> implements Matche
     private final Map<Operation, DoubleNode<MaskType>> children = new EnumMap<>(Operation.class);
     private final MaskType empty;
 
-    public CompositeDoubleNode(Class<MaskType> type) {
-      this.empty = Masks.singleton(type);
+    public CompositeDoubleNode(MaskType empty) {
+      this.empty = empty;
     }
 
     public void add(Operation relation, double threshold, int priority) {
@@ -87,23 +88,38 @@ public class DoubleMatcher<T, MaskType extends Mask<MaskType>> implements Matche
       this.sets = (MaskType[]) Array.newInstance(empty.getClass(), 16);
     }
 
-    public void add(double threshold, int priority) {
-      int position = Arrays.binarySearch(thresholds, 0, count, threshold);
-      int insertionPoint = -(position + 1);
-      if (position < 0 && insertionPoint < count) {
-        incrementCount();
-        for (int i = count; i > insertionPoint; --i) {
-          sets[i] = sets[i - 1];
-          thresholds[i] = thresholds[i - 1];
+    public void add(double value, int priority) {
+      if (count > 0 && value > thresholds[count - 1]) {
+        ensureCapacity();
+        int position = count;
+        MaskType mask = sets[position];
+        if (null == mask) {
+          mask = empty.clone();
         }
-        sets[insertionPoint] = maskWith(priority);
-        thresholds[insertionPoint] = threshold;
-      } else if (position < 0) {
-        sets[count] = maskWith(priority);
-        thresholds[count] = threshold;
-        incrementCount();
+        mask.add(priority);
+        thresholds[position] = value;
+        sets[position] = mask;
+        ++count;
       } else {
-        sets[position].add(priority);
+        int position = Arrays.binarySearch(thresholds, 0, count, value);
+        int insertionPoint = -(position + 1);
+        if (position < 0 && insertionPoint < count) {
+          ensureCapacity();
+          for (int i = count; i > insertionPoint; --i) {
+            sets[i] = sets[i - 1];
+            thresholds[i] = thresholds[i - 1];
+          }
+          sets[insertionPoint] = maskWith(priority);
+          thresholds[insertionPoint] = value;
+          ++count;
+        } else if (position < 0) {
+          ensureCapacity();
+          sets[count] = maskWith(priority);
+          thresholds[count] = value;
+          ++count;
+        } else {
+          sets[position].add(priority);
+        }
       }
     }
 
@@ -174,11 +190,11 @@ public class DoubleMatcher<T, MaskType extends Mask<MaskType>> implements Matche
       sets = Arrays.copyOf(sets, count);
     }
 
-    private void incrementCount() {
-      ++count;
-      if (count == thresholds.length) {
-        sets = Arrays.copyOf(sets, count * 2);
-        thresholds = Arrays.copyOf(thresholds, count * 2);
+    private void ensureCapacity() {
+      int newCount = count + 1;
+      if (newCount == thresholds.length) {
+        sets = Arrays.copyOf(sets, newCount * 2);
+        thresholds = Arrays.copyOf(thresholds, newCount * 2);
       }
     }
 

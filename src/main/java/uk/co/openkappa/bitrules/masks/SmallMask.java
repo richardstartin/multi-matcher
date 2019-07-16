@@ -8,19 +8,9 @@ import java.util.stream.IntStream;
 
 public class SmallMask implements Mask<SmallMask> {
 
+  public static final MaskFactory<SmallMask> FACTORY = new Factory();
+
   public static final int MAX_CAPACITY = 1 << 16;
-
-  public static SmallMask contiguous(int to) {
-    return new SmallMask(RunContainer.rangeOfOnes(0, to));
-  }
-
-  public static SmallMask of(int... values) {
-    SmallMask mask = new SmallMask(values.length > 4096 ? new BitmapContainer() : new ArrayContainer());
-    for (int v : values) {
-      mask.add(v);
-    }
-    return mask;
-  }
 
   private Container container;
 
@@ -111,5 +101,33 @@ public class SmallMask implements Mask<SmallMask> {
       return container.equals(((SmallMask) other).container);
     }
     return false;
+  }
+
+  private static final class Factory implements MaskFactory<SmallMask> {
+    private final SmallMask EMPTY = empty();
+
+    @Override
+    public SmallMask empty() {
+      return new SmallMask(new ArrayContainer());
+    }
+
+    @Override
+    public SmallMask contiguous(int max) {
+      return new SmallMask(RunContainer.rangeOfOnes(0, max));
+    }
+
+    @Override
+    public SmallMask of(int... values) {
+      SmallMask mask = new SmallMask(values.length > 4096 ? new BitmapContainer() : new ArrayContainer());
+      for (int v : values) {
+        mask.add(v);
+      }
+      return mask;
+    }
+
+    @Override
+    public SmallMask emptySingleton() {
+      return EMPTY;
+    }
   }
 }

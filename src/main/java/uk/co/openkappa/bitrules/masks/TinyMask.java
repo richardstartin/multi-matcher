@@ -9,19 +9,9 @@ import java.util.stream.LongStream;
 
 public class TinyMask implements Mask<TinyMask> {
 
+  public static final MaskFactory<TinyMask> FACTORY = new Factory();
+
   public static final int MAX_CAPACITY = 64;
-
-  public static TinyMask contiguous(int to) {
-    return new TinyMask(((1L << to) - 1));
-  }
-
-  public static TinyMask of(int... values) {
-    long word = 0L;
-    for (int v : values) {
-      word |= (1L << v);
-    }
-    return new TinyMask(word);
-  }
 
   private long mask;
 
@@ -109,5 +99,32 @@ public class TinyMask implements Mask<TinyMask> {
   @Override
   public int hashCode() {
     return Objects.hash(mask);
+  }
+
+  private static final class Factory implements MaskFactory<TinyMask> {
+    private final TinyMask EMPTY = empty();
+    @Override
+    public TinyMask empty() {
+      return new TinyMask(0L);
+    }
+
+    @Override
+    public TinyMask contiguous(int max) {
+      return new TinyMask(((1L << max) - 1));
+    }
+
+    @Override
+    public TinyMask of(int... values) {
+      long word = 0L;
+      for (int v : values) {
+        word |= (1L << v);
+      }
+      return new TinyMask(word);
+    }
+
+    @Override
+    public TinyMask emptySingleton() {
+      return EMPTY;
+    }
   }
 }

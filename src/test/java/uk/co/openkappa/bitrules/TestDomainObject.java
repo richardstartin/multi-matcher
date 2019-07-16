@@ -10,6 +10,10 @@ public class TestDomainObject {
     MEASURE1
   }
 
+  public enum Colour {
+    RED, BLUE, YELLOW
+  }
+
   public static TestDomainObject random() {
     return new TestDomainObject(UUID.randomUUID().toString(),
             UUID.randomUUID().toString(),
@@ -18,7 +22,8 @@ public class TestDomainObject {
             UUID.randomUUID().toString(),
             ThreadLocalRandom.current().nextDouble(),
             ThreadLocalRandom.current().nextInt(),
-            ThreadLocalRandom.current().nextLong()
+            ThreadLocalRandom.current().nextLong(),
+            Colour.RED
     );
   }
 
@@ -30,6 +35,7 @@ public class TestDomainObject {
   private double measure1;
   private int measure2;
   private long measure3;
+  private Colour colour;
 
 
   public TestDomainObject(String field1,
@@ -39,7 +45,8 @@ public class TestDomainObject {
                           String field5,
                           double measure1,
                           int measure2,
-                          long measure3) {
+                          long measure3,
+                          Colour colour) {
     this.field1 = field1;
     this.field2 = field2;
     this.field3 = field3;
@@ -48,6 +55,8 @@ public class TestDomainObject {
     this.measure1 = measure1;
     this.measure2 = measure2;
     this.measure3 = measure3;
+    this.colour = colour;
+
   }
 
 
@@ -120,6 +129,15 @@ public class TestDomainObject {
 
   public TestDomainObject setMeasure3(long measure3) {
     this.measure3 = measure3;
+    return this;
+  }
+
+  public Colour getColour() {
+    return colour;
+  }
+
+  public TestDomainObject setColour(Colour colour) {
+    this.colour = colour;
     return this;
   }
 }

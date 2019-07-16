@@ -10,9 +10,8 @@ import java.util.Comparator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static uk.co.openkappa.bitrules.masks.SmallMask.contiguous;
+import static uk.co.openkappa.bitrules.masks.SmallMask.FACTORY;
 import static uk.co.openkappa.bitrules.Mask.with;
-import static uk.co.openkappa.bitrules.matchers.Masks.singleton;
 
 public class ComparableNodeTest {
 
@@ -23,7 +22,7 @@ public class ComparableNodeTest {
   @Test
   public void testGreaterThan() {
     ComparableMatcher.ComparableNode<LocalDate, SmallMask> node = build(100, Operation.GT);
-    SmallMask mask = contiguous(100);
+    SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.match(LocalDate.ofEpochDay(0), mask.clone()).isEmpty());
     assertEquals(ZERO, node.match(LocalDate.ofEpochDay(1), mask.clone()));
     assertEquals(ZERO_OR_ONE, node.match(LocalDate.ofEpochDay(11), mask.clone()));
@@ -32,7 +31,7 @@ public class ComparableNodeTest {
   @Test
   public void testEqual() {
     ComparableMatcher.ComparableNode<LocalDate, SmallMask> node = build(100, Operation.EQ);
-    SmallMask mask = contiguous(100);
+    SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.match(LocalDate.ofEpochDay((1)), mask.clone()).isEmpty());
     assertEquals(ZERO, node.match(LocalDate.ofEpochDay(0), mask.clone()));
     assertEquals(ONE, node.match(LocalDate.ofEpochDay(10), mask.clone()));
@@ -41,7 +40,7 @@ public class ComparableNodeTest {
   @Test
   public void testLessThan() {
     ComparableMatcher.ComparableNode<LocalDate, SmallMask> node = build(100, Operation.LT);
-    SmallMask mask = contiguous(100);
+    SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.match(LocalDate.ofEpochDay(1001), mask.clone()).isEmpty());
     assertEquals(mask.andNot(ZERO), node.match(LocalDate.ofEpochDay(0), mask.clone()));
     assertEquals(mask.andNot(ZERO_OR_ONE), node.match(LocalDate.ofEpochDay(10), mask.clone()));
@@ -50,7 +49,7 @@ public class ComparableNodeTest {
   @Test
   public void testGreaterThanRev() {
     ComparableMatcher.ComparableNode<LocalDate, SmallMask> node = buildRev(100, Operation.GT);
-    SmallMask mask = contiguous(100);
+    SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.match(LocalDate.ofEpochDay(0), mask.clone()).isEmpty());
     assertEquals(ZERO, node.match(LocalDate.ofEpochDay(1), mask.clone()));
   }
@@ -58,7 +57,7 @@ public class ComparableNodeTest {
   @Test
   public void testEqualRev() {
     ComparableMatcher.ComparableNode<LocalDate, SmallMask> node = buildRev(100, Operation.EQ);
-    SmallMask mask = contiguous(100);
+    SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.match(LocalDate.ofEpochDay(1), mask.clone()).isEmpty());
     assertEquals(ZERO, node.match(LocalDate.ofEpochDay(0), mask.clone()));
     assertEquals(ONE, node.match(LocalDate.ofEpochDay(10), mask.clone()));
@@ -67,7 +66,7 @@ public class ComparableNodeTest {
   @Test
   public void testLessThanRev() {
     ComparableMatcher.ComparableNode<LocalDate, SmallMask> node = buildRev(100, Operation.LT);
-    SmallMask mask = contiguous(100);
+    SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.match(LocalDate.ofEpochDay(1001), mask.clone()).isEmpty());
     assertEquals(mask.andNot(ZERO), node.match(LocalDate.ofEpochDay(0), mask.clone()));
     assertEquals(mask.andNot(ZERO_OR_ONE), node.match(LocalDate.ofEpochDay(10), mask.clone()));
@@ -77,14 +76,14 @@ public class ComparableNodeTest {
   public void testBuildNode() {
     ComparableMatcher.ComparableNode<Double, SmallMask> node = new ComparableMatcher.ComparableNode<>(Comparator.comparingDouble(Double::doubleValue), Operation.GT, new SmallMask());
     node.add(0D, 0);
-    assertEquals(contiguous(1), node.match(1D, contiguous(1)));
+    assertEquals(FACTORY.contiguous(1), node.match(1D, FACTORY.contiguous(1)));
     node.add(10D, 1);
     node.optimise();
-    assertEquals(contiguous(2), node.match(11D, contiguous(2)));
+    assertEquals(FACTORY.contiguous(2), node.match(11D, FACTORY.contiguous(2)));
   }
 
   private ComparableMatcher.ComparableNode<LocalDate, SmallMask> build(int count, Operation operation) {
-    ComparableMatcher.ComparableNode<LocalDate, SmallMask> node = new ComparableMatcher.ComparableNode<>(Comparator.<LocalDate>naturalOrder(), operation, singleton(SmallMask.class));
+    ComparableMatcher.ComparableNode<LocalDate, SmallMask> node = new ComparableMatcher.ComparableNode<>(Comparator.<LocalDate>naturalOrder(), operation, FACTORY.emptySingleton());
     for (int i = 0; i < count; ++i) {
       node.add(LocalDate.ofEpochDay(i * 10),  i);
     }
@@ -92,7 +91,7 @@ public class ComparableNodeTest {
   }
 
   private ComparableMatcher.ComparableNode<LocalDate, SmallMask> buildRev(int count, Operation operation) {
-    ComparableMatcher.ComparableNode<LocalDate, SmallMask> node = new ComparableMatcher.ComparableNode<>(Comparator.<LocalDate>naturalOrder(), operation, singleton(SmallMask.class));
+    ComparableMatcher.ComparableNode<LocalDate, SmallMask> node = new ComparableMatcher.ComparableNode<>(Comparator.<LocalDate>naturalOrder(), operation, FACTORY.emptySingleton());
     for (int i = count - 1; i >= 0; --i) {
       node.add(LocalDate.ofEpochDay(i * 10),  i);
     }

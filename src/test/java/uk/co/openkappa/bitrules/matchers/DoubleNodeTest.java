@@ -7,7 +7,7 @@ import uk.co.openkappa.bitrules.Operation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static uk.co.openkappa.bitrules.masks.SmallMask.contiguous;
+import static uk.co.openkappa.bitrules.masks.SmallMask.FACTORY;
 import static uk.co.openkappa.bitrules.Mask.with;
 
 public class DoubleNodeTest {
@@ -19,7 +19,7 @@ public class DoubleNodeTest {
   @Test
   public void testGreaterThan() {
     DoubleMatcher.DoubleNode<SmallMask> node = build(100, Operation.GT);
-    SmallMask mask = contiguous( 100);
+    SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.match(0, mask.clone()).isEmpty());
     assertEquals(ZERO, node.match(1, mask.clone()));
     assertEquals(ZERO_OR_ONE, node.match(11, mask.clone()));
@@ -28,7 +28,7 @@ public class DoubleNodeTest {
   @Test
   public void testEqual() {
     DoubleMatcher.DoubleNode<SmallMask> node = build(100, Operation.EQ);
-    SmallMask mask = contiguous( 100);
+    SmallMask mask = FACTORY.contiguous( 100);
     assertTrue(node.match(-1, mask.clone()).isEmpty());
     assertEquals(ZERO, node.match(0, mask.clone()));
     assertEquals(ONE, node.match(10, mask.clone()));
@@ -37,7 +37,7 @@ public class DoubleNodeTest {
   @Test
   public void testLessThan() {
     DoubleMatcher.DoubleNode<SmallMask> node = build(100, Operation.LT);
-    SmallMask mask = contiguous( 100);
+    SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.match(1001, mask.clone()).isEmpty());
     assertEquals(mask.andNot(ZERO), node.match(0, mask.clone()));
     assertEquals(mask.andNot(ZERO_OR_ONE), node.match(10, mask.clone()));
@@ -46,7 +46,7 @@ public class DoubleNodeTest {
   @Test
   public void testGreaterThanRev() {
     DoubleMatcher.DoubleNode<SmallMask> node = buildRev(100, Operation.GT);
-    SmallMask mask = contiguous( 100);
+    SmallMask mask = FACTORY.contiguous( 100);
     assertTrue(node.match(0, mask.clone()).isEmpty());
     assertEquals(ZERO, node.match(1, mask.clone()));
   }
@@ -54,7 +54,7 @@ public class DoubleNodeTest {
   @Test
   public void testEqualRev() {
     DoubleMatcher.DoubleNode<SmallMask> node = buildRev(100, Operation.EQ);
-    SmallMask mask = contiguous( 100);
+    SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.match(-1, mask.clone()).isEmpty());
     assertEquals(ZERO, node.match(0, mask.clone()));
     assertEquals(ONE, node.match(10, mask.clone()));
@@ -63,7 +63,7 @@ public class DoubleNodeTest {
   @Test
   public void testLessThanRev() {
     DoubleMatcher.DoubleNode<SmallMask> node = buildRev(100, Operation.LT);
-    SmallMask mask = contiguous( 100);
+    SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.match(1001, mask.clone()).isEmpty());
     assertEquals(mask.andNot(ZERO), node.match(0, mask.clone()));
     assertEquals(mask.andNot(ZERO_OR_ONE), node.match(10, mask.clone()));
@@ -73,9 +73,9 @@ public class DoubleNodeTest {
   public void testBuildNode() {
     DoubleMatcher.DoubleNode<SmallMask> node = new DoubleMatcher.DoubleNode<>(Operation.EQ, new SmallMask());
     node.add(0, 0);
-    assertEquals(contiguous(1), node.match(0, contiguous(1)));
+    assertEquals(FACTORY.contiguous(1), node.match(0, FACTORY.contiguous(1)));
     node.add(0, 1);
-    assertEquals(contiguous(2), node.match(0, contiguous(2)));
+    assertEquals(FACTORY.contiguous(2), node.match(0, FACTORY.contiguous(2)));
   }
 
   private DoubleMatcher.DoubleNode<SmallMask> build(int count, Operation relation) {

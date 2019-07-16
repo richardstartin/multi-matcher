@@ -12,6 +12,8 @@ import java.util.*;
 
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.*;
+import static uk.co.openkappa.bitrules.TestDomainObject.Colour.BLUE;
+import static uk.co.openkappa.bitrules.TestDomainObject.Colour.RED;
 
 public class ClassifierTest {
 
@@ -267,6 +269,28 @@ public class ClassifierTest {
     assertEquals(2, classifier.classifications(test.setField1("foo").setField3("bar")).count());
   }
 
+  @Test
+  public void testStringAndEnumMatcher() throws IOException {
+    Classifier<TestDomainObject, String> classifier = buildStringAndEnumMatcher(() ->
+            Arrays.asList(MatchingConstraint.<String, String>anonymous()
+                            .startsWith("field1", "foo")
+                            .eq("field3", "bar")
+                            .eq("colour", RED)
+                            .priority(0)
+                            .classification("REDbar")
+                            .build(),
+                    MatchingConstraint.<String, String>anonymous()
+                            .startsWith("field1", "fo")
+                            .eq("colour", BLUE)
+                            .priority(1)
+                            .classification("BLUEfoo")
+                            .build()));
+    TestDomainObject test = TestDomainObject.random();
+    assertFalse(classifier.classifications(test).findAny().isPresent());
+    assertFalse(classifier.classification(test).isPresent());
+    assertEquals("BLUEfoo", classifier.classification(test.setField1("foo").setField3("bar").setColour(BLUE)).orElse("NONE"));
+  }
+
   private Classifier<TestDomainObject, String> buildSimple(RuleSet<String, String> repo) throws IOException {
     return ImmutableClassifier.<String, TestDomainObject, String>builder(Schema.<String, TestDomainObject>create()
             .withAttribute("field1", TestDomainObject::getField1)
@@ -297,6 +321,15 @@ public class ClassifierTest {
             .withStringAttribute("field1", TestDomainObject::getField1)
             .withStringAttribute("field2", TestDomainObject::getField2)
             .withStringAttribute("field3", TestDomainObject::getField3)
+    ).build(repo.constraints());
+  }
+
+  private Classifier<TestDomainObject, String> buildStringAndEnumMatcher(RuleSet<String, String> repo) throws IOException {
+    return ImmutableClassifier.<String, TestDomainObject, String>builder(Schema.<String, TestDomainObject>create()
+            .withStringAttribute("field1", TestDomainObject::getField1)
+            .withStringAttribute("field2", TestDomainObject::getField2)
+            .withStringAttribute("field3", TestDomainObject::getField3)
+            .withEnumAttribute("colour", TestDomainObject::getColour, TestDomainObject.Colour.class)
     ).build(repo.constraints());
   }
 

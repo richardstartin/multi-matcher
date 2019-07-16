@@ -6,7 +6,7 @@ import uk.co.openkappa.bitrules.Operation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static uk.co.openkappa.bitrules.masks.SmallMask.contiguous;
+import static uk.co.openkappa.bitrules.masks.SmallMask.FACTORY;
 import static uk.co.openkappa.bitrules.Mask.with;
 import static uk.co.openkappa.bitrules.Mask.without;
 
@@ -16,7 +16,7 @@ public class LongNodeTest {
   @Test
   public void testGreaterThan() {
     LongMatcher.LongNode<SmallMask> node = build(100, Operation.GT);
-    SmallMask mask = contiguous(100);
+    SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.apply(0L, mask.clone()).isEmpty());
     assertEquals(with(new SmallMask(), 0), node.apply(1L, mask.clone()));
   }
@@ -25,7 +25,7 @@ public class LongNodeTest {
   @Test
   public void testGreaterThanOrEqual() {
     LongMatcher.LongNode<SmallMask> node = build(100, Operation.GE);
-    SmallMask mask = contiguous(100);
+    SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.apply(-1L, mask.clone()).isEmpty());
     assertEquals(with(new SmallMask(), 0), node.apply(0L, mask.clone()));
     assertEquals(with(with(new SmallMask(), 0), 1), node.apply(10L, mask.clone()));
@@ -34,7 +34,7 @@ public class LongNodeTest {
   @Test
   public void testEqual() {
     LongMatcher.LongNode<SmallMask> node = build(100, Operation.EQ);
-    SmallMask mask = contiguous(100);
+    SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.apply(-1L, mask.clone()).isEmpty());
     assertEquals(with(new SmallMask(), 0), node.apply(0L, mask.clone()));
     assertEquals(with(new SmallMask(), 1), node.apply(10L, mask.clone()));
@@ -44,7 +44,7 @@ public class LongNodeTest {
   @Test
   public void testLessThanOrEqual() {
     LongMatcher.LongNode<SmallMask> node = build(100, Operation.LE);
-    SmallMask mask = contiguous(100);
+    SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.apply(1001, mask.clone()).isEmpty());
     assertEquals(mask, node.apply(0L, mask.clone()));
     assertEquals(without(mask.clone(), 0), node.apply(10L, mask.clone()));
@@ -53,7 +53,7 @@ public class LongNodeTest {
   @Test
   public void testLessThan() {
     LongMatcher.LongNode<SmallMask> node = build(100, Operation.LT);
-    SmallMask mask = contiguous(100);
+    SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.apply(1001, mask.clone()).isEmpty());
     assertEquals(without(mask.clone(), 0), node.apply(0L, mask.clone()));
     assertEquals(without(without(mask.clone(), 0), 1), node.apply(10L, mask.clone()));
@@ -62,7 +62,7 @@ public class LongNodeTest {
   @Test
   public void testGreaterThanRev() {
     LongMatcher.LongNode<SmallMask> node = buildRev(100, Operation.GT);
-    SmallMask mask = contiguous(100);
+    SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.apply(0L, mask.clone()).isEmpty());
     assertEquals(with(new SmallMask(), 0), node.apply(1L, mask.clone()));
   }
@@ -71,15 +71,15 @@ public class LongNodeTest {
   public void testBuildNode() {
     LongMatcher.LongNode<SmallMask> node = new LongMatcher.LongNode<>(Operation.EQ, new SmallMask());
     node.add(0, 0);
-    assertEquals(contiguous(1), node.apply(0, contiguous(1)));
+    assertEquals(FACTORY.contiguous(1), node.apply(0, FACTORY.contiguous(1)));
     node.add(0, 1);
-    assertEquals(contiguous(2), node.apply(0, contiguous(2)));
+    assertEquals(FACTORY.contiguous(2), node.apply(0, FACTORY.contiguous(2)));
   }
 
   @Test
   public void testGreaterThanOrEqualRev() {
     LongMatcher.LongNode<SmallMask> node = buildRev(100, Operation.GE);
-    SmallMask mask = contiguous(100);
+    SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.apply(-1L, mask.clone()).isEmpty());
     assertEquals(with(new SmallMask(), 0), node.apply(0L, mask.clone()));
     assertEquals(with(with(new SmallMask(), 0), 1), node.apply(10L, mask.clone()));
@@ -88,7 +88,7 @@ public class LongNodeTest {
   @Test
   public void testEqualRev() {
     LongMatcher.LongNode<SmallMask> node = buildRev(100, Operation.EQ);
-    SmallMask mask = contiguous(100);
+    SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.apply(-1L, mask.clone()).isEmpty());
     assertEquals(with(new SmallMask(), 0), node.apply(0L, mask.clone()));
     assertEquals(with(new SmallMask(), 1), node.apply(10L, mask.clone()));
@@ -98,7 +98,7 @@ public class LongNodeTest {
   @Test
   public void testLessThanOrEqualRev() {
     LongMatcher.LongNode<SmallMask> node = buildRev(100, Operation.LE);
-    SmallMask mask = contiguous(100);
+    SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.apply(1001, mask.clone()).isEmpty());
     assertEquals(mask, node.apply(0L, mask.clone()));
     assertEquals(without(mask, 0), node.apply(10L, mask.clone()));
@@ -107,7 +107,7 @@ public class LongNodeTest {
   @Test
   public void testLessThanRev() {
     LongMatcher.LongNode<SmallMask> node = buildRev(100, Operation.LT);
-    SmallMask mask = contiguous(100);
+    SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.apply(1001, mask.clone()).isEmpty());
     assertEquals(without(mask.clone(), 0), node.apply(0L, mask.clone()));
     assertEquals(without(without(mask.clone(), 0), 1), node.apply(10L, mask.clone()));

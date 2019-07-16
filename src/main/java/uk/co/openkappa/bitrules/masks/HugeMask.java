@@ -9,15 +9,7 @@ import java.util.stream.IntStream;
 
 public class HugeMask implements Mask<HugeMask> {
 
-  public static HugeMask contiguous(int to) {
-    RoaringBitmap range = new RoaringBitmap();
-    range.add(0L, to & 0xFFFFFFFFL);
-    return new HugeMask(range);
-  }
-
-  public static HugeMask of(int... values) {
-    return new HugeMask(RoaringBitmap.bitmapOf(values));
-  }
+  public static MaskFactory<HugeMask> FACTORY = new Factory();
 
   private final RoaringBitmap bitmap;
 
@@ -104,5 +96,31 @@ public class HugeMask implements Mask<HugeMask> {
   @Override
   public int hashCode() {
     return Objects.hash(bitmap);
+  }
+
+  private static final class Factory implements MaskFactory<HugeMask> {
+    private final HugeMask EMPTY = empty();
+
+    @Override
+    public HugeMask empty() {
+      return new HugeMask();
+    }
+
+    @Override
+    public HugeMask contiguous(int max) {
+      RoaringBitmap range = new RoaringBitmap();
+      range.add(0L, max & 0xFFFFFFFFL);
+      return new HugeMask(range);
+    }
+
+    @Override
+    public HugeMask of(int... values) {
+      return new HugeMask(RoaringBitmap.bitmapOf(values));
+    }
+
+    @Override
+    public HugeMask emptySingleton() {
+      return EMPTY;
+    }
   }
 }

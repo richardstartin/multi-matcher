@@ -4,18 +4,20 @@ import uk.co.openkappa.bitrules.Mask;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import static uk.co.openkappa.bitrules.Mask.with;
 
 class GenericEqualityNode<T, MaskType extends Mask<MaskType>> implements Node<T, MaskType> {
 
-  private final Map<T, MaskType> segments = new HashMap<>();
+  private final Map<T, MaskType> segments;
   private final MaskType empty;
   private final MaskType wildcard;
 
-  public GenericEqualityNode(MaskType empty, MaskType wildcard) {
+  public GenericEqualityNode(Map<T, MaskType> segments, MaskType empty, MaskType wildcard) {
     this.empty = empty;
     this.wildcard = wildcard;
+    this.segments = segments;
   }
 
   public void add(T segment, int priority) {

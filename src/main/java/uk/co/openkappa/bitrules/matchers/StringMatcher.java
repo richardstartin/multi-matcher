@@ -10,6 +10,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static uk.co.openkappa.bitrules.Mask.with;
 import static uk.co.openkappa.bitrules.Operation.EQ;
@@ -18,14 +19,20 @@ import static uk.co.openkappa.bitrules.Operation.STARTS_WITH;
 public class StringMatcher<Input, MaskType extends Mask<MaskType>> implements Matcher<Input, MaskType> {
 
   private final Map<Operation, Node<String, MaskType>> nodes = new HashMap<>();
+  private final Supplier<Map<String, MaskType>> mapSupplier;
   private final Function<Input, String> accessor;
   private final MaskType wildcards;
   private final MaskType empty;
 
   public StringMatcher(Function<Input, String> accessor, Class<MaskType> type, int max) {
+    this(HashMap::new, accessor, type, max);
+  }
+
+  public StringMatcher(Supplier<Map<String, MaskType>> mapSupplier, Function<Input, String> accessor, Class<MaskType> type, int max) {
     this.accessor = accessor;
     this.empty = Masks.singleton(type);
     this.wildcards = Masks.wildcards(type, max);
+    this.mapSupplier = mapSupplier;
   }
 
   @Override
@@ -48,7 +55,7 @@ public class StringMatcher<Input, MaskType extends Mask<MaskType>> implements Ma
         break;
       case EQ:
         GenericEqualityNode<String, MaskType> literal = (GenericEqualityNode<String, MaskType>) nodes.computeIfAbsent(EQ,
-                o -> new GenericEqualityNode<>(empty, wildcards));
+                o -> new GenericEqualityNode<>(mapSupplier.get(), empty, wildcards));
         literal.add(constraint.getValue(), priority);
         break;
       default:

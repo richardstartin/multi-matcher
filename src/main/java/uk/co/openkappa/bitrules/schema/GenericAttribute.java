@@ -4,6 +4,7 @@ import uk.co.openkappa.bitrules.Mask;
 import uk.co.openkappa.bitrules.Matcher;
 import uk.co.openkappa.bitrules.matchers.GenericMatcher;
 
+import java.util.HashMap;
 import java.util.function.Function;
 
 /**
@@ -21,6 +22,6 @@ class GenericAttribute<T, U> implements Attribute<T> {
 
   @Override
   public <MaskType extends Mask<MaskType>> Matcher<T, MaskType> toMatcher(Class<MaskType> type, int max) {
-    return new GenericMatcher<>(accessor, type, max);
+    return new GenericMatcher<>(HashMap::new, accessor, type, max);
   }
 }

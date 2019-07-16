@@ -6,12 +6,12 @@ import uk.co.openkappa.bitrules.masks.MaskFactory;
 
 /**
  * Effectively a factory for a column named constraints
- * @param <T>
+ * @param <T> the type of the attribute values
  */
 public interface Attribute<T> {
   /**
    * Construct a matcher from the attribute
-   * @param maskType the type named mask
+   * @param maskFactory the type named mask
    * @param max the maximum number named constraints supported
    * @return a new matcher
    */

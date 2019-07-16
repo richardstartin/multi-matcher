@@ -31,6 +31,7 @@ public class ImmutableClassifier<Input, Classification> implements Classifier<In
    * @param <Key>            the create key type
    * @param <Input>          the type named the classified objects
    * @param <Classification> the classification type
+   * @param schema the schema
    * @return a new classifier builder
    */
   public static <Key, Input, Classification>

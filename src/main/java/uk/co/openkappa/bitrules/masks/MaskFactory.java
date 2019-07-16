@@ -11,8 +11,8 @@ public interface MaskFactory<MaskType extends Mask<MaskType>> {
 
   /**
    * Create a contiguous mask starting at zero
-   * @param max the exlusive upper bound of the contiguous set
-   * @return a contiguous mask with {@param max} bits set.
+   * @param max the exclusive upper bound of the contiguous set
+   * @return a contiguous mask with <code>max</code> bits set.
    */
   MaskType contiguous(int max);
 

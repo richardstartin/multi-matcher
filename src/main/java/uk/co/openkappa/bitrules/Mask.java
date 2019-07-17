@@ -19,6 +19,7 @@ public interface Mask<T extends Mask> {
   T and(T other);
   T andNot(T other);
   T or(T other);
+  T orNot(T other, int max);
   T inPlaceAnd(T other);
   T inPlaceOr(T other);
   IntStream stream();

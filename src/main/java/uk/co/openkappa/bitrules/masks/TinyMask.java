@@ -48,6 +48,11 @@ public class TinyMask implements Mask<TinyMask> {
     return new TinyMask(this.mask | other.mask);
   }
 
+  @Override
+  public TinyMask orNot(TinyMask other, int max) {
+    return new TinyMask(mask | ((~other.mask) & ((1L << max) - 1)));
+  }
+
   public TinyMask inPlaceOr(TinyMask other) {
     this.mask |= other.mask;
     return this;

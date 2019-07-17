@@ -9,6 +9,8 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.ToIntFunction;
 
+import static uk.co.openkappa.bitrules.matchers.SelectivityHeuristics.avgCardinality;
+
 public class IntMatcher<T, MaskType extends Mask<MaskType>> implements MutableMatcher<T, MaskType> {
 
   private final ToIntFunction<T> accessor;
@@ -41,6 +43,11 @@ public class IntMatcher<T, MaskType extends Mask<MaskType>> implements MutableMa
     optimise();
     wildcards.optimise();
     return this;
+  }
+
+
+  public float averageSelectivity() {
+    return avgCardinality(children.values(), IntNode::averageSelectivity);
   }
 
 
@@ -128,6 +135,11 @@ public class IntMatcher<T, MaskType extends Mask<MaskType>> implements MutableMa
         default:
           return context;
       }
+    }
+
+
+    public float averageSelectivity() {
+      return avgCardinality(sets);
     }
 
     public IntNode<MaskType> optimise() {

@@ -62,5 +62,9 @@ public class GenericMatcher<T, U, MaskType extends Mask<MaskType>> implements Mu
       return node.match(accessor.apply(value), context).inPlaceOr(mask);
     }
 
+    @Override
+    public float averageSelectivity() {
+      return node.averageSelectivity();
+    }
   }
 }

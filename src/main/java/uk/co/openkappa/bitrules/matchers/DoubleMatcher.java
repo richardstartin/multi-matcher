@@ -9,6 +9,8 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.ToDoubleFunction;
 
+import static uk.co.openkappa.bitrules.matchers.SelectivityHeuristics.avgCardinality;
+
 public class DoubleMatcher<T, MaskType extends Mask<MaskType>> implements MutableMatcher<T, MaskType> {
 
   private final ToDoubleFunction<T> accessor;
@@ -60,6 +62,11 @@ public class DoubleMatcher<T, MaskType extends Mask<MaskType>> implements Mutabl
     Map<Operation, DoubleNode<MaskType>> optimised = new EnumMap<>(Operation.class);
     children.forEach((op, node) -> optimised.put(op, node.optimise()));
     children.putAll(optimised);
+  }
+
+  @Override
+  public float averageSelectivity() {
+    return avgCardinality(children.values(), DoubleNode::averageSelectivity);
   }
 
 
@@ -128,6 +135,10 @@ public class DoubleMatcher<T, MaskType extends Mask<MaskType>> implements Mutabl
       }
       trim();
       return this;
+    }
+
+    public float averageSelectivity() {
+      return avgCardinality(sets);
     }
 
     public MaskType match(double value, MaskType context) {

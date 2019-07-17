@@ -3,7 +3,6 @@ package uk.co.openkappa.bitrules.matchers;
 import org.apache.commons.collections4.trie.PatriciaTrie;
 import uk.co.openkappa.bitrules.*;
 import uk.co.openkappa.bitrules.masks.MaskFactory;
-import uk.co.openkappa.bitrules.structures.PerfectHashMap;
 
 import java.util.*;
 import java.util.function.Function;

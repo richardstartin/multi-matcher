@@ -34,7 +34,7 @@ public class FooTest {
   }
 
   @Test
-  void test() {
+  public void testSimpleConfig() {
     // declare a schema, associating attribute accessors with some kind of key (a string here)
     Schema<String, Foo> schema = Schema.<String, Foo>create()
             .withAttribute("productType", Foo::getProductType)

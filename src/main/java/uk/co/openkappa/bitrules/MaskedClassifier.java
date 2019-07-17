@@ -1,17 +1,15 @@
 package uk.co.openkappa.bitrules;
 
-import java.util.Iterator;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 public class MaskedClassifier<MaskType extends Mask<MaskType>, Input, Classification> implements Classifier<Input, Classification> {
 
-  private final List<Classification> classifications;
-  private final Iterable<Matcher<Input, MaskType>> rules;
+  private final Classification[] classifications;
+  private final Matcher<Input, MaskType>[] rules;
   private final Mask<MaskType> mask;
 
-  public MaskedClassifier(List<Classification> classifications, Iterable<Matcher<Input, MaskType>> rules, Mask<MaskType> mask) {
+  public MaskedClassifier(Classification[] classifications, Matcher<Input, MaskType>[] rules, Mask<MaskType> mask) {
     this.classifications = classifications;
     this.rules = rules;
     this.mask = mask;
@@ -19,7 +17,7 @@ public class MaskedClassifier<MaskType extends Mask<MaskType>, Input, Classifica
 
   @Override
   public Stream<Classification> classifications(Input value) {
-    return match(value).stream().mapToObj(classifications::get);
+    return match(value).stream().mapToObj(i -> classifications[i]);
   }
 
   @Override
@@ -27,14 +25,16 @@ public class MaskedClassifier<MaskType extends Mask<MaskType>, Input, Classifica
     MaskType matches = match(value);
     return matches.isEmpty()
             ? Optional.empty()
-            : Optional.of(classifications.get(matches.first()));
+            : Optional.of(classifications[matches.first()]);
   }
 
   private MaskType match(Input value) {
     MaskType context = mask.clone();
-    Iterator<Matcher<Input, MaskType>> it = rules.iterator();
-    while (it.hasNext() && !context.isEmpty()) {
-      context = it.next().match(value, context);
+    for (Matcher<Input, MaskType> matcher : rules) {
+      context = matcher.match(value, context);
+      if (context.isEmpty()) {
+        break;
+      }
     }
     return context;
   }

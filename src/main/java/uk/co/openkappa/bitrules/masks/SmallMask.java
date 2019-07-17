@@ -86,6 +86,11 @@ public class SmallMask implements Mask<SmallMask> {
   }
 
   @Override
+  public int cardinality() {
+    return container.getCardinality();
+  }
+
+  @Override
   public String toString() {
     return container.toString();
   }

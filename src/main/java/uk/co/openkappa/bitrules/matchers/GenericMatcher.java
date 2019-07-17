@@ -39,6 +39,11 @@ public class GenericMatcher<T, U, MaskType extends Mask<MaskType>> implements Mu
     return new OptimisedGenericMatcher<>(accessor, node.optimise(), wildcard);
   }
 
+  @Override
+  public float averageSelectivity() {
+    return node.averageSelectivity();
+  }
+
   private static class OptimisedGenericMatcher<T, U, MaskType extends Mask<MaskType>> implements Matcher<T, MaskType> {
 
     private final Function<T, U> accessor;

@@ -5,10 +5,7 @@ import uk.co.openkappa.bitrules.*;
 import uk.co.openkappa.bitrules.masks.MaskFactory;
 import uk.co.openkappa.bitrules.structures.PerfectHashMap;
 
-import java.util.Comparator;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -67,6 +64,17 @@ public class StringMatcher<Input, MaskType extends Mask<MaskType>> implements Mu
   @Override
   public Matcher<Input, MaskType> freeze() {
     return new OptimisedStringMatcher<>(this);
+  }
+
+  @Override
+  public float averageSelectivity() {
+    float avg = 0;
+    int count = 0;
+    for (var node : nodes.values()) {
+      avg += node.averageSelectivity();
+      ++count;
+    }
+    return avg / count;
   }
 
   private static class PrefixNode<MaskType extends Mask<MaskType>> implements MutableNode<String, MaskType> {

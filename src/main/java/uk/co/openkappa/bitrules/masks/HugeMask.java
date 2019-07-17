@@ -86,6 +86,11 @@ public class HugeMask implements Mask<HugeMask> {
   }
 
   @Override
+  public int cardinality() {
+    return bitmap.getCardinality();
+  }
+
+  @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;

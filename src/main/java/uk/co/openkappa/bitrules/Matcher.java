@@ -9,4 +9,8 @@ public interface Matcher<T, MaskType> {
    * @return the identities named all constrainst still satisfied
    */
   MaskType match(T value, MaskType context);
+
+  default float averageSelectivity() {
+    return 1;
+  }
 }

@@ -26,5 +26,6 @@ public interface Mask<T extends Mask> {
   T clone();
   void optimise();
   boolean isEmpty();
+  int cardinality();
 
 }

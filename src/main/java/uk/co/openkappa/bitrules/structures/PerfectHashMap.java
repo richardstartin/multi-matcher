@@ -50,6 +50,17 @@ public abstract class PerfectHashMap<T> implements Map<String, T> {
       return null;
     }
 
+    @Override
+    public Collection<T> values() {
+      List<T> values = new ArrayList<>(this.values.length);
+      for (Object value : this.values) {
+        if (null != value) {
+          values.add((T) value);
+        }
+      }
+      return values;
+    }
+
     private int position(String data) {
       byte[] bytes = data.getBytes(UTF_8);
       long hash = State.HASHER.hash(bytes, State.SEED);
@@ -105,6 +116,17 @@ public abstract class PerfectHashMap<T> implements Map<String, T> {
       return null;
     }
 
+    @Override
+    public Collection<T> values() {
+      List<T> values = new ArrayList<>(this.values.length);
+      for (Object value : this.values) {
+        if (null != value) {
+          values.add((T) value);
+        }
+      }
+      return values;
+    }
+
     private int position(String data) {
       byte[] bytes = data.getBytes(UTF_8);
       long hash = State.HASHER.hash(bytes, State.SEED);
@@ -158,6 +180,17 @@ public abstract class PerfectHashMap<T> implements Map<String, T> {
         return position < 0 ? null : (T) values[position];
       }
       return null;
+    }
+
+    @Override
+    public Collection<T> values() {
+      List<T> values = new ArrayList<>(this.values.length);
+      for (Object value : this.values) {
+        if (null != value) {
+          values.add((T) value);
+        }
+      }
+      return values;
     }
 
     private int position(String data) {
@@ -292,11 +325,6 @@ public abstract class PerfectHashMap<T> implements Map<String, T> {
 
   @Override
   public Set<String> keySet() {
-    throw new IllegalStateException("not iterable");
-  }
-
-  @Override
-  public Collection<T> values() {
     throw new IllegalStateException("not iterable");
   }
 

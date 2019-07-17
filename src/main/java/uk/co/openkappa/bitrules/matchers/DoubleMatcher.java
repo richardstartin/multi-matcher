@@ -43,7 +43,6 @@ public class DoubleMatcher<T, MaskType extends Mask<MaskType>> implements Mutabl
     return this;
   }
 
-
   private void add(Operation relation, double threshold, int priority) {
     children.computeIfAbsent(relation, r -> new DoubleNode<>(r, empty))
             .add(threshold, priority);

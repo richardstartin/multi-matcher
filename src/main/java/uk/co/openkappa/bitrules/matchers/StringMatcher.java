@@ -76,8 +76,13 @@ public class StringMatcher<Input, MaskType extends Mask<MaskType>> implements Mu
     private int longest;
 
     private PrefixNode(MaskType empty) {
+      this(empty, new HashMap<>(), 0);
+    }
+
+    private PrefixNode(MaskType empty, Map<String, MaskType> map, int longest) {
       this.empty = empty;
-      this.map = new HashMap<>();
+      this.map = map;
+      this.longest = longest;
     }
 
     @Override
@@ -108,7 +113,7 @@ public class StringMatcher<Input, MaskType extends Mask<MaskType>> implements Mu
                  }
                });
          });
-      return this;
+      return new PrefixNode<>(empty, PerfectHashMap.wrap(map), longest);
     }
 
     public void add(String prefix, int id) {

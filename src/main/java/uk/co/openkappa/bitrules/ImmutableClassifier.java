@@ -52,7 +52,7 @@ public class ImmutableClassifier<Input, Classification> implements Classifier<In
   public static class ClassifierBuilder<Key, Input, Classification> {
 
     private final Schema<Key, Input> registry;
-    private final Map<Key, Matcher<Input, ? extends Mask>> matchers = new HashMap<>();
+    private final Map<Key, MutableMatcher<Input, ? extends Mask>> matchers = new HashMap<>();
     private final List<Classification> classifications = new ArrayList<>();
 
     public ClassifierBuilder(Schema<Key, Input> registry) {
@@ -95,8 +95,8 @@ public class ImmutableClassifier<Input, Classification> implements Classifier<In
     }
 
     private <MaskType extends Mask<MaskType>>
-    Matcher<Input, MaskType> memoisedMatcher(Key key, MaskFactory<MaskType> maskFactory, int max) {
-      Matcher<Input, MaskType> matcher = (Matcher<Input, MaskType>)matchers.get(key);
+    MutableMatcher<Input, MaskType> memoisedMatcher(Key key, MaskFactory<MaskType> maskFactory, int max) {
+      MutableMatcher<Input, MaskType> matcher = (MutableMatcher<Input, MaskType>)matchers.get(key);
       if (null == matcher) {
         matcher = registry.getAttribute(key).toMatcher(maskFactory, max);
         matchers.put(key, matcher);
@@ -107,9 +107,8 @@ public class ImmutableClassifier<Input, Classification> implements Classifier<In
     private <MaskType extends Mask<MaskType>>
     List<Matcher<Input, MaskType>> freezeMatchers() {
       List<Matcher<Input, MaskType>> frozen = new ArrayList<>(matchers.size());
-      for (Matcher<Input, ? extends Mask> matcher : matchers.values()) {
-        matcher.freeze();
-        frozen.add((Matcher<Input, MaskType>) matcher);
+      for (MutableMatcher<Input, ? extends Mask> matcher : matchers.values()) {
+        frozen.add((Matcher<Input, MaskType>) matcher.freeze());
       }
       return frozen;
     }

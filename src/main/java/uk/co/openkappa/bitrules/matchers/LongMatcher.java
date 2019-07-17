@@ -1,9 +1,6 @@
 package uk.co.openkappa.bitrules.matchers;
 
-import uk.co.openkappa.bitrules.Constraint;
-import uk.co.openkappa.bitrules.Mask;
-import uk.co.openkappa.bitrules.Matcher;
-import uk.co.openkappa.bitrules.Operation;
+import uk.co.openkappa.bitrules.*;
 import uk.co.openkappa.bitrules.masks.MaskFactory;
 
 import java.lang.reflect.Array;
@@ -12,21 +9,22 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.ToLongFunction;
 
-public class LongMatcher<T, MaskType extends Mask<MaskType>> implements Matcher<T, MaskType> {
+public class LongMatcher<T, MaskType extends Mask<MaskType>> implements MutableMatcher<T, MaskType> {
 
   private final ToLongFunction<T> accessor;
-  private final CompositeLongNode<MaskType> node;
+  private final Map<Operation, LongNode<MaskType>> children = new EnumMap<>(Operation.class);
+  private final MaskType empty;
   private final MaskType wildcards;
 
   public LongMatcher(ToLongFunction<T> accessor, MaskFactory<MaskType> maskFactory, int max) {
     this.accessor = accessor;
-    this.node = new CompositeLongNode<>(maskFactory.emptySingleton());
+    this.empty = maskFactory.emptySingleton();
     this.wildcards = maskFactory.contiguous(max);
   }
 
   @Override
   public MaskType match(T value, MaskType context) {
-    MaskType result = node.match(accessor.applyAsLong(value), context);
+    MaskType result = match(accessor.applyAsLong(value), context);
     return context.inPlaceAnd(result.inPlaceOr(wildcards));
   }
 
@@ -34,41 +32,36 @@ public class LongMatcher<T, MaskType extends Mask<MaskType>> implements Matcher<
   public void addConstraint(Constraint constraint, int priority) {
     Number number = constraint.getValue();
     long value = number.longValue();
-    node.add(constraint.getOperation(), value, priority);
+    add(constraint.getOperation(), value, priority);
     wildcards.remove(priority);
   }
 
   @Override
-  public void freeze() {
-    node.optimise();
+  public Matcher<T, MaskType> freeze() {
+    optimise();
     wildcards.optimise();
+    return this;
   }
 
-  public static class CompositeLongNode<MaskType extends Mask<MaskType>> {
 
-    private final Map<Operation, LongNode<MaskType>> children = new EnumMap<>(Operation.class);
-    private final MaskType empty;
-
-    public CompositeLongNode(MaskType empty) {
-      this.empty = empty;
-    }
-
-    public void add(Operation relation, long threshold, int priority) {
-      children.computeIfAbsent(relation, r -> new LongNode<>(r, empty)).add(threshold, priority);
-    }
-
-    public MaskType match(long value, MaskType result) {
-      MaskType temp = empty.clone();
-      for (LongNode<MaskType> component : children.values()) {
-        temp = temp.inPlaceOr(component.apply(value, result.clone()));
-      }
-      return result.inPlaceAnd(temp);
-    }
-
-    public void optimise() {
-      children.values().forEach(LongNode::optimise);
-    }
+  private void add(Operation relation, long threshold, int priority) {
+    children.computeIfAbsent(relation, r -> new LongNode<>(r, empty)).add(threshold, priority);
   }
+
+  private MaskType match(long value, MaskType result) {
+    MaskType temp = empty.clone();
+    for (LongNode<MaskType> component : children.values()) {
+      temp = temp.inPlaceOr(component.apply(value, result.clone()));
+    }
+    return result.inPlaceAnd(temp);
+  }
+
+  private void optimise() {
+    Map<Operation, LongNode<MaskType>> optimised = new EnumMap<>(Operation.class);
+    children.forEach((op, node) -> optimised.put(op, node.optimise()));
+    children.putAll(optimised);
+  }
+
 
   public static class LongNode<MaskType extends Mask<MaskType>> {
 

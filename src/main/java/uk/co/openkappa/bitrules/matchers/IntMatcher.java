@@ -1,31 +1,30 @@
 package uk.co.openkappa.bitrules.matchers;
 
-import uk.co.openkappa.bitrules.Constraint;
-import uk.co.openkappa.bitrules.Mask;
-import uk.co.openkappa.bitrules.Matcher;
-import uk.co.openkappa.bitrules.Operation;
+import uk.co.openkappa.bitrules.*;
 import uk.co.openkappa.bitrules.masks.MaskFactory;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.EnumMap;
+import java.util.Map;
 import java.util.function.ToIntFunction;
 
-public class IntMatcher<T, MaskType extends Mask<MaskType>> implements Matcher<T, MaskType> {
+public class IntMatcher<T, MaskType extends Mask<MaskType>> implements MutableMatcher<T, MaskType> {
 
   private final ToIntFunction<T> accessor;
-  private final CompositeIntNode<MaskType> node;
+  private final EnumMap<Operation, IntNode<MaskType>> children = new EnumMap<>(Operation.class);
   private final MaskType wildcards;
+  private final MaskType empty;
 
   public IntMatcher(ToIntFunction<T> accessor, MaskFactory<MaskType> maskFactory, int max) {
     this.accessor = accessor;
-    this.node = new CompositeIntNode<>(maskFactory.emptySingleton());
+    this.empty = maskFactory.emptySingleton();
     this.wildcards = maskFactory.contiguous(max);
   }
 
   @Override
   public MaskType match(T value, MaskType context) {
-    MaskType result = node.match(accessor.applyAsInt(value), context);
+    MaskType result = match(accessor.applyAsInt(value), context);
     return context.inPlaceAnd(result.inPlaceOr(wildcards));
   }
 
@@ -33,42 +32,36 @@ public class IntMatcher<T, MaskType extends Mask<MaskType>> implements Matcher<T
   public void addConstraint(Constraint constraint, int priority) {
     Number number = constraint.getValue();
     int value = number.intValue();
-    node.add(constraint.getOperation(), value, priority);
+    add(constraint.getOperation(), value, priority);
     wildcards.remove(priority);
   }
 
   @Override
-  public void freeze() {
-    node.optimise();
+  public Matcher<T, MaskType> freeze() {
+    optimise();
     wildcards.optimise();
+    return this;
   }
 
-  public static class CompositeIntNode<MaskType extends Mask<MaskType>> {
 
-    private final EnumMap<Operation, IntNode<MaskType>> children = new EnumMap<>(Operation.class);
-    private final MaskType empty;
-
-    public CompositeIntNode(MaskType empty) {
-      this.empty = empty;
-    }
-
-
-    public void add(Operation relation, int threshold, int priority) {
-      children.computeIfAbsent(relation, r -> new IntNode<>(r, empty)).add(threshold, priority);
-    }
-
-    public MaskType match(int value, MaskType result) {
-      MaskType temp = empty.clone();
-      for (IntNode<MaskType> component : children.values()) {
-        temp = temp.inPlaceOr(component.apply(value, result.clone()));
-      }
-      return result.inPlaceAnd(temp);
-    }
-
-    public void optimise() {
-      children.values().forEach(IntNode::optimise);
-    }
+  private void add(Operation relation, int threshold, int priority) {
+    children.computeIfAbsent(relation, r -> new IntNode<>(r, empty)).add(threshold, priority);
   }
+
+  private MaskType match(int value, MaskType result) {
+    MaskType temp = empty.clone();
+    for (IntNode<MaskType> component : children.values()) {
+      temp = temp.inPlaceOr(component.apply(value, result.clone()));
+    }
+    return result.inPlaceAnd(temp);
+  }
+
+  private void optimise() {
+    Map<Operation, IntNode<MaskType>> optimised = new EnumMap<>(Operation.class);
+    children.forEach((op, node) -> optimised.put(op, node.optimise()));
+    children.putAll(optimised);
+  }
+
 
   public static class IntNode<MaskType extends Mask<MaskType>> {
 
@@ -120,7 +113,7 @@ public class IntMatcher<T, MaskType extends Mask<MaskType>> implements Matcher<T
       }
     }
 
-    public MaskType apply(int value, MaskType context) {
+    MaskType apply(int value, MaskType context) {
       switch (relation) {
         case GT:
           return context.inPlaceAnd(findRangeEncoded(value));

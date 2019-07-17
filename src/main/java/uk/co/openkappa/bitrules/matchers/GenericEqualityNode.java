@@ -2,22 +2,30 @@ package uk.co.openkappa.bitrules.matchers;
 
 import uk.co.openkappa.bitrules.Mask;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 import static uk.co.openkappa.bitrules.Mask.with;
 
-class GenericEqualityNode<T, MaskType extends Mask<MaskType>> implements Node<T, MaskType> {
+class GenericEqualityNode<T, MaskType extends Mask<MaskType>> implements MutableNode<T, MaskType> {
 
-  private final Map<T, MaskType> segments;
+  private final Function<Map<T, MaskType>, Map<T, MaskType>> segmentOptimiser;
+  final Map<T, MaskType> segments;
   private final MaskType empty;
   private final MaskType wildcard;
 
   public GenericEqualityNode(Map<T, MaskType> segments, MaskType empty, MaskType wildcard) {
+    this(segments, empty, wildcard, Function.identity());
+  }
+
+  public GenericEqualityNode(Map<T, MaskType> segments,
+                             MaskType empty,
+                             MaskType wildcard,
+                             Function<Map<T, MaskType>, Map<T, MaskType>> segmentOptimiser) {
     this.empty = empty;
     this.wildcard = wildcard;
     this.segments = segments;
+    this.segmentOptimiser = segmentOptimiser;
   }
 
   public void add(T segment, int priority) {
@@ -30,15 +38,35 @@ class GenericEqualityNode<T, MaskType extends Mask<MaskType>> implements Node<T,
   }
 
   @Override
-  public void optimise() {
-    for (Map.Entry<T, MaskType> segment: segments.entrySet()) {
-      segment.getValue().optimise();
-    }
+  public ClassificationNode<T, MaskType> optimise() {
+    wildcard.optimise();
+    return new OptimisedGeneralEqualityNode<>(segmentOptimiser.apply(segments), empty, wildcard);
   }
 
   private MaskType maskWith(int priority) {
     MaskType mask = empty.clone();
     mask.add(priority);
     return mask;
+  }
+
+  private static class OptimisedGeneralEqualityNode<Input, MaskType extends Mask<MaskType>>
+          implements ClassificationNode<Input, MaskType> {
+    private final Map<Input, MaskType> segments;
+    private final MaskType empty;
+    private final MaskType wildcard;
+
+
+    private OptimisedGeneralEqualityNode(Map<Input, MaskType> segments,
+                                         MaskType empty,
+                                         MaskType wildcard) {
+      this.segments = segments;
+      this.empty = empty;
+      this.wildcard = wildcard;
+    }
+
+    @Override
+    public MaskType match(Input input, MaskType context) {
+      return context.inPlaceAnd(segments.getOrDefault(input, empty).or(wildcard));
+    }
   }
 }

@@ -1,11 +1,9 @@
 package uk.co.openkappa.bitrules.matchers;
 
 import org.apache.commons.collections4.trie.PatriciaTrie;
-import uk.co.openkappa.bitrules.Constraint;
-import uk.co.openkappa.bitrules.Mask;
-import uk.co.openkappa.bitrules.Matcher;
-import uk.co.openkappa.bitrules.Operation;
+import uk.co.openkappa.bitrules.*;
 import uk.co.openkappa.bitrules.masks.MaskFactory;
+import uk.co.openkappa.bitrules.structures.PerfectHashMap;
 
 import java.util.Comparator;
 import java.util.EnumMap;
@@ -18,9 +16,9 @@ import static uk.co.openkappa.bitrules.Mask.with;
 import static uk.co.openkappa.bitrules.Operation.EQ;
 import static uk.co.openkappa.bitrules.Operation.STARTS_WITH;
 
-public class StringMatcher<Input, MaskType extends Mask<MaskType>> implements Matcher<Input, MaskType> {
+public class StringMatcher<Input, MaskType extends Mask<MaskType>> implements MutableMatcher<Input, MaskType> {
 
-  private final EnumMap<Operation, Node<String, MaskType>> nodes = new EnumMap<>(Operation.class);
+  private final EnumMap<Operation, MutableNode<String, MaskType>> nodes = new EnumMap<>(Operation.class);
   private final Supplier<Map<String, MaskType>> mapSupplier;
   private final Function<Input, String> accessor;
   private final MaskType wildcards;
@@ -30,7 +28,7 @@ public class StringMatcher<Input, MaskType extends Mask<MaskType>> implements Ma
     this(HashMap::new, accessor, maskFactory, max);
   }
 
-  public StringMatcher(Supplier<Map<String, MaskType>> mapSupplier, Function<Input, String> accessor, MaskFactory<MaskType> maskFactory, int max) {
+  private StringMatcher(Supplier<Map<String, MaskType>> mapSupplier, Function<Input, String> accessor, MaskFactory<MaskType> maskFactory, int max) {
     this.accessor = accessor;
     this.empty = maskFactory.emptySingleton();
     this.wildcards = maskFactory.contiguous(max);
@@ -41,7 +39,7 @@ public class StringMatcher<Input, MaskType extends Mask<MaskType>> implements Ma
   public MaskType match(Input input, MaskType context) {
     String value = accessor.apply(input);
     MaskType result = empty.clone();
-    for (Node<String, MaskType> component : nodes.values()) {
+    for (MutableNode<String, MaskType> component : nodes.values()) {
       result = result.inPlaceOr(component.match(value, context.clone()));
     }
     return result.inPlaceAnd(context.or(wildcards));
@@ -57,7 +55,7 @@ public class StringMatcher<Input, MaskType extends Mask<MaskType>> implements Ma
         break;
       case EQ:
         GenericEqualityNode<String, MaskType> literal = (GenericEqualityNode<String, MaskType>) nodes.computeIfAbsent(EQ,
-                o -> new GenericEqualityNode<>(mapSupplier.get(), empty, wildcards));
+                o -> new GenericEqualityNode<>(mapSupplier.get(), empty, wildcards, PerfectHashMap::wrap));
         literal.add(constraint.getValue(), priority);
         break;
       default:
@@ -67,12 +65,11 @@ public class StringMatcher<Input, MaskType extends Mask<MaskType>> implements Ma
   }
 
   @Override
-  public void freeze() {
-    wildcards.optimise();
-    nodes.values().forEach(Node::optimise);
+  public Matcher<Input, MaskType> freeze() {
+    return new OptimisedStringMatcher<>(this);
   }
 
-  private static class PrefixNode<MaskType extends Mask<MaskType>> implements Node<String, MaskType> {
+  private static class PrefixNode<MaskType extends Mask<MaskType>> implements MutableNode<String, MaskType> {
 
     private final MaskType empty;
     private final Map<String, MaskType> map;
@@ -97,7 +94,7 @@ public class StringMatcher<Input, MaskType extends Mask<MaskType>> implements Ma
     }
 
     @Override
-    public void optimise() {
+    public ClassificationNode<String, MaskType> optimise() {
       this.longest = map.keySet().stream().mapToInt(String::length).max().orElse(0);
       PatriciaTrie<MaskType> trie = new PatriciaTrie<>();
       trie.putAll(map);
@@ -111,10 +108,39 @@ public class StringMatcher<Input, MaskType extends Mask<MaskType>> implements Ma
                  }
                });
          });
+      return this;
     }
 
     public void add(String prefix, int id) {
       map.compute(prefix, (p, mask) -> with(null == mask ? empty.clone() : mask, id));
+    }
+  }
+
+  private static class OptimisedStringMatcher<Input, MaskType extends Mask<MaskType>> implements Matcher<Input, MaskType> {
+
+    private final EnumMap<Operation, ClassificationNode<String, MaskType>> nodes = new EnumMap<>(Operation.class);
+    private final Function<Input, String> accessor;
+    private final MaskType wildcards;
+    private final MaskType empty;
+
+    private OptimisedStringMatcher(StringMatcher<Input, MaskType> unoptimised) {
+      this.accessor = unoptimised.accessor;
+      this.wildcards = unoptimised.wildcards;
+      this.empty = unoptimised.empty;
+      for (Map.Entry<Operation, MutableNode<String, MaskType>> entry : unoptimised.nodes.entrySet()) {
+        this.nodes.put(entry.getKey(), entry.getValue().optimise());
+      }
+      wildcards.optimise();
+    }
+
+    @Override
+    public MaskType match(Input input, MaskType context) {
+      String value = accessor.apply(input);
+      MaskType result = empty.clone();
+      for (ClassificationNode<String, MaskType> component : nodes.values()) {
+        result = result.inPlaceOr(component.match(value, context.clone()));
+      }
+      return result.inPlaceAnd(context.or(wildcards));
     }
   }
 

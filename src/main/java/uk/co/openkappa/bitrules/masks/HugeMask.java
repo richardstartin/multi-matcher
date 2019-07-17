@@ -33,6 +33,9 @@ public class HugeMask implements Mask<HugeMask> {
 
   @Override
   public HugeMask and(HugeMask other) {
+    if (other.isEmpty()) {
+      return FACTORY.empty();
+    }
     return new HugeMask(RoaringBitmap.and(bitmap, other.bitmap));
   }
 
@@ -43,17 +46,26 @@ public class HugeMask implements Mask<HugeMask> {
 
   @Override
   public HugeMask or(HugeMask other) {
+    if (other.isEmpty()) {
+      return this;
+    }
     return new HugeMask(RoaringBitmap.or(bitmap, other.bitmap));
   }
 
   @Override
   public HugeMask inPlaceAnd(HugeMask other) {
+    if (other.isEmpty()) {
+      return FACTORY.empty();
+    }
     bitmap.and(other.bitmap);
     return this;
   }
 
   @Override
   public HugeMask inPlaceOr(HugeMask other) {
+    if (other.isEmpty()) {
+      return this;
+    }
     bitmap.or(other.bitmap);
     return this;
   }

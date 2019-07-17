@@ -1,9 +1,6 @@
 package uk.co.openkappa.bitrules;
 
-import java.util.Map;
-import java.util.Objects;
-import java.util.TreeMap;
-import java.util.UUID;
+import java.util.*;
 
 import static java.util.Objects.requireNonNull;
 
@@ -22,7 +19,7 @@ public class MatchingConstraint<Key, Classification> {
   public static class Builder<K, C> {
 
     private final String id;
-    private Map<K, Constraint> constraints = new TreeMap<>();
+    private Map<K, Constraint> constraints = new HashMap<>();
     private int priority;
     private C classification;
 

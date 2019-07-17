@@ -26,7 +26,7 @@ public class SelectivityHeuristics {
   static <Node> float avgCardinality(Collection<Node> nodes, ToDoubleFunction<Node> selectivity) {
     float avg = 0;
     int count = 0;
-    for (var node : nodes) {
+    for (Node node : nodes) {
       avg += selectivity.applyAsDouble(node);
       ++count;
     }

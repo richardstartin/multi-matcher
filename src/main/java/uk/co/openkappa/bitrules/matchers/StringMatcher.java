@@ -53,7 +53,7 @@ public class StringMatcher<Input, MaskType extends Mask<MaskType>> implements Mu
         break;
       case EQ:
         GenericEqualityNode<String, MaskType> literal = (GenericEqualityNode<String, MaskType>) nodes.computeIfAbsent(EQ,
-                o -> new GenericEqualityNode<>(mapSupplier.get(), empty, wildcards, PerfectHashMap::wrap));
+                o -> new GenericEqualityNode<>(mapSupplier.get(), empty, wildcards));
         literal.add(constraint.getValue(), priority);
         break;
       default:
@@ -111,7 +111,7 @@ public class StringMatcher<Input, MaskType extends Mask<MaskType>> implements Mu
                  }
                });
          });
-      return new PrefixNode<>(empty, PerfectHashMap.wrap(map), longest);
+      return new PrefixNode<>(empty, map, longest);
     }
 
     public void add(String prefix, int id) {

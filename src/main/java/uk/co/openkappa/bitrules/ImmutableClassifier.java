@@ -71,21 +71,20 @@ public class ImmutableClassifier<Input, Classification> implements Classifier<In
     public ImmutableClassifier<Input, Classification> build(List<MatchingConstraint<Key, Classification>> constraints) {
       int maxPriority = constraints.size();
       return maxPriority < TinyMask.MAX_CAPACITY
-              ? new ImmutableClassifier<>(build(constraints, TinyMask.FACTORY.contiguous(maxPriority), TinyMask.FACTORY, maxPriority))
+              ? new ImmutableClassifier<>(build(constraints, TinyMask.FACTORY, maxPriority))
               : maxPriority < SmallMask.MAX_CAPACITY
-                ? new ImmutableClassifier<>(build(constraints, SmallMask.FACTORY.contiguous(maxPriority), SmallMask.FACTORY, maxPriority))
-                : new ImmutableClassifier<>(build(constraints, HugeMask.FACTORY.contiguous(maxPriority), HugeMask.FACTORY, maxPriority));
+                ? new ImmutableClassifier<>(build(constraints, SmallMask.FACTORY, maxPriority))
+                : new ImmutableClassifier<>(build(constraints, HugeMask.FACTORY, maxPriority));
     }
 
     private <MaskType extends Mask<MaskType>>
     MaskedClassifier<MaskType, Input, Classification> build(List<MatchingConstraint<Key, Classification>> specs,
-                                                            MaskType mask,
                                                             MaskFactory<MaskType> maskFactory,
                                                             int max) {
       PrimitiveIterator.OfInt sequence = IntStream.iterate(0, i -> i + 1).iterator();
       specs.stream().sorted(Comparator.comparingInt(rd -> order(rd.getPriority())))
                     .forEach(rule -> addMatchingConstraint(rule, sequence.nextInt(), maskFactory, max));
-      return new MaskedClassifier<>((Classification[])classifications.toArray(), freezeMatchers(), mask);
+      return new MaskedClassifier<>((Classification[])classifications.toArray(), freezeMatchers(), maskFactory.contiguous(max));
     }
 
     private <MaskType extends Mask<MaskType>>

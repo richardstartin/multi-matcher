@@ -14,6 +14,10 @@ public class Constraint {
     return condition(Operation.EQ, value);
   }
 
+  public static Constraint notEqualTo(Object value) {
+    return condition(Operation.NE, value);
+  }
+
   public static Constraint greaterThan(Comparable<?> value) {
     return condition(Operation.GT, value);
   }

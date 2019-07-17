@@ -53,6 +53,13 @@ public class HugeMask implements Mask<HugeMask> {
   }
 
   @Override
+  public HugeMask orNot(HugeMask other, int max) {
+    RoaringBitmap not = other.bitmap.clone();
+    not.flip(0, max & 0xFFFFFFFFL);
+    return new HugeMask(RoaringBitmap.or(bitmap, not));
+  }
+
+  @Override
   public HugeMask inPlaceAnd(HugeMask other) {
     if (other.isEmpty()) {
       return FACTORY.empty();

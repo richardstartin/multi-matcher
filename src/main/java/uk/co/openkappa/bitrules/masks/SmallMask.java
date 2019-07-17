@@ -63,6 +63,14 @@ public class SmallMask implements Mask<SmallMask> {
   }
 
   @Override
+  public SmallMask orNot(SmallMask other, int max) {
+    if (other.isEmpty()) {
+      return new SmallMask(RunContainer.rangeOfOnes(0, max));
+    }
+    return new SmallMask(container.or(other.container.not(0, max)));
+  }
+
+  @Override
   public SmallMask inPlaceOr(SmallMask other) {
     if (other.isEmpty()) {
       return this;

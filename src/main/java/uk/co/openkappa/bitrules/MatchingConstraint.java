@@ -31,6 +31,10 @@ public class MatchingConstraint<Key, Classification> {
       return constraint(key, Constraint.equalTo(value));
     }
 
+    public Builder<K, C> neq(K key, Object value) {
+      return constraint(key, Constraint.notEqualTo(value));
+    }
+
     public Builder<K, C> lt(K key, Comparable<?> value) {
       return constraint(key, Constraint.lessThan(value));
     }

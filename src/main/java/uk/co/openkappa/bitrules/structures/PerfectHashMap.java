@@ -11,7 +11,7 @@ public abstract class PerfectHashMap<T> implements Map<String, T> {
 
   private static class State {
     private static final int SEED = 0xdeadbeef;
-    private static final Hasher HASHER = XXHash64::hash64;
+    private static final Hasher HASHER = XXHash64::hash;
   }
 
   private final static class TinyPerfectHashMap<T> extends PerfectHashMap<T> {

@@ -30,7 +30,7 @@ class XXHash64 {
   private XXHash64() {}
 
 
-  public static long hash64(byte[] input, int offset, int length, long seed) {
+  public static long hash(byte[] input, int offset, int length, long seed) {
     long hash;
     long remaining = length;
 

@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.co.openkappa.bitrules.masks.SmallMask.FACTORY;
 import static uk.co.openkappa.bitrules.Mask.with;
 
-public class ComparableNodeTest {
+public class ComparableMutableNodeTest {
 
   private static final SmallMask ZERO = with(new SmallMask(), 0);
   private static final SmallMask ONE = with(new SmallMask(), 1);

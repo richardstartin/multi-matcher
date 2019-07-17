@@ -10,7 +10,7 @@ import static uk.co.openkappa.bitrules.masks.SmallMask.FACTORY;
 import static uk.co.openkappa.bitrules.Mask.with;
 import static uk.co.openkappa.bitrules.Mask.without;
 
-public class LongNodeTest {
+public class LongMutableNodeTest {
 
 
   @Test

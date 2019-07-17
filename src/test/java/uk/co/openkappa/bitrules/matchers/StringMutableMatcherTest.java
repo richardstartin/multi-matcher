@@ -10,7 +10,7 @@ import static uk.co.openkappa.bitrules.Constraint.equalTo;
 import static uk.co.openkappa.bitrules.Constraint.startsWith;
 import static uk.co.openkappa.bitrules.masks.TinyMask.FACTORY;
 
-public class StringMatcherTest {
+public class StringMutableMatcherTest {
 
   @Test
   public void test1() {

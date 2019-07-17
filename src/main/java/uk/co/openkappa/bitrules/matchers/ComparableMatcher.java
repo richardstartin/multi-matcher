@@ -1,50 +1,67 @@
 package uk.co.openkappa.bitrules.matchers;
 
-import uk.co.openkappa.bitrules.Constraint;
-import uk.co.openkappa.bitrules.Mask;
-import uk.co.openkappa.bitrules.Matcher;
-import uk.co.openkappa.bitrules.Operation;
+import uk.co.openkappa.bitrules.*;
 import uk.co.openkappa.bitrules.masks.MaskFactory;
 
 import java.util.*;
 import java.util.function.Function;
 
-
-public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements Matcher<T, MaskType> {
+public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements MutableMatcher<T, MaskType> {
 
   private final Function<T, U> accessor;
   private final MaskType wildcards;
-  private final CompositeComparableNode<U, MaskType> node;
+  private final Comparator<U> comparator;
+  private final EnumMap<Operation, ComparableNode<U, MaskType>> children = new EnumMap<>(Operation.class);
+  private final MaskType empty;
 
   public ComparableMatcher(Function<T, U> accessor, Comparator<U> comparator, MaskFactory<MaskType> maskFactory, int max) {
     this.accessor = accessor;
-    this.node = new CompositeComparableNode<>(comparator, maskFactory.emptySingleton());
+    this.comparator = comparator;
+    this.empty = maskFactory.emptySingleton();
     this.wildcards = maskFactory.contiguous(max);
   }
 
   @Override
   public MaskType match(T value, MaskType context) {
-    MaskType result = node.match(accessor.apply(value), context);
+    MaskType result = matchValue(accessor.apply(value), context);
     return context.inPlaceAnd(result.or(wildcards));
   }
 
   @Override
   public void addConstraint(Constraint constraint, int priority) {
-    node.add(constraint.getOperation(), constraint.getValue(), priority);
+    add(constraint.getOperation(), constraint.getValue(), priority);
     wildcards.remove(priority);
   }
 
   @Override
-  public void freeze() {
-    node.optimise();
+  public Matcher<T, MaskType> freeze() {
+    optimise();
     wildcards.optimise();
+    return this;
   }
 
   @Override
   public String toString() {
-    return node + ", *: " + wildcards;
+    return children + ", *: " + wildcards;
   }
 
+  private void add(Operation relation, U threshold, int priority) {
+    children.computeIfAbsent(relation, r -> new ComparableNode<>(comparator, r, empty)).add(threshold, priority);
+  }
+
+  private MaskType matchValue(U value, MaskType context) {
+    MaskType temp = empty.clone();
+    for (ComparableNode<U, MaskType> component : children.values()) {
+      temp = temp.inPlaceOr(component.match(value, context.clone()));
+    }
+    return context.and(temp);
+  }
+
+  public void optimise() {
+    Map<Operation, ComparableNode<U, MaskType>> optimised = new EnumMap<>(Operation.class);
+    children.forEach((op, node) -> optimised.put(op, node.optimise()));
+    children.putAll(optimised);
+  }
 
   public static class ComparableNode<T, MaskType extends Mask<MaskType>> {
 
@@ -128,36 +145,4 @@ public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements
     }
   }
 
-  private static class CompositeComparableNode<T, MaskType extends Mask<MaskType>> {
-
-    private final Comparator<T> comparator;
-    private final EnumMap<Operation, ComparableNode<T, MaskType>> children = new EnumMap<>(Operation.class);
-    private final MaskType empty;
-
-    public CompositeComparableNode(Comparator<T> comparator, MaskType empty) {
-      this.comparator = comparator;
-      this.empty = empty;
-    }
-
-    public void add(Operation relation, T threshold, int priority) {
-      children.computeIfAbsent(relation, r -> new ComparableNode<>(comparator, r, empty)).add(threshold, priority);
-    }
-
-    public MaskType match(T value, MaskType result) {
-      MaskType temp = empty.clone();
-      for (ComparableNode<T, MaskType> component : children.values()) {
-        temp = temp.inPlaceOr(component.match(value, result.clone()));
-      }
-      return result.and(temp);
-    }
-
-    public void optimise() {
-      children.values().forEach(ComparableNode::optimise);
-    }
-
-    @Override
-    public String toString() {
-      return children.toString();
-    }
-  }
 }

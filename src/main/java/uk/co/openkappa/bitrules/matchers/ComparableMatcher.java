@@ -6,6 +6,8 @@ import uk.co.openkappa.bitrules.masks.MaskFactory;
 import java.util.*;
 import java.util.function.Function;
 
+import static uk.co.openkappa.bitrules.matchers.SelectivityHeuristics.avgCardinality;
+
 public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements MutableMatcher<T, MaskType> {
 
   private final Function<T, U> accessor;
@@ -38,6 +40,11 @@ public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements
     optimise();
     wildcards.optimise();
     return this;
+  }
+
+  @Override
+  public float averageSelectivity() {
+    return avgCardinality(children.values(), ComparableNode::averageSelectivity);
   }
 
   @Override
@@ -115,6 +122,10 @@ public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements
         default:
           return this;
       }
+    }
+
+    float averageSelectivity() {
+      return avgCardinality(sets.values());
     }
 
     private void rangeEncode() {

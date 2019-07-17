@@ -1,7 +1,9 @@
 package uk.co.openkappa.bitrules.matchers;
 
+import com.sun.nio.file.SensitivityWatchEventModifier;
 import uk.co.openkappa.bitrules.Mask;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -41,6 +43,11 @@ class GenericEqualityNode<T, MaskType extends Mask<MaskType>> implements Mutable
   public ClassificationNode<T, MaskType> optimise() {
     wildcard.optimise();
     return new OptimisedGeneralEqualityNode<>(segmentOptimiser.apply(segments), empty, wildcard);
+  }
+
+  @Override
+  public float averageSelectivity() {
+    return SelectivityHeuristics.avgCardinality(segments.values());
   }
 
   private MaskType maskWith(int priority) {

@@ -12,6 +12,7 @@ import java.util.function.Supplier;
 import static uk.co.openkappa.bitrules.Mask.with;
 import static uk.co.openkappa.bitrules.Operation.EQ;
 import static uk.co.openkappa.bitrules.Operation.STARTS_WITH;
+import static uk.co.openkappa.bitrules.matchers.SelectivityHeuristics.avgCardinality;
 
 public class StringMatcher<Input, MaskType extends Mask<MaskType>> implements MutableMatcher<Input, MaskType> {
 
@@ -66,17 +67,6 @@ public class StringMatcher<Input, MaskType extends Mask<MaskType>> implements Mu
     return new OptimisedStringMatcher<>(this);
   }
 
-  @Override
-  public float averageSelectivity() {
-    float avg = 0;
-    int count = 0;
-    for (var node : nodes.values()) {
-      avg += node.averageSelectivity();
-      ++count;
-    }
-    return avg / count;
-  }
-
   private static class PrefixNode<MaskType extends Mask<MaskType>> implements MutableNode<String, MaskType> {
 
     private final MaskType empty;
@@ -127,6 +117,12 @@ public class StringMatcher<Input, MaskType extends Mask<MaskType>> implements Mu
     public void add(String prefix, int id) {
       map.compute(prefix, (p, mask) -> with(null == mask ? empty.clone() : mask, id));
     }
+
+    @Override
+    public float averageSelectivity() {
+      // probably completely wrong
+      return avgCardinality(map.values());
+    }
   }
 
   private static class OptimisedStringMatcher<Input, MaskType extends Mask<MaskType>> implements Matcher<Input, MaskType> {
@@ -154,6 +150,11 @@ public class StringMatcher<Input, MaskType extends Mask<MaskType>> implements Mu
         result = result.inPlaceOr(component.match(value, context.clone()));
       }
       return result.inPlaceAnd(context.or(wildcards));
+    }
+
+    @Override
+    public float averageSelectivity() {
+      return avgCardinality(nodes.values(), ClassificationNode::averageSelectivity);
     }
   }
 

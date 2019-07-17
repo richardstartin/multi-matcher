@@ -9,6 +9,8 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.ToLongFunction;
 
+import static uk.co.openkappa.bitrules.matchers.SelectivityHeuristics.avgCardinality;
+
 public class LongMatcher<T, MaskType extends Mask<MaskType>> implements MutableMatcher<T, MaskType> {
 
   private final ToLongFunction<T> accessor;
@@ -62,6 +64,10 @@ public class LongMatcher<T, MaskType extends Mask<MaskType>> implements MutableM
     children.putAll(optimised);
   }
 
+  @Override
+  public float averageSelectivity() {
+    return avgCardinality(children.values(), LongNode::averageSelectivity);
+  }
 
   public static class LongNode<MaskType extends Mask<MaskType>> {
 
@@ -145,6 +151,10 @@ public class LongMatcher<T, MaskType extends Mask<MaskType>> implements MutableM
       }
       trim();
       return this;
+    }
+
+    public float averageSelectivity() {
+      return avgCardinality(sets);
     }
 
     private MaskType findEqualityEncoded(long value) {

@@ -34,6 +34,9 @@ public class SmallMask implements Mask<SmallMask> {
 
   @Override
   public SmallMask and(SmallMask other) {
+    if (other.isEmpty()) {
+      return FACTORY.empty();
+    }
     return new SmallMask(container.and(other.container));
   }
 
@@ -44,17 +47,26 @@ public class SmallMask implements Mask<SmallMask> {
 
   @Override
   public SmallMask inPlaceAnd(SmallMask other) {
+    if (other.isEmpty()) {
+      return FACTORY.empty();
+    }
     this.container = container.iand(other.container);
     return this;
   }
 
   @Override
   public SmallMask or(SmallMask other) {
+    if (other.isEmpty()) {
+      return this;
+    }
     return new SmallMask(container.or(other.container));
   }
 
   @Override
   public SmallMask inPlaceOr(SmallMask other) {
+    if (other.isEmpty()) {
+      return this;
+    }
     this.container = container.ior(other.container);
     return this;
   }
@@ -113,7 +125,7 @@ public class SmallMask implements Mask<SmallMask> {
 
     @Override
     public SmallMask empty() {
-      return new SmallMask(new ArrayContainer());
+      return new SmallMask(new ArrayContainer(0));
     }
 
     @Override

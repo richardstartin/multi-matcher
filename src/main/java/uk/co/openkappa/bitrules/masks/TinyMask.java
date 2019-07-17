@@ -84,6 +84,11 @@ public class TinyMask implements Mask<TinyMask> {
   }
 
   @Override
+  public int cardinality() {
+    return Long.bitCount(mask);
+  }
+
+  @Override
   public String toString() {
     return Long.toBinaryString(mask);
   }

@@ -7,7 +7,10 @@ import uk.co.openkappa.bitrules.masks.HugeMask;
 import uk.co.openkappa.bitrules.masks.SmallMask;
 import uk.co.openkappa.bitrules.masks.TinyMask;
 
+import java.lang.reflect.Array;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -82,7 +85,7 @@ public class ImmutableClassifier<Input, Classification> implements Classifier<In
       PrimitiveIterator.OfInt sequence = IntStream.iterate(0, i -> i + 1).iterator();
       specs.stream().sorted(Comparator.comparingInt(rd -> order(rd.getPriority())))
                     .forEach(rule -> addMatchingConstraint(rule, sequence.nextInt(), maskFactory, max));
-      return new MaskedClassifier<>(classifications, freezeMatchers(), mask);
+      return new MaskedClassifier<>((Classification[])classifications.toArray(), freezeMatchers(), mask);
     }
 
     private <MaskType extends Mask<MaskType>>
@@ -105,16 +108,18 @@ public class ImmutableClassifier<Input, Classification> implements Classifier<In
     }
 
     private <MaskType extends Mask<MaskType>>
-    List<Matcher<Input, MaskType>> freezeMatchers() {
+    Matcher<Input, MaskType>[] freezeMatchers() {
       List<Matcher<Input, MaskType>> frozen = new ArrayList<>(matchers.size());
       for (MutableMatcher<Input, ? extends Mask> matcher : matchers.values()) {
         frozen.add((Matcher<Input, MaskType>) matcher.freeze());
       }
-      return frozen;
+      return frozen.stream()
+              .sorted(Comparator.comparingInt(x -> (int)(x.averageSelectivity() * 1000)))
+              .toArray(Matcher[]::new);
     }
 
     private static int order(int priority) {
-      return (1 << 16) - priority - 1;
+      return (1 << 31) - priority - 1;
     }
   }
 

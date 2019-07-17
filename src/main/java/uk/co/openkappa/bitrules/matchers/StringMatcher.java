@@ -5,10 +5,7 @@ import uk.co.openkappa.bitrules.*;
 import uk.co.openkappa.bitrules.masks.MaskFactory;
 import uk.co.openkappa.bitrules.structures.PerfectHashMap;
 
-import java.util.Comparator;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -69,6 +66,17 @@ public class StringMatcher<Input, MaskType extends Mask<MaskType>> implements Mu
     return new OptimisedStringMatcher<>(this);
   }
 
+  @Override
+  public float averageSelectivity() {
+    float avg = 0;
+    int count = 0;
+    for (var node : nodes.values()) {
+      avg += node.averageSelectivity();
+      ++count;
+    }
+    return avg / count;
+  }
+
   private static class PrefixNode<MaskType extends Mask<MaskType>> implements MutableNode<String, MaskType> {
 
     private final MaskType empty;
@@ -76,8 +84,13 @@ public class StringMatcher<Input, MaskType extends Mask<MaskType>> implements Mu
     private int longest;
 
     private PrefixNode(MaskType empty) {
+      this(empty, new HashMap<>(), 0);
+    }
+
+    private PrefixNode(MaskType empty, Map<String, MaskType> map, int longest) {
       this.empty = empty;
-      this.map = new HashMap<>();
+      this.map = map;
+      this.longest = longest;
     }
 
     @Override
@@ -108,7 +121,7 @@ public class StringMatcher<Input, MaskType extends Mask<MaskType>> implements Mu
                  }
                });
          });
-      return this;
+      return new PrefixNode<>(empty, PerfectHashMap.wrap(map), longest);
     }
 
     public void add(String prefix, int id) {

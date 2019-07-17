@@ -11,7 +11,7 @@ public abstract class PerfectHashMap<T> implements Map<String, T> {
 
   private static class State {
     private static final int SEED = 0xdeadbeef;
-    private static final Hasher HASHER = (data, from, to, seed) -> Arrays.hashCode(data);
+    private static final Hasher HASHER = XXHash64::hash;
   }
 
   private final static class TinyPerfectHashMap<T> extends PerfectHashMap<T> {
@@ -19,13 +19,14 @@ public abstract class PerfectHashMap<T> implements Map<String, T> {
     private final Object[] values;
     private final int[] seeds;
     private final byte[] positions;
+    private final long[] hashes;
 
-    TinyPerfectHashMap(Object[] values, int[] seeds, byte[] positions) {
+    TinyPerfectHashMap(Object[] values, int[] seeds, byte[] positions, long[] hashes) {
       this.values = values;
       this.seeds = seeds;
       this.positions = positions;
+      this.hashes = hashes;
     }
-
 
     @Override
     public int size() {
@@ -49,11 +50,26 @@ public abstract class PerfectHashMap<T> implements Map<String, T> {
       return null;
     }
 
+    @Override
+    public Collection<T> values() {
+      List<T> values = new ArrayList<>(this.values.length);
+      for (Object value : this.values) {
+        if (null != value) {
+          values.add((T) value);
+        }
+      }
+      return values;
+    }
+
     private int position(String data) {
       byte[] bytes = data.getBytes(UTF_8);
       long hash = State.HASHER.hash(bytes, State.SEED);
-      int seed = seeds[(int) (hash & (seeds.length - 1))];
+      int pos = (int) (hash & (seeds.length - 1));
+      int seed = seeds[pos];
       if (seed == -1) {
+        return -1;
+      }
+      if (hash != hashes[pos]) {
         return -1;
       }
       if (seed < 0) {
@@ -68,11 +84,13 @@ public abstract class PerfectHashMap<T> implements Map<String, T> {
     private final Object[] values;
     private final int[] seeds;
     private final short[] positions;
+    private final long[] hashes;
 
-    SmallPerfectHashMap(Object[] values, int[] seeds, short[] positions) {
+    SmallPerfectHashMap(Object[] values, int[] seeds, short[] positions, long[] hashes) {
       this.values = values;
       this.seeds = seeds;
       this.positions = positions;
+      this.hashes = hashes;
     }
 
 
@@ -98,11 +116,26 @@ public abstract class PerfectHashMap<T> implements Map<String, T> {
       return null;
     }
 
+    @Override
+    public Collection<T> values() {
+      List<T> values = new ArrayList<>(this.values.length);
+      for (Object value : this.values) {
+        if (null != value) {
+          values.add((T) value);
+        }
+      }
+      return values;
+    }
+
     private int position(String data) {
       byte[] bytes = data.getBytes(UTF_8);
       long hash = State.HASHER.hash(bytes, State.SEED);
-      int seed = seeds[(int) (hash & (seeds.length - 1))];
+      int pos = (int) (hash & (seeds.length - 1));
+      int seed = seeds[pos];
       if (seed == -1) {
+        return -1;
+      }
+      if (hash != hashes[pos]) {
         return -1;
       }
       if (seed < 0) {
@@ -117,11 +150,13 @@ public abstract class PerfectHashMap<T> implements Map<String, T> {
     private final Object[] values;
     private final int[] seeds;
     private final int[] positions;
+    private final long[] hashes;
 
-    HugePerfectHashMap(Object[] values, int[] seeds, int[] positions) {
+    HugePerfectHashMap(Object[] values, int[] seeds, int[] positions, long[] hashes) {
       this.values = values;
       this.seeds = seeds;
       this.positions = positions;
+      this.hashes = hashes;
     }
 
 
@@ -147,11 +182,26 @@ public abstract class PerfectHashMap<T> implements Map<String, T> {
       return null;
     }
 
+    @Override
+    public Collection<T> values() {
+      List<T> values = new ArrayList<>(this.values.length);
+      for (Object value : this.values) {
+        if (null != value) {
+          values.add((T) value);
+        }
+      }
+      return values;
+    }
+
     private int position(String data) {
       byte[] bytes = data.getBytes(UTF_8);
       long hash = State.HASHER.hash(bytes, State.SEED);
-      int seed = seeds[(int) (hash & (seeds.length - 1))];
+      int pos = (int) (hash & (seeds.length - 1));
+      int seed = seeds[pos];
       if (seed == -1) {
+        return -1;
+      }
+      if (hash != hashes[pos]) {
         return -1;
       }
       if (seed < 0) {
@@ -171,6 +221,7 @@ public abstract class PerfectHashMap<T> implements Map<String, T> {
     Arrays.fill(positions, -1);
     int[] seeds = new int[size];
     Arrays.fill(seeds, -1);
+    long[] hashes = new long[size];
     for (int i = 0; i < keys.size(); ++i) {
       String key = keys.get(i);
       values[i] = map.get(key);
@@ -184,9 +235,7 @@ public abstract class PerfectHashMap<T> implements Map<String, T> {
       }
       slots.add(new Slot(bytes, i, hash));
     }
-
     Arrays.sort(collisions, nullsLast(comparingInt((ToIntFunction<List<Slot>>) List::size).reversed()));
-
     BitSet claimed = new BitSet(size);
     int position = 0;
     while (position < size && null != collisions[position] && collisions[position].size() > 1) {
@@ -201,6 +250,7 @@ public abstract class PerfectHashMap<T> implements Map<String, T> {
           int claim = (int) (hash & (size - 1));
           if (!claimed.get(claim) && !contains(candidates, s, claim)) {
             candidates[s++] = claim;
+            hashes[claim] = slot.hash;
           } else {
             break trial;
           }
@@ -223,6 +273,7 @@ public abstract class PerfectHashMap<T> implements Map<String, T> {
       Slot slot = collisions[position].get(0);
       int claim = claimed.nextClearBit(last);
       positions[claim] = slot.position;
+      hashes[claim] = slot.hash;
       seeds[(int) (slot.hash & (size - 1))] = claim | 0x80000000;
       ++position;
       last = claim + 1;
@@ -233,16 +284,16 @@ public abstract class PerfectHashMap<T> implements Map<String, T> {
       for (int i = 0; i < minimised.length; ++i) {
         minimised[i] = (byte) positions[i];
       }
-      return new TinyPerfectHashMap<>(values, seeds, minimised);
+      return new TinyPerfectHashMap<>(values, seeds, minimised, hashes);
     } else if (size < 0x10000) {
       assert positions[size - 1] < 0x10000;
       short[] minimised = new short[size];
       for (int i = 0; i < minimised.length; ++i) {
         minimised[i] = (short) positions[i];
       }
-      return new SmallPerfectHashMap<>(values, seeds, minimised);
+      return new SmallPerfectHashMap<>(values, seeds, minimised, hashes);
     } else {
-      return new HugePerfectHashMap<>(values, seeds, positions);
+      return new HugePerfectHashMap<>(values, seeds, positions, hashes);
     }
   }
 
@@ -274,11 +325,6 @@ public abstract class PerfectHashMap<T> implements Map<String, T> {
 
   @Override
   public Set<String> keySet() {
-    throw new IllegalStateException("not iterable");
-  }
-
-  @Override
-  public Collection<T> values() {
     throw new IllegalStateException("not iterable");
   }
 

@@ -183,7 +183,7 @@ public class LongMatcher<T, MaskType extends Mask<MaskType>> implements MutableM
     private MaskType findReverseRangeEncodedInclusive(long value) {
       int pos = Arrays.binarySearch(thresholds, 0, count, value);
       int index = (pos >= 0 ? pos : -(pos + 1));
-      return index >= 0 && index < count ? sets[index] : empty;
+      return index < count ? sets[index] : empty;
     }
 
     private void reverseRangeEncode() {

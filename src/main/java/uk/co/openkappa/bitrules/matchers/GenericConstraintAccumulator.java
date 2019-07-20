@@ -13,8 +13,7 @@ import static uk.co.openkappa.bitrules.Operation.EQ;
 import static uk.co.openkappa.bitrules.Operation.NE;
 import static uk.co.openkappa.bitrules.matchers.SelectivityHeuristics.avgCardinality;
 
-public class GenericMatcher<T, U, MaskType extends Mask<MaskType>> implements ConstraintAccumulator<T, MaskType>,
-        Matcher<T, MaskType> {
+public class GenericConstraintAccumulator<T, U, MaskType extends Mask<MaskType>> implements ConstraintAccumulator<T, MaskType> {
 
   private final Function<T, U> accessor;
   private final Supplier<Map<U, MaskType>> mapSupplier;
@@ -23,29 +22,15 @@ public class GenericMatcher<T, U, MaskType extends Mask<MaskType>> implements Co
   private final MaskType empty;
   private final int max;
 
-  public GenericMatcher(Supplier<Map<U, MaskType>> mapSupplier,
-                        Function<T, U> accessor,
-                        MaskFactory<MaskType> maskFactory,
-                        int max) {
+  public GenericConstraintAccumulator(Supplier<Map<U, MaskType>> mapSupplier,
+                                      Function<T, U> accessor,
+                                      MaskFactory<MaskType> maskFactory,
+                                      int max) {
     this.accessor = accessor;
     this.mapSupplier = mapSupplier;
     this.wildcard = maskFactory.contiguous(max);
     this.empty = maskFactory.emptySingleton();
     this.max = max;
-  }
-
-  public MaskType match(T value, MaskType context) {
-    MaskType mask = wildcard.and(context);
-    U key = accessor.apply(value);
-    MutableNode<U, MaskType> equality = nodes.get(EQ);
-    if (null != equality) {
-      mask = equality.match(key, context).inPlaceOr(mask);
-    }
-    MutableNode<U, MaskType> inequality = nodes.get(NE);
-    if (null != inequality) {
-      mask = mask.orNot(inequality.match(key, context), max);
-    }
-    return mask;
   }
 
   @Override
@@ -62,11 +47,6 @@ public class GenericMatcher<T, U, MaskType extends Mask<MaskType>> implements Co
     EnumMap<Operation, ClassificationNode<U, MaskType>> optimised = new EnumMap<>(Operation.class);
     nodes.forEach((op, node) -> optimised.put(op, node.optimise()));
     return new OptimisedGenericMatcher<>(accessor, optimised, wildcard, max);
-  }
-
-  @Override
-  public float averageSelectivity() {
-    return avgCardinality(nodes.values(), ClassificationNode::averageSelectivity);
   }
 
   private static class OptimisedGenericMatcher<T, U, MaskType extends Mask<MaskType>> implements Matcher<T, MaskType> {

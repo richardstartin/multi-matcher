@@ -3,7 +3,7 @@ package uk.co.openkappa.bitrules.schema;
 import uk.co.openkappa.bitrules.Mask;
 import uk.co.openkappa.bitrules.ConstraintAccumulator;
 import uk.co.openkappa.bitrules.masks.MaskFactory;
-import uk.co.openkappa.bitrules.matchers.GenericMatcher;
+import uk.co.openkappa.bitrules.matchers.GenericConstraintAccumulator;
 
 import java.util.HashMap;
 import java.util.function.Function;
@@ -23,6 +23,6 @@ class GenericAttribute<T, U> implements Attribute<T> {
 
   @Override
   public <MaskType extends Mask<MaskType>> ConstraintAccumulator<T, MaskType> toMatcher(MaskFactory<MaskType> maskFactory, int max) {
-    return new GenericMatcher<>(HashMap::new, accessor, maskFactory, max);
+    return new GenericConstraintAccumulator<>(HashMap::new, accessor, maskFactory, max);
   }
 }

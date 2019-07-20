@@ -14,13 +14,13 @@ public class StringMutableMatcherTest {
 
   @Test
   public void test1() {
-    StringMatcher<String, TinyMask> matcher = new StringMatcher<>(Function.identity(), FACTORY, 4);
+    StringConstraintAccumulator<String, TinyMask> matcher = new StringConstraintAccumulator<>(Function.identity(), FACTORY, 4);
     matcher.addConstraint(equalTo("foo"), 0);
     matcher.addConstraint(equalTo("bar"), 1);
     matcher.addConstraint(startsWith("foo"), 2);
     matcher.addConstraint(startsWith("f"), 3);
     matcher.freeze();
-    TinyMask mask = matcher.match("foo", FACTORY.contiguous(63));
+    TinyMask mask = matcher.freeze().match("foo", FACTORY.contiguous(63));
     assertEquals(FACTORY.of(0, 2, 3), mask);
   }
 }

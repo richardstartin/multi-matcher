@@ -15,8 +15,8 @@ import static uk.co.openkappa.bitrules.Operation.EQ;
 import static uk.co.openkappa.bitrules.Operation.STARTS_WITH;
 import static uk.co.openkappa.bitrules.matchers.SelectivityHeuristics.avgCardinality;
 
-public class StringMatcher<Input, MaskType extends Mask<MaskType>>
-        implements ConstraintAccumulator<Input, MaskType>, Matcher<Input, MaskType> {
+public class StringConstraintAccumulator<Input, MaskType extends Mask<MaskType>>
+        implements ConstraintAccumulator<Input, MaskType> {
 
   private final EnumMap<Operation, MutableNode<String, MaskType>> nodes = new EnumMap<>(Operation.class);
   private final Supplier<Map<String, MaskType>> mapSupplier;
@@ -24,25 +24,15 @@ public class StringMatcher<Input, MaskType extends Mask<MaskType>>
   private final MaskType wildcards;
   private final MaskType empty;
 
-  public StringMatcher(Function<Input, String> accessor, MaskFactory<MaskType> maskFactory, int max) {
+  public StringConstraintAccumulator(Function<Input, String> accessor, MaskFactory<MaskType> maskFactory, int max) {
     this(HashMap::new, accessor, maskFactory, max);
   }
 
-  private StringMatcher(Supplier<Map<String, MaskType>> mapSupplier, Function<Input, String> accessor, MaskFactory<MaskType> maskFactory, int max) {
+  private StringConstraintAccumulator(Supplier<Map<String, MaskType>> mapSupplier, Function<Input, String> accessor, MaskFactory<MaskType> maskFactory, int max) {
     this.accessor = accessor;
     this.empty = maskFactory.emptySingleton();
     this.wildcards = maskFactory.contiguous(max);
     this.mapSupplier = mapSupplier;
-  }
-
-  @Override
-  public MaskType match(Input input, MaskType context) {
-    String value = accessor.apply(input);
-    MaskType result = empty.clone();
-    for (MutableNode<String, MaskType> component : nodes.values()) {
-      result = result.inPlaceOr(component.match(value, context.clone()));
-    }
-    return result.inPlaceAnd(context.or(wildcards));
   }
 
   @Override
@@ -76,7 +66,7 @@ public class StringMatcher<Input, MaskType extends Mask<MaskType>>
     private final MaskType wildcards;
     private final MaskType empty;
 
-    private OptimisedStringMatcher(StringMatcher<Input, MaskType> unoptimised) {
+    private OptimisedStringMatcher(StringConstraintAccumulator<Input, MaskType> unoptimised) {
       this.accessor = unoptimised.accessor;
       this.wildcards = unoptimised.wildcards;
       this.empty = unoptimised.empty;

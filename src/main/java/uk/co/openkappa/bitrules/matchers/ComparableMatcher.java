@@ -9,7 +9,8 @@ import java.util.function.Function;
 
 import static uk.co.openkappa.bitrules.matchers.SelectivityHeuristics.avgCardinality;
 
-public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements MutableMatcher<T, MaskType> {
+public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements ConstraintAccumulator<T, MaskType>,
+        Matcher<T, MaskType> {
 
   private final Function<T, U> accessor;
   private final MaskType wildcards;

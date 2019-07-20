@@ -13,7 +13,8 @@ import static uk.co.openkappa.bitrules.Operation.EQ;
 import static uk.co.openkappa.bitrules.Operation.NE;
 import static uk.co.openkappa.bitrules.matchers.SelectivityHeuristics.avgCardinality;
 
-public class GenericMatcher<T, U, MaskType extends Mask<MaskType>> implements MutableMatcher<T, MaskType> {
+public class GenericMatcher<T, U, MaskType extends Mask<MaskType>> implements ConstraintAccumulator<T, MaskType>,
+        Matcher<T, MaskType> {
 
   private final Function<T, U> accessor;
   private final Supplier<Map<U, MaskType>> mapSupplier;

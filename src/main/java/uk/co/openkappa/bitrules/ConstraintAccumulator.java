@@ -4,7 +4,7 @@ package uk.co.openkappa.bitrules;
  * A matcher is a column named constraints on the same attribute.
  * @param <T> the type named the classified objects
  */
-public interface MutableMatcher<T, MaskType> extends Matcher<T, MaskType> {
+public interface ConstraintAccumulator<T, MaskType> {
 
 
 

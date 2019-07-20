@@ -10,7 +10,8 @@ import java.util.function.ToDoubleFunction;
 
 import static uk.co.openkappa.bitrules.matchers.SelectivityHeuristics.avgCardinality;
 
-public class DoubleMatcher<T, MaskType extends Mask<MaskType>> implements MutableMatcher<T, MaskType> {
+public class DoubleMatcher<T, MaskType extends Mask<MaskType>> implements ConstraintAccumulator<T, MaskType>,
+        Matcher<T, MaskType> {
 
   private final ToDoubleFunction<T> accessor;
   private final Map<Operation, DoubleNode<MaskType>> children = new EnumMap<>(Operation.class);

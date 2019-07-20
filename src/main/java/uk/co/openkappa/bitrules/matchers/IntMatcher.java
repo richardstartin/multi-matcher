@@ -10,7 +10,8 @@ import java.util.function.ToIntFunction;
 
 import static uk.co.openkappa.bitrules.matchers.SelectivityHeuristics.avgCardinality;
 
-public class IntMatcher<T, MaskType extends Mask<MaskType>> implements MutableMatcher<T, MaskType> {
+public class IntMatcher<T, MaskType extends Mask<MaskType>> implements ConstraintAccumulator<T, MaskType>,
+        Matcher<T, MaskType> {
 
   private final ToIntFunction<T> accessor;
   private final EnumMap<Operation, IntNode<MaskType>> children = new EnumMap<>(Operation.class);

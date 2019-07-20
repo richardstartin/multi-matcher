@@ -10,7 +10,8 @@ import java.util.function.ToLongFunction;
 
 import static uk.co.openkappa.bitrules.matchers.SelectivityHeuristics.avgCardinality;
 
-public class LongMatcher<T, MaskType extends Mask<MaskType>> implements MutableMatcher<T, MaskType> {
+public class LongMatcher<T, MaskType extends Mask<MaskType>> implements ConstraintAccumulator<T, MaskType>,
+        Matcher<T, MaskType> {
 
   private final ToLongFunction<T> accessor;
   private final Map<Operation, LongNode<MaskType>> children = new EnumMap<>(Operation.class);

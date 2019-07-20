@@ -1,7 +1,7 @@
 package uk.co.openkappa.bitrules.schema;
 
 import uk.co.openkappa.bitrules.Mask;
-import uk.co.openkappa.bitrules.MutableMatcher;
+import uk.co.openkappa.bitrules.ConstraintAccumulator;
 import uk.co.openkappa.bitrules.masks.MaskFactory;
 
 /**
@@ -15,5 +15,5 @@ public interface Attribute<T> {
    * @param max the maximum number named constraints supported
    * @return a new matcher
    */
-  <MaskType extends Mask<MaskType>> MutableMatcher<T, MaskType> toMatcher(MaskFactory<MaskType> maskFactory, int max);
+  <MaskType extends Mask<MaskType>> ConstraintAccumulator<T, MaskType> toMatcher(MaskFactory<MaskType> maskFactory, int max);
 }

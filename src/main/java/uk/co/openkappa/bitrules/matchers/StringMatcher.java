@@ -15,7 +15,8 @@ import static uk.co.openkappa.bitrules.Operation.EQ;
 import static uk.co.openkappa.bitrules.Operation.STARTS_WITH;
 import static uk.co.openkappa.bitrules.matchers.SelectivityHeuristics.avgCardinality;
 
-public class StringMatcher<Input, MaskType extends Mask<MaskType>> implements MutableMatcher<Input, MaskType> {
+public class StringMatcher<Input, MaskType extends Mask<MaskType>>
+        implements ConstraintAccumulator<Input, MaskType>, Matcher<Input, MaskType> {
 
   private final EnumMap<Operation, MutableNode<String, MaskType>> nodes = new EnumMap<>(Operation.class);
   private final Supplier<Map<String, MaskType>> mapSupplier;

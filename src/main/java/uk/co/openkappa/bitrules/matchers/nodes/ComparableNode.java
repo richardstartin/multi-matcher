@@ -92,8 +92,6 @@ public class ComparableNode<T, MaskType extends Mask<MaskType>> implements Mutab
 
   @Override
   public String toString() {
-    return Nodes.toString(sets.size(), operation,
-            sets.keySet().stream().iterator(),
-            sets.values().stream().iterator());
+    return Nodes.toString(sets.size(), operation, sets);
   }
 }

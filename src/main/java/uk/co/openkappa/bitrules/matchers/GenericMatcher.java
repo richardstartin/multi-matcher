@@ -2,6 +2,7 @@ package uk.co.openkappa.bitrules.matchers;
 
 import uk.co.openkappa.bitrules.*;
 import uk.co.openkappa.bitrules.masks.MaskFactory;
+import uk.co.openkappa.bitrules.matchers.nodes.GenericEqualityNode;
 
 import java.util.EnumMap;
 import java.util.Map;

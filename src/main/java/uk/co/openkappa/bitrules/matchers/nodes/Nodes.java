@@ -1,4 +1,4 @@
-package uk.co.openkappa.bitrules.matchers;
+package uk.co.openkappa.bitrules.matchers.nodes;
 
 import uk.co.openkappa.bitrules.Operation;
 
@@ -6,7 +6,7 @@ import java.util.Iterator;
 
 class Nodes {
 
-  static String toString(int count,
+  public static String toString(int count,
                          Operation op,
                          Iterator<? extends Object> thresholds,
                          Iterator<? extends Object> matches) {

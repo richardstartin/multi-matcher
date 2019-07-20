@@ -1,13 +1,16 @@
-package uk.co.openkappa.bitrules.matchers;
+package uk.co.openkappa.bitrules.matchers.nodes;
 
 import uk.co.openkappa.bitrules.Mask;
+import uk.co.openkappa.bitrules.matchers.ClassificationNode;
+import uk.co.openkappa.bitrules.matchers.MutableNode;
+import uk.co.openkappa.bitrules.matchers.SelectivityHeuristics;
 
 import java.util.Map;
 import java.util.function.Function;
 
 import static uk.co.openkappa.bitrules.Mask.with;
 
-class GenericEqualityNode<T, MaskType extends Mask<MaskType>> implements MutableNode<T, MaskType> {
+public class GenericEqualityNode<T, MaskType extends Mask<MaskType>> implements MutableNode<T, MaskType> {
 
   private final Function<Map<T, MaskType>, Map<T, MaskType>> segmentOptimiser;
   final Map<T, MaskType> segments;

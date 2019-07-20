@@ -13,7 +13,7 @@ import static uk.co.openkappa.bitrules.Mask.with;
 public class GenericEqualityNode<T, MaskType extends Mask<MaskType>> implements MutableNode<T, MaskType> {
 
   private final Function<Map<T, MaskType>, Map<T, MaskType>> segmentOptimiser;
-  final Map<T, MaskType> segments;
+  private final Map<T, MaskType> segments;
   private final MaskType empty;
   private final MaskType wildcard;
 

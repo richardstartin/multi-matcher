@@ -45,6 +45,12 @@ public class HugeMask implements Mask<HugeMask> {
   }
 
   @Override
+  public HugeMask inPlaceAndNot(HugeMask other) {
+    bitmap.andNot(other.bitmap);
+    return this;
+  }
+
+  @Override
   public HugeMask or(HugeMask other) {
     if (other.isEmpty()) {
       return this;

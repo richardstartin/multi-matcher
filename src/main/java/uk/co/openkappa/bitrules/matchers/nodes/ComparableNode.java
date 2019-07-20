@@ -51,7 +51,7 @@ public class ComparableNode<T, MaskType extends Mask<MaskType>> implements Mutab
     }
   }
 
-  public ComparableNode<T, MaskType> optimise() {
+  public ComparableNode<T, MaskType> freeze() {
     switch (operation) {
       case GE:
       case GT:

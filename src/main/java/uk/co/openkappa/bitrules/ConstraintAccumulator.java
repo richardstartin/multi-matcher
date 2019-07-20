@@ -16,7 +16,7 @@ public interface ConstraintAccumulator<T, MaskType> {
   boolean addConstraint(Constraint constraint, int priority);
 
   /**
-   * Freezes the column. DO NOT add constraints after calling this method.
+   * Freezes the column. DO NOT remove constraints after calling this method.
    */
   Matcher<T, MaskType> freeze();
 

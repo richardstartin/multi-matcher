@@ -46,6 +46,12 @@ public class SmallMask implements Mask<SmallMask> {
   }
 
   @Override
+  public SmallMask inPlaceAndNot(SmallMask other) {
+    this.container = this.container.andNot(other.container);
+    return this;
+  }
+
+  @Override
   public SmallMask inPlaceAnd(SmallMask other) {
     if (other.isEmpty()) {
       return FACTORY.empty();

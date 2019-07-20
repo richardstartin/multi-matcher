@@ -6,12 +6,12 @@ import java.util.stream.Stream;
 public class MaskedClassifier<MaskType extends Mask<MaskType>, Input, Classification> implements Classifier<Input, Classification> {
 
   private final Classification[] classifications;
-  private final Matcher<Input, MaskType>[] rules;
+  private final Matcher<Input, MaskType>[] matchers;
   private final Mask<MaskType> mask;
 
-  public MaskedClassifier(Classification[] classifications, Matcher<Input, MaskType>[] rules, Mask<MaskType> mask) {
+  public MaskedClassifier(Classification[] classifications, Matcher<Input, MaskType>[] matchers, Mask<MaskType> mask) {
     this.classifications = classifications;
-    this.rules = rules;
+    this.matchers = matchers;
     this.mask = mask;
   }
 
@@ -30,7 +30,7 @@ public class MaskedClassifier<MaskType extends Mask<MaskType>, Input, Classifica
 
   private MaskType match(Input value) {
     MaskType context = mask.clone();
-    for (Matcher<Input, MaskType> matcher : rules) {
+    for (Matcher<Input, MaskType> matcher : matchers) {
       context = matcher.match(value, context);
       if (context.isEmpty()) {
         break;

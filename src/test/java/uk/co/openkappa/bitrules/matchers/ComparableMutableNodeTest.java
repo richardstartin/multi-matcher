@@ -75,7 +75,7 @@ public class ComparableMutableNodeTest {
     node.add(0D, 0);
     assertEquals(FACTORY.contiguous(1), node.match(1D));
     node.add(10D, 1);
-    node.optimise();
+    node.freeze();
     assertEquals(FACTORY.contiguous(2), node.match(11D));
   }
 
@@ -84,7 +84,7 @@ public class ComparableMutableNodeTest {
     for (int i = 0; i < count; ++i) {
       node.add(LocalDate.ofEpochDay(i * 10),  i);
     }
-    return node.optimise();
+    return node.freeze();
   }
 
   private ComparableNode<LocalDate, SmallMask> buildRev(int count, Operation operation) {
@@ -92,6 +92,6 @@ public class ComparableMutableNodeTest {
     for (int i = count - 1; i >= 0; --i) {
       node.add(LocalDate.ofEpochDay(i * 10),  i);
     }
-    return node.optimise();
+    return node.freeze();
   }
 }

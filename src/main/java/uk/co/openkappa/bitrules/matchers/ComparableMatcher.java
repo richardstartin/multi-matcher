@@ -69,7 +69,7 @@ public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements
 
   public void optimise() {
     Map<Operation, ComparableNode<U, MaskType>> optimised = new EnumMap<>(Operation.class);
-    children.forEach((op, node) -> optimised.put(op, node.optimise()));
+    children.forEach((op, node) -> optimised.put(op, node.freeze()));
     children.putAll(optimised);
   }
 

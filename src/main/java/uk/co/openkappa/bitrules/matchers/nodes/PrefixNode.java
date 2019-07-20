@@ -42,7 +42,7 @@ public class PrefixNode<MaskType extends Mask<MaskType>> implements MutableNode<
   }
 
   @Override
-  public ClassificationNode<String, MaskType> optimise() {
+  public ClassificationNode<String, MaskType> freeze() {
     this.longest = map.keySet().stream().mapToInt(String::length).max().orElse(0);
     PatriciaTrie<MaskType> trie = new PatriciaTrie<>();
     trie.putAll(map);

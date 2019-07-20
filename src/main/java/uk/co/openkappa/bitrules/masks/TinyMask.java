@@ -39,6 +39,12 @@ public class TinyMask implements Mask<TinyMask> {
     return new TinyMask(mask &~ other.mask);
   }
 
+  @Override
+  public TinyMask inPlaceAndNot(TinyMask other) {
+    this.mask &= ~other.mask;
+    return this;
+  }
+
   public TinyMask inPlaceAnd(TinyMask other) {
     this.mask &= other.mask;
     return this;

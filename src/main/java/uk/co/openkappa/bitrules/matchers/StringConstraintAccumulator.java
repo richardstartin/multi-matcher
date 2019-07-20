@@ -42,14 +42,6 @@ public class StringConstraintAccumulator<Input, MaskType extends Mask<MaskType>>
                 o -> new PrefixNode<>(empty));
         prefix.add(constraint.getValue(), priority);
         break;
-      case GT:
-      case GE:
-      case LT:
-      case LE:
-        var comparable = (ComparableNode<String, MaskType>) nodes.computeIfAbsent(STARTS_WITH,
-                o -> new ComparableNode<String, MaskType>(nullsFirst(naturalOrder()), constraint.getOperation(), empty));
-        comparable.add(constraint.getValue(), priority);
-        break;
       default:
         return false;
     }
@@ -97,7 +89,6 @@ public class StringConstraintAccumulator<Input, MaskType extends Mask<MaskType>>
       if (null != neq) {
         result = result.inPlaceAnd(neq.match(value));
       }
-      // TODO range predicates
       return context.inPlaceAnd(result);
     }
   }

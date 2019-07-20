@@ -31,11 +31,12 @@ public class DoubleMatcher<T, MaskType extends Mask<MaskType>> implements Constr
   }
 
   @Override
-  public void addConstraint(Constraint constraint, int priority) {
+  public boolean addConstraint(Constraint constraint, int priority) {
     Number number = constraint.getValue();
     double value = number.doubleValue();
     add(constraint.getOperation(), value, priority);
     wildcards.remove(priority);
+    return true;
   }
 
   @Override

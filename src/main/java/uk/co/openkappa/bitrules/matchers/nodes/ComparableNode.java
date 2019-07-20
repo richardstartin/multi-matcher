@@ -2,6 +2,7 @@ package uk.co.openkappa.bitrules.matchers.nodes;
 
 import uk.co.openkappa.bitrules.Mask;
 import uk.co.openkappa.bitrules.Operation;
+import uk.co.openkappa.bitrules.matchers.MutableNode;
 
 import java.util.Comparator;
 import java.util.Map;
@@ -10,7 +11,7 @@ import java.util.TreeMap;
 
 import static uk.co.openkappa.bitrules.matchers.SelectivityHeuristics.avgCardinality;
 
-public class ComparableNode<T, MaskType extends Mask<MaskType>> {
+public class ComparableNode<T, MaskType extends Mask<MaskType>> implements MutableNode<T, MaskType> {
 
   private final MaskType empty;
   private final NavigableMap<T, MaskType> sets;
@@ -32,6 +33,7 @@ public class ComparableNode<T, MaskType extends Mask<MaskType>> {
     });
   }
 
+  @Override
   public MaskType match(T value, MaskType context) {
     switch (operation) {
       case GE:

@@ -15,12 +15,12 @@ import static uk.co.openkappa.bitrules.matchers.SelectivityHeuristics.avgCardina
 
 public class GenericConstraintAccumulator<T, U, MaskType extends Mask<MaskType>> implements ConstraintAccumulator<T, MaskType> {
 
-  private final Function<T, U> accessor;
-  private final Supplier<Map<U, MaskType>> mapSupplier;
-  private final EnumMap<Operation, MutableNode<U, MaskType>> nodes = new EnumMap<>(Operation.class);
-  private final MaskType wildcard;
-  private final MaskType empty;
-  private final int max;
+  protected final Function<T, U> accessor;
+  protected final Supplier<Map<U, MaskType>> mapSupplier;
+  protected final EnumMap<Operation, MutableNode<U, MaskType>> nodes = new EnumMap<>(Operation.class);
+  protected final MaskType wildcard;
+  protected final MaskType empty;
+  protected final int max;
 
   public GenericConstraintAccumulator(Supplier<Map<U, MaskType>> mapSupplier,
                                       Function<T, U> accessor,
@@ -34,11 +34,18 @@ public class GenericConstraintAccumulator<T, U, MaskType extends Mask<MaskType>>
   }
 
   @Override
-  public void addConstraint(Constraint constraint, int priority) {
-    ((GenericEqualityNode<U, MaskType>)nodes
-            .computeIfAbsent(constraint.getOperation(), op -> new GenericEqualityNode<>(mapSupplier.get(), empty, wildcard)))
-    .add(constraint.getValue(), priority);
-    wildcard.remove(priority);
+  public boolean addConstraint(Constraint constraint, int priority) {
+    switch (constraint.getOperation()) {
+      case NE:
+      case EQ:
+        ((GenericEqualityNode<U, MaskType>)nodes
+                .computeIfAbsent(constraint.getOperation(), op -> new GenericEqualityNode<>(mapSupplier.get(), empty, wildcard)))
+                .add(constraint.getValue(), priority);
+        wildcard.remove(priority);
+        return true;
+      default:
+        return false;
+    }
   }
 
   @Override
@@ -46,7 +53,7 @@ public class GenericConstraintAccumulator<T, U, MaskType extends Mask<MaskType>>
     wildcard.optimise();
     EnumMap<Operation, ClassificationNode<U, MaskType>> optimised = new EnumMap<>(Operation.class);
     nodes.forEach((op, node) -> optimised.put(op, node.optimise()));
-    return new OptimisedGenericMatcher<>(accessor, optimised, wildcard, max);
+    return new OptimisedGenericMatcher<>(accessor, optimised, wildcard, empty, max);
   }
 
   private static class OptimisedGenericMatcher<T, U, MaskType extends Mask<MaskType>> implements Matcher<T, MaskType> {
@@ -54,30 +61,33 @@ public class GenericConstraintAccumulator<T, U, MaskType extends Mask<MaskType>>
     private final Function<T, U> accessor;
     private final EnumMap<Operation, ClassificationNode<U, MaskType>> nodes;
     private final MaskType wildcard;
+    private final MaskType empty;
     private final int max;
 
     private OptimisedGenericMatcher(Function<T, U> accessor,
                                     EnumMap<Operation, ClassificationNode<U, MaskType>> nodes,
-                                    MaskType wildcard, int max) {
+                                    MaskType wildcard, MaskType empty, int max) {
       this.accessor = accessor;
       this.nodes = nodes;
       this.wildcard = wildcard;
+      this.empty = empty;
       this.max = max;
     }
 
     @Override
-    public MaskType match(T value, MaskType context) {
-      MaskType mask = wildcard.and(context);
-      U key = accessor.apply(value);
-      ClassificationNode<U, MaskType> equality = nodes.get(EQ);
-      if (null != equality) {
-        mask = equality.match(key, context).inPlaceOr(mask);
+    public MaskType match(T input, MaskType context) {
+      U value = accessor.apply(input);
+      MaskType result = empty.clone();
+      for (var component : nodes.entrySet()) {
+        var op = component.getKey();
+        var node = component.getValue();
+        if (op == NE) {
+          result = result.orNot(node.match(value, context.clone()), max);
+        } else {
+          result = result.inPlaceOr(node.match(value, context.clone()));
+        }
       }
-      ClassificationNode<U, MaskType> inequality = nodes.get(NE);
-      if (null != inequality) {
-        mask = mask.orNot(inequality.match(key, context), max);
-      }
-      return mask;
+      return result.inPlaceAnd(context.or(wildcard));
     }
 
     @Override

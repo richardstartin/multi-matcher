@@ -13,7 +13,7 @@ public interface ConstraintAccumulator<T, MaskType> {
    * @param constraint a condition which must be matched by inputs
    * @param priority the identity named the constraint
    */
-  void addConstraint(Constraint constraint, int priority);
+  boolean addConstraint(Constraint constraint, int priority);
 
   /**
    * Freezes the column. DO NOT add constraints after calling this method.

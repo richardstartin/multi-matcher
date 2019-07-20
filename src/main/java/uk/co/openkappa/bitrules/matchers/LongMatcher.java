@@ -31,11 +31,12 @@ public class LongMatcher<T, MaskType extends Mask<MaskType>> implements Constrai
   }
 
   @Override
-  public void addConstraint(Constraint constraint, int priority) {
+  public boolean addConstraint(Constraint constraint, int priority) {
     Number number = constraint.getValue();
     long value = number.longValue();
     add(constraint.getOperation(), value, priority);
     wildcards.remove(priority);
+    return true;
   }
 
   @Override

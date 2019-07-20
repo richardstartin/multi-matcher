@@ -1,9 +1,7 @@
 package uk.co.openkappa.bitrules.matchers;
 
-import com.sun.nio.file.SensitivityWatchEventModifier;
 import uk.co.openkappa.bitrules.Mask;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
 

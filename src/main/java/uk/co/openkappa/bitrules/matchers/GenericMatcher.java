@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static java.util.stream.Collectors.toMap;
 import static uk.co.openkappa.bitrules.Operation.EQ;
 import static uk.co.openkappa.bitrules.Operation.NE;
 import static uk.co.openkappa.bitrules.matchers.SelectivityHeuristics.avgCardinality;

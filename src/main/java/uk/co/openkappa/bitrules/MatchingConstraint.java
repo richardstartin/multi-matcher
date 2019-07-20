@@ -1,6 +1,9 @@
 package uk.co.openkappa.bitrules;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 
 import static java.util.Objects.requireNonNull;
 

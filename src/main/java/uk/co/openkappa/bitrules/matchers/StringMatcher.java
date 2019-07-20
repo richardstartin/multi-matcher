@@ -4,7 +4,10 @@ import org.apache.commons.collections4.trie.PatriciaTrie;
 import uk.co.openkappa.bitrules.*;
 import uk.co.openkappa.bitrules.masks.MaskFactory;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 

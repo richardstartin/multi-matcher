@@ -1,16 +1,13 @@
 package uk.co.openkappa.bitrules;
 
 
-import uk.co.openkappa.bitrules.masks.MaskFactory;
-import uk.co.openkappa.bitrules.schema.Schema;
 import uk.co.openkappa.bitrules.masks.HugeMask;
+import uk.co.openkappa.bitrules.masks.MaskFactory;
 import uk.co.openkappa.bitrules.masks.SmallMask;
 import uk.co.openkappa.bitrules.masks.TinyMask;
+import uk.co.openkappa.bitrules.schema.Schema;
 
-import java.lang.reflect.Array;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 

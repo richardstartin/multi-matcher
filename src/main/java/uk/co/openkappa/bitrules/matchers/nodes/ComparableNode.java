@@ -34,20 +34,20 @@ public class ComparableNode<T, MaskType extends Mask<MaskType>> implements Mutab
   }
 
   @Override
-  public MaskType match(T value, MaskType context) {
+  public MaskType match(T value) {
     switch (operation) {
       case GE:
       case EQ:
       case LE:
-        return context.inPlaceAnd(sets.getOrDefault(value, empty));
+        return sets.getOrDefault(value, empty);
       case LT:
         Map.Entry<T, MaskType> higher = sets.higherEntry(value);
-        return context.inPlaceAnd(null == higher ? empty : higher.getValue());
+        return null == higher ? empty : higher.getValue();
       case GT:
         Map.Entry<T, MaskType> lower = sets.lowerEntry(value);
-        return context.inPlaceAnd(null == lower ? empty : lower.getValue());
+        return null == lower ? empty : lower.getValue();
       default:
-        return context;
+        return empty;
     }
   }
 

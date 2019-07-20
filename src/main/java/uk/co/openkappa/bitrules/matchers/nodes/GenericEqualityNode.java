@@ -36,8 +36,8 @@ public class GenericEqualityNode<T, MaskType extends Mask<MaskType>> implements 
   }
 
   @Override
-  public MaskType match(T value, MaskType result) {
-    return result.inPlaceAnd(segments.getOrDefault(value, empty).or(wildcard));
+  public MaskType match(T value) {
+    return segments.getOrDefault(value, empty).or(wildcard);
   }
 
   @Override
@@ -73,8 +73,8 @@ public class GenericEqualityNode<T, MaskType extends Mask<MaskType>> implements 
     }
 
     @Override
-    public MaskType match(Input input, MaskType context) {
-      return context.inPlaceAnd(segments.getOrDefault(input, empty).or(wildcard));
+    public MaskType match(Input input) {
+      return segments.getOrDefault(input, empty).or(wildcard);
     }
   }
 }

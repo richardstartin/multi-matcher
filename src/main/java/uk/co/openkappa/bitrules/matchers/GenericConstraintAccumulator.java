@@ -82,12 +82,12 @@ public class GenericConstraintAccumulator<T, U, MaskType extends Mask<MaskType>>
         var op = component.getKey();
         var node = component.getValue();
         if (op == NE) {
-          result = result.orNot(node.match(value, context.clone()), max);
+          result = result.orNot(node.match(value), max);
         } else {
-          result = result.inPlaceOr(node.match(value, context.clone()));
+          result = result.inPlaceOr(node.match(value));
         }
       }
-      return result.inPlaceAnd(context.or(wildcard));
+      return context.inPlaceAnd(result.inPlaceOr(wildcard));
     }
 
     @Override

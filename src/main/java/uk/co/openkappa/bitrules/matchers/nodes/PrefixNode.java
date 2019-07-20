@@ -29,16 +29,16 @@ public class PrefixNode<MaskType extends Mask<MaskType>> implements MutableNode<
   }
 
   @Override
-  public MaskType match(String value, MaskType context) {
+  public MaskType match(String value) {
     int position = longest;
-    while (position > 0 && !context.isEmpty()) {
+    while (position > 0) {
       MaskType match = map.get(value.substring(0, position));
       if (null != match) {
-        return context.inPlaceAnd(match);
+        return match;
       }
       --position;
     }
-    return context.inPlaceAnd(empty);
+    return empty;
   }
 
   @Override

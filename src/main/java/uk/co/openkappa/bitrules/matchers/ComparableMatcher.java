@@ -62,9 +62,9 @@ public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements
   private MaskType matchValue(U value, MaskType context) {
     MaskType temp = empty.clone();
     for (ComparableNode<U, MaskType> component : children.values()) {
-      temp = temp.inPlaceOr(component.match(value, context.clone()));
+      temp = temp.inPlaceOr(component.match(value));
     }
-    return context.and(temp);
+    return context.inPlaceAnd(temp.inPlaceOr(wildcards));
   }
 
   public void optimise() {

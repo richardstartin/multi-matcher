@@ -46,19 +46,9 @@ public class InequalityNode<T, MaskType extends Mask<MaskType>> implements Mutab
   }
 
   @Override
-  public MaskType match(T value) {
-    return segments.getOrDefault(value, wildcard);
-  }
-
-  @Override
   public ClassificationNode<T, MaskType> freeze() {
     wildcard.optimise();
     return new OptimisedGeneralEqualityNode<>(segmentOptimiser.apply(segments), wildcard);
-  }
-
-  @Override
-  public float averageSelectivity() {
-    return avgCardinality(segments.values());
   }
 
   private MaskType newMaskWithout(int priority) {
@@ -80,6 +70,11 @@ public class InequalityNode<T, MaskType extends Mask<MaskType>> implements Mutab
     @Override
     public MaskType match(Input input) {
       return segments.getOrDefault(input, wildcard);
+    }
+
+    @Override
+    public float averageSelectivity() {
+      return avgCardinality(segments.values());
     }
   }
 }

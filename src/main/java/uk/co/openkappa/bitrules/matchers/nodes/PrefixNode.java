@@ -12,7 +12,8 @@ import java.util.Map;
 import static uk.co.openkappa.bitrules.Mask.with;
 import static uk.co.openkappa.bitrules.matchers.SelectivityHeuristics.avgCardinality;
 
-public class PrefixNode<MaskType extends Mask<MaskType>> implements MutableNode<String, MaskType> {
+public class PrefixNode<MaskType extends Mask<MaskType>> implements MutableNode<String, MaskType>,
+        ClassificationNode<String, MaskType> {
 
   private final MaskType empty;
   private final Map<String, MaskType> map;

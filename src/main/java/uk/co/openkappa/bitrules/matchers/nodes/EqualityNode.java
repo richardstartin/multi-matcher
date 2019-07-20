@@ -4,14 +4,13 @@ import uk.co.openkappa.bitrules.Mask;
 import uk.co.openkappa.bitrules.Operation;
 import uk.co.openkappa.bitrules.matchers.ClassificationNode;
 import uk.co.openkappa.bitrules.matchers.MutableNode;
-import uk.co.openkappa.bitrules.matchers.SelectivityHeuristics;
 
 import java.util.Map;
 import java.util.function.Function;
 
 import static uk.co.openkappa.bitrules.Mask.with;
 import static uk.co.openkappa.bitrules.Operation.NE;
-import static uk.co.openkappa.bitrules.Operation.STARTS_WITH;
+import static uk.co.openkappa.bitrules.matchers.SelectivityHeuristics.avgCardinality;
 
 public class EqualityNode<T, MaskType extends Mask<MaskType>> implements MutableNode<T, MaskType> {
 
@@ -39,11 +38,6 @@ public class EqualityNode<T, MaskType extends Mask<MaskType>> implements Mutable
   }
 
   @Override
-  public MaskType match(T value) {
-    return segments.getOrDefault(value, empty).or(wildcard);
-  }
-
-  @Override
   public ClassificationNode<T, MaskType> freeze() {
     return new OptimisedGeneralEqualityNode<>(segmentOptimiser.apply(segments), empty);
   }
@@ -55,11 +49,6 @@ public class EqualityNode<T, MaskType extends Mask<MaskType>> implements Mutable
       var node = (InequalityNode<T, MaskType>)inequalityNode;
       segments.forEach(node::remove);
     }
-  }
-
-  @Override
-  public float averageSelectivity() {
-    return SelectivityHeuristics.avgCardinality(segments.values());
   }
 
   private MaskType maskWith(int priority) {
@@ -82,6 +71,11 @@ public class EqualityNode<T, MaskType extends Mask<MaskType>> implements Mutable
     @Override
     public MaskType match(Input input) {
       return segments.getOrDefault(input, empty);
+    }
+
+    @Override
+    public float averageSelectivity() {
+      return avgCardinality(segments.values());
     }
   }
 }

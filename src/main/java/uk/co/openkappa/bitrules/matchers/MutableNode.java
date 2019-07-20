@@ -5,7 +5,7 @@ import uk.co.openkappa.bitrules.Operation;
 
 import java.util.Map;
 
-public interface MutableNode<Input, MaskType extends Mask<MaskType>> extends ClassificationNode<Input, MaskType> {
+public interface MutableNode<Input, MaskType extends Mask<MaskType>> {
   ClassificationNode<Input, MaskType> freeze();
 
   // TODO - better handled by vistor

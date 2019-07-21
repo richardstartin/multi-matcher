@@ -18,6 +18,7 @@ public interface Mask<T extends Mask> {
   void remove(int id);
   T and(T other);
   T andNot(T other);
+  T inPlaceAndNot(T other);
   T or(T other);
   T orNot(T other, int max);
   T inPlaceAnd(T other);

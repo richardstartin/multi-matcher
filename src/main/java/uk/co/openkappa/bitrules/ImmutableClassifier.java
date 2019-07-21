@@ -1,16 +1,13 @@
 package uk.co.openkappa.bitrules;
 
 
-import uk.co.openkappa.bitrules.masks.MaskFactory;
-import uk.co.openkappa.bitrules.schema.Schema;
 import uk.co.openkappa.bitrules.masks.HugeMask;
+import uk.co.openkappa.bitrules.masks.MaskFactory;
 import uk.co.openkappa.bitrules.masks.SmallMask;
 import uk.co.openkappa.bitrules.masks.TinyMask;
+import uk.co.openkappa.bitrules.schema.Schema;
 
-import java.lang.reflect.Array;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -55,7 +52,7 @@ public class ImmutableClassifier<Input, Classification> implements Classifier<In
   public static class ClassifierBuilder<Key, Input, Classification> {
 
     private final Schema<Key, Input> registry;
-    private final Map<Key, MutableMatcher<Input, ? extends Mask>> matchers = new HashMap<>();
+    private final Map<Key, ConstraintAccumulator<Input, ? extends Mask>> matchers = new HashMap<>();
     private final List<Classification> classifications = new ArrayList<>();
 
     public ClassifierBuilder(Schema<Key, Input> registry) {
@@ -97,8 +94,8 @@ public class ImmutableClassifier<Input, Classification> implements Classifier<In
     }
 
     private <MaskType extends Mask<MaskType>>
-    MutableMatcher<Input, MaskType> memoisedMatcher(Key key, MaskFactory<MaskType> maskFactory, int max) {
-      MutableMatcher<Input, MaskType> matcher = (MutableMatcher<Input, MaskType>)matchers.get(key);
+    ConstraintAccumulator<Input, MaskType> memoisedMatcher(Key key, MaskFactory<MaskType> maskFactory, int max) {
+      ConstraintAccumulator<Input, MaskType> matcher = (ConstraintAccumulator<Input, MaskType>)matchers.get(key);
       if (null == matcher) {
         matcher = registry.getAttribute(key).toMatcher(maskFactory, max);
         matchers.put(key, matcher);
@@ -109,7 +106,7 @@ public class ImmutableClassifier<Input, Classification> implements Classifier<In
     private <MaskType extends Mask<MaskType>>
     Matcher<Input, MaskType>[] freezeMatchers() {
       List<Matcher<Input, MaskType>> frozen = new ArrayList<>(matchers.size());
-      for (MutableMatcher<Input, ? extends Mask> matcher : matchers.values()) {
+      for (ConstraintAccumulator<Input, ? extends Mask> matcher : matchers.values()) {
         frozen.add((Matcher<Input, MaskType>) matcher.freeze());
       }
       return frozen.stream()

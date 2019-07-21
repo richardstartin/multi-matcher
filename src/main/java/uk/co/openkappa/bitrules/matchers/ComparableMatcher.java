@@ -2,13 +2,15 @@ package uk.co.openkappa.bitrules.matchers;
 
 import uk.co.openkappa.bitrules.*;
 import uk.co.openkappa.bitrules.masks.MaskFactory;
+import uk.co.openkappa.bitrules.matchers.nodes.ComparableNode;
 
 import java.util.*;
 import java.util.function.Function;
 
 import static uk.co.openkappa.bitrules.matchers.SelectivityHeuristics.avgCardinality;
 
-public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements MutableMatcher<T, MaskType> {
+public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements ConstraintAccumulator<T, MaskType>,
+        Matcher<T, MaskType> {
 
   private final Function<T, U> accessor;
   private final MaskType wildcards;
@@ -30,9 +32,10 @@ public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements
   }
 
   @Override
-  public void addConstraint(Constraint constraint, int priority) {
+  public boolean addConstraint(Constraint constraint, int priority) {
     add(constraint.getOperation(), constraint.getValue(), priority);
     wildcards.remove(priority);
+    return true;
   }
 
   @Override
@@ -59,101 +62,15 @@ public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements
   private MaskType matchValue(U value, MaskType context) {
     MaskType temp = empty.clone();
     for (ComparableNode<U, MaskType> component : children.values()) {
-      temp = temp.inPlaceOr(component.match(value, context.clone()));
+      temp = temp.inPlaceOr(component.match(value));
     }
-    return context.and(temp);
+    return context.inPlaceAnd(temp.inPlaceOr(wildcards));
   }
 
   public void optimise() {
     Map<Operation, ComparableNode<U, MaskType>> optimised = new EnumMap<>(Operation.class);
-    children.forEach((op, node) -> optimised.put(op, node.optimise()));
+    children.forEach((op, node) -> optimised.put(op, node.freeze()));
     children.putAll(optimised);
-  }
-
-  public static class ComparableNode<T, MaskType extends Mask<MaskType>> {
-
-    private final MaskType empty;
-    private final NavigableMap<T, MaskType> sets;
-    private final Operation operation;
-
-    public ComparableNode(Comparator<T> comparator, Operation operation, MaskType empty) {
-      this.sets = new TreeMap<>(comparator);
-      this.operation = operation;
-      this.empty = empty;
-    }
-
-    public void add(T value, int priority) {
-      sets.compute(value, (k, v) -> {
-        if (v == null) {
-          v = empty.clone();
-        }
-        v.add(priority);
-        return v;
-      });
-    }
-
-    public MaskType match(T value, MaskType context) {
-      switch (operation) {
-        case GE:
-        case EQ:
-        case LE:
-          return context.inPlaceAnd(sets.getOrDefault(value, empty));
-        case LT:
-          Map.Entry<T, MaskType> higher = sets.higherEntry(value);
-          return context.inPlaceAnd(null == higher ? empty : higher.getValue());
-        case GT:
-          Map.Entry<T, MaskType> lower = sets.lowerEntry(value);
-          return context.inPlaceAnd(null == lower ? empty : lower.getValue());
-        default:
-          return context;
-      }
-    }
-
-    public ComparableNode<T, MaskType> optimise() {
-      switch (operation) {
-        case GE:
-        case GT:
-          rangeEncode();
-          return this;
-        case LE:
-        case LT:
-          reverseRangeEncode();
-          return this;
-        default:
-          return this;
-      }
-    }
-
-    float averageSelectivity() {
-      return avgCardinality(sets.values());
-    }
-
-    private void rangeEncode() {
-      MaskType prev = null;
-      for (Map.Entry<T, MaskType> set : sets.entrySet()) {
-        if (prev != null) {
-          sets.put(set.getKey(), set.getValue().inPlaceOr(prev));
-        }
-        prev = set.getValue();
-      }
-    }
-
-    private void reverseRangeEncode() {
-      MaskType prev = null;
-      for (Map.Entry<T, MaskType> set : sets.descendingMap().entrySet()) {
-        if (prev != null) {
-          sets.put(set.getKey(), set.getValue().inPlaceOr(prev));
-        }
-        prev = set.getValue();
-      }
-    }
-
-    @Override
-    public String toString() {
-      return Nodes.toString(sets.size(), operation,
-              sets.keySet().stream().iterator(),
-              sets.values().stream().iterator());
-    }
   }
 
 }

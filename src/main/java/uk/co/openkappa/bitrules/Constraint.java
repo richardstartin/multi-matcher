@@ -1,6 +1,17 @@
 package uk.co.openkappa.bitrules;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Constraint {
+
+  public static List<Constraint> decompose(Constraint constraint, Operation... operations) {
+    List<Constraint> decomposition = new ArrayList<>(operations.length);
+    for (Operation operation : operations) {
+      decomposition.add(condition(operation, constraint.value));
+    }
+    return decomposition;
+  }
 
   public static Constraint lessThan(Comparable<?> value) {
     return condition(Operation.LT, value);

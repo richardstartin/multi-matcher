@@ -3,6 +3,7 @@ package uk.co.openkappa.bitrules.matchers;
 import org.junit.jupiter.api.Test;
 import uk.co.openkappa.bitrules.masks.SmallMask;
 import uk.co.openkappa.bitrules.Operation;
+import uk.co.openkappa.bitrules.matchers.nodes.LongNode;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -15,7 +16,7 @@ public class LongMutableNodeTest {
 
   @Test
   public void testGreaterThan() {
-    LongMatcher.LongNode<SmallMask> node = build(100, Operation.GT);
+    LongNode<SmallMask> node = build(100, Operation.GT);
     SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.apply(0L, mask.clone()).isEmpty());
     assertEquals(with(new SmallMask(), 0), node.apply(1L, mask.clone()));
@@ -24,7 +25,7 @@ public class LongMutableNodeTest {
 
   @Test
   public void testGreaterThanOrEqual() {
-    LongMatcher.LongNode<SmallMask> node = build(100, Operation.GE);
+    LongNode<SmallMask> node = build(100, Operation.GE);
     SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.apply(-1L, mask.clone()).isEmpty());
     assertEquals(with(new SmallMask(), 0), node.apply(0L, mask.clone()));
@@ -33,7 +34,7 @@ public class LongMutableNodeTest {
 
   @Test
   public void testEqual() {
-    LongMatcher.LongNode<SmallMask> node = build(100, Operation.EQ);
+    LongNode<SmallMask> node = build(100, Operation.EQ);
     SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.apply(-1L, mask.clone()).isEmpty());
     assertEquals(with(new SmallMask(), 0), node.apply(0L, mask.clone()));
@@ -43,7 +44,7 @@ public class LongMutableNodeTest {
 
   @Test
   public void testLessThanOrEqual() {
-    LongMatcher.LongNode<SmallMask> node = build(100, Operation.LE);
+    LongNode<SmallMask> node = build(100, Operation.LE);
     SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.apply(1001, mask.clone()).isEmpty());
     assertEquals(mask, node.apply(0L, mask.clone()));
@@ -52,7 +53,7 @@ public class LongMutableNodeTest {
 
   @Test
   public void testLessThan() {
-    LongMatcher.LongNode<SmallMask> node = build(100, Operation.LT);
+    LongNode<SmallMask> node = build(100, Operation.LT);
     SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.apply(1001, mask.clone()).isEmpty());
     assertEquals(without(mask.clone(), 0), node.apply(0L, mask.clone()));
@@ -61,7 +62,7 @@ public class LongMutableNodeTest {
 
   @Test
   public void testGreaterThanRev() {
-    LongMatcher.LongNode<SmallMask> node = buildRev(100, Operation.GT);
+    LongNode<SmallMask> node = buildRev(100, Operation.GT);
     SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.apply(0L, mask.clone()).isEmpty());
     assertEquals(with(new SmallMask(), 0), node.apply(1L, mask.clone()));
@@ -69,7 +70,7 @@ public class LongMutableNodeTest {
 
   @Test
   public void testBuildNode() {
-    LongMatcher.LongNode<SmallMask> node = new LongMatcher.LongNode<>(Operation.EQ, new SmallMask());
+    LongNode<SmallMask> node = new LongNode<>(Operation.EQ, new SmallMask());
     node.add(0, 0);
     assertEquals(FACTORY.contiguous(1), node.apply(0, FACTORY.contiguous(1)));
     node.add(0, 1);
@@ -78,7 +79,7 @@ public class LongMutableNodeTest {
 
   @Test
   public void testGreaterThanOrEqualRev() {
-    LongMatcher.LongNode<SmallMask> node = buildRev(100, Operation.GE);
+    LongNode<SmallMask> node = buildRev(100, Operation.GE);
     SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.apply(-1L, mask.clone()).isEmpty());
     assertEquals(with(new SmallMask(), 0), node.apply(0L, mask.clone()));
@@ -87,7 +88,7 @@ public class LongMutableNodeTest {
 
   @Test
   public void testEqualRev() {
-    LongMatcher.LongNode<SmallMask> node = buildRev(100, Operation.EQ);
+    LongNode<SmallMask> node = buildRev(100, Operation.EQ);
     SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.apply(-1L, mask.clone()).isEmpty());
     assertEquals(with(new SmallMask(), 0), node.apply(0L, mask.clone()));
@@ -97,7 +98,7 @@ public class LongMutableNodeTest {
 
   @Test
   public void testLessThanOrEqualRev() {
-    LongMatcher.LongNode<SmallMask> node = buildRev(100, Operation.LE);
+    LongNode<SmallMask> node = buildRev(100, Operation.LE);
     SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.apply(1001, mask.clone()).isEmpty());
     assertEquals(mask, node.apply(0L, mask.clone()));
@@ -106,7 +107,7 @@ public class LongMutableNodeTest {
 
   @Test
   public void testLessThanRev() {
-    LongMatcher.LongNode<SmallMask> node = buildRev(100, Operation.LT);
+    LongNode<SmallMask> node = buildRev(100, Operation.LT);
     SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.apply(1001, mask.clone()).isEmpty());
     assertEquals(without(mask.clone(), 0), node.apply(0L, mask.clone()));
@@ -114,16 +115,16 @@ public class LongMutableNodeTest {
   }
 
 
-  private LongMatcher.LongNode<SmallMask> build(int count, Operation relation) {
-    LongMatcher.LongNode<SmallMask> node = new LongMatcher.LongNode<>(relation, new SmallMask());
+  private LongNode<SmallMask> build(int count, Operation relation) {
+    LongNode<SmallMask> node = new LongNode<>(relation, new SmallMask());
     for (int i = 0; i < count; ++i) {
       node.add(i * 10, i);
     }
     return node.optimise();
   }
 
-  private LongMatcher.LongNode<SmallMask> buildRev(int count, Operation relation) {
-    LongMatcher.LongNode<SmallMask> node = new LongMatcher.LongNode<>(relation, new SmallMask());
+  private LongNode<SmallMask> buildRev(int count, Operation relation) {
+    LongNode<SmallMask> node = new LongNode<>(relation, new SmallMask());
     for (int i = count - 1; i >= 0; --i) {
       node.add(i * 10, i);
     }

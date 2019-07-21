@@ -3,6 +3,7 @@ package uk.co.openkappa.bitrules.matchers;
 import org.junit.jupiter.api.Test;
 import uk.co.openkappa.bitrules.masks.SmallMask;
 import uk.co.openkappa.bitrules.Operation;
+import uk.co.openkappa.bitrules.matchers.nodes.IntNode;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -14,7 +15,7 @@ public class IntNodeTest {
 
   @Test
   public void testGreaterThan() {
-    IntMatcher.IntNode<SmallMask> node = build(100, Operation.GT);
+    IntNode<SmallMask> node = build(100, Operation.GT);
     SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.apply(0, mask.clone()).isEmpty());
     assertEquals(with(new SmallMask(), 0), node.apply(1, mask.clone()));
@@ -23,7 +24,7 @@ public class IntNodeTest {
 
   @Test
   public void testGreaterThanOrEqual() {
-    IntMatcher.IntNode<SmallMask> node = build(100, Operation.GE);
+    IntNode<SmallMask> node = build(100, Operation.GE);
     SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.apply(-1, mask.clone()).isEmpty());
     assertEquals(with(new SmallMask(), 0), node.apply(0, mask.clone()));
@@ -32,7 +33,7 @@ public class IntNodeTest {
 
   @Test
   public void testEqual() {
-    IntMatcher.IntNode<SmallMask> node = build(100, Operation.EQ);
+    IntNode<SmallMask> node = build(100, Operation.EQ);
     SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.apply(-1, mask.clone()).isEmpty());
     assertEquals(with(new SmallMask(), 0), node.apply(0, mask.clone()));
@@ -42,7 +43,7 @@ public class IntNodeTest {
 
   @Test
   public void testLessThanOrEqual() {
-    IntMatcher.IntNode<SmallMask> node = build(100, Operation.LE);
+    IntNode<SmallMask> node = build(100, Operation.LE);
     SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.apply(1001, mask.clone()).isEmpty());
     assertEquals(mask, node.apply(0, mask.clone()));
@@ -51,7 +52,7 @@ public class IntNodeTest {
 
   @Test
   public void testLessThan() {
-    IntMatcher.IntNode<SmallMask> node = build(100, Operation.LT);
+    IntNode<SmallMask> node = build(100, Operation.LT);
     SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.apply(1001, mask.clone()).isEmpty());
     assertEquals(without(mask.clone(), 0), node.apply(0, mask.clone()));
@@ -60,7 +61,7 @@ public class IntNodeTest {
 
   @Test
   public void testGreaterThanRev() {
-    IntMatcher.IntNode<SmallMask> node = buildRev(100, Operation.GT);
+    IntNode<SmallMask> node = buildRev(100, Operation.GT);
     SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.apply(0, mask.clone()).isEmpty());
     assertEquals(with(new SmallMask(), 0), node.apply(1, mask.clone()));
@@ -69,7 +70,7 @@ public class IntNodeTest {
 
   @Test
   public void testGreaterThanOrEqualRev() {
-    IntMatcher.IntNode<SmallMask> node = buildRev(100, Operation.GE);
+    IntNode<SmallMask> node = buildRev(100, Operation.GE);
     SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.apply(-1, mask.clone()).isEmpty());
     assertEquals(with(new SmallMask(), 0), node.apply(0, mask.clone()));
@@ -78,7 +79,7 @@ public class IntNodeTest {
 
   @Test
   public void testEqualRev() {
-    IntMatcher.IntNode<SmallMask> node = buildRev(100, Operation.EQ);
+    IntNode<SmallMask> node = buildRev(100, Operation.EQ);
     SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.apply(-1, mask.clone()).isEmpty());
     assertEquals(with(new SmallMask(), 0), node.apply(0, mask.clone()));
@@ -88,7 +89,7 @@ public class IntNodeTest {
 
   @Test
   public void testLessThanOrEqualRev() {
-    IntMatcher.IntNode<SmallMask> node = buildRev(100, Operation.LE);
+    IntNode<SmallMask> node = buildRev(100, Operation.LE);
     SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.apply(1001, mask.clone()).isEmpty());
     assertEquals(mask, node.apply(0, mask.clone()));
@@ -97,7 +98,7 @@ public class IntNodeTest {
 
   @Test
   public void testLessThanRev() {
-    IntMatcher.IntNode<SmallMask> node = buildRev(100, Operation.LT);
+    IntNode<SmallMask> node = buildRev(100, Operation.LT);
     SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.apply(1001, mask.clone()).isEmpty());
     assertEquals(without(mask.clone(), 0), node.apply(0, mask.clone()));
@@ -106,23 +107,23 @@ public class IntNodeTest {
 
   @Test
   public void testBuildNode() {
-    IntMatcher.IntNode<SmallMask> node = new IntMatcher.IntNode<>(Operation.EQ, new SmallMask());
+    IntNode<SmallMask> node = new IntNode<>(Operation.EQ, new SmallMask());
     node.add(0, 0);
     assertEquals(FACTORY.contiguous( 1), node.apply(0, FACTORY.contiguous( 1)));
     node.add(0, 1);
     assertEquals(FACTORY.contiguous( 2), node.apply(0, FACTORY.contiguous( 2)));
   }
 
-  private IntMatcher.IntNode<SmallMask> build(int count, Operation relation) {
-    IntMatcher.IntNode<SmallMask> node = new IntMatcher.IntNode<>(relation, new SmallMask());
+  private IntNode<SmallMask> build(int count, Operation relation) {
+    IntNode<SmallMask> node = new IntNode<>(relation, new SmallMask());
     for (int i = 0; i < count; ++i) {
       node.add(i * 10, i);
     }
     return node.optimise();
   }
 
-  private IntMatcher.IntNode<SmallMask> buildRev(int count, Operation relation) {
-    IntMatcher.IntNode<SmallMask> node = new IntMatcher.IntNode<>(relation, new SmallMask());
+  private IntNode<SmallMask> buildRev(int count, Operation relation) {
+    IntNode<SmallMask> node = new IntNode<>(relation, new SmallMask());
     for (int i = count - 1; i >= 0; --i) {
       node.add(i * 10, i);
     }

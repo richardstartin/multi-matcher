@@ -4,6 +4,7 @@ package uk.co.openkappa.bitrules.matchers;
 import org.junit.jupiter.api.Test;
 import uk.co.openkappa.bitrules.masks.SmallMask;
 import uk.co.openkappa.bitrules.Operation;
+import uk.co.openkappa.bitrules.matchers.nodes.DoubleNode;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -18,7 +19,7 @@ public class DoubleMutableNodeTest {
 
   @Test
   public void testGreaterThan() {
-    DoubleMatcher.DoubleNode<SmallMask> node = build(100, Operation.GT);
+    DoubleNode<SmallMask> node = build(100, Operation.GT);
     SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.match(0, mask.clone()).isEmpty());
     assertEquals(ZERO, node.match(1, mask.clone()));
@@ -27,7 +28,7 @@ public class DoubleMutableNodeTest {
 
   @Test
   public void testEqual() {
-    DoubleMatcher.DoubleNode<SmallMask> node = build(100, Operation.EQ);
+    DoubleNode<SmallMask> node = build(100, Operation.EQ);
     SmallMask mask = FACTORY.contiguous( 100);
     assertTrue(node.match(-1, mask.clone()).isEmpty());
     assertEquals(ZERO, node.match(0, mask.clone()));
@@ -36,7 +37,7 @@ public class DoubleMutableNodeTest {
 
   @Test
   public void testLessThan() {
-    DoubleMatcher.DoubleNode<SmallMask> node = build(100, Operation.LT);
+    DoubleNode<SmallMask> node = build(100, Operation.LT);
     SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.match(1001, mask.clone()).isEmpty());
     assertEquals(mask.andNot(ZERO), node.match(0, mask.clone()));
@@ -45,7 +46,7 @@ public class DoubleMutableNodeTest {
 
   @Test
   public void testGreaterThanRev() {
-    DoubleMatcher.DoubleNode<SmallMask> node = buildRev(100, Operation.GT);
+    DoubleNode<SmallMask> node = buildRev(100, Operation.GT);
     SmallMask mask = FACTORY.contiguous( 100);
     assertTrue(node.match(0, mask.clone()).isEmpty());
     assertEquals(ZERO, node.match(1, mask.clone()));
@@ -53,7 +54,7 @@ public class DoubleMutableNodeTest {
 
   @Test
   public void testEqualRev() {
-    DoubleMatcher.DoubleNode<SmallMask> node = buildRev(100, Operation.EQ);
+    DoubleNode<SmallMask> node = buildRev(100, Operation.EQ);
     SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.match(-1, mask.clone()).isEmpty());
     assertEquals(ZERO, node.match(0, mask.clone()));
@@ -62,7 +63,7 @@ public class DoubleMutableNodeTest {
 
   @Test
   public void testLessThanRev() {
-    DoubleMatcher.DoubleNode<SmallMask> node = buildRev(100, Operation.LT);
+    DoubleNode<SmallMask> node = buildRev(100, Operation.LT);
     SmallMask mask = FACTORY.contiguous(100);
     assertTrue(node.match(1001, mask.clone()).isEmpty());
     assertEquals(mask.andNot(ZERO), node.match(0, mask.clone()));
@@ -71,23 +72,23 @@ public class DoubleMutableNodeTest {
 
   @Test
   public void testBuildNode() {
-    DoubleMatcher.DoubleNode<SmallMask> node = new DoubleMatcher.DoubleNode<>(Operation.EQ, new SmallMask());
+    DoubleNode<SmallMask> node = new DoubleNode<>(Operation.EQ, new SmallMask());
     node.add(0, 0);
     assertEquals(FACTORY.contiguous(1), node.match(0, FACTORY.contiguous(1)));
     node.add(0, 1);
     assertEquals(FACTORY.contiguous(2), node.match(0, FACTORY.contiguous(2)));
   }
 
-  private DoubleMatcher.DoubleNode<SmallMask> build(int count, Operation relation) {
-    DoubleMatcher.DoubleNode<SmallMask> node = new DoubleMatcher.DoubleNode<>(relation, new SmallMask());
+  private DoubleNode<SmallMask> build(int count, Operation relation) {
+    DoubleNode<SmallMask> node = new DoubleNode<>(relation, new SmallMask());
     for (int i = 0; i < count; ++i) {
       node.add(i * 10,  i);
     }
     return node.optimise();
   }
 
-  private DoubleMatcher.DoubleNode<SmallMask> buildRev(int count, Operation relation) {
-    DoubleMatcher.DoubleNode<SmallMask> node = new DoubleMatcher.DoubleNode<>(relation, new SmallMask());
+  private DoubleNode<SmallMask> buildRev(int count, Operation relation) {
+    DoubleNode<SmallMask> node = new DoubleNode<>(relation, new SmallMask());
     for (int i = count - 1; i >= 0; --i) {
       node.add(i * 10,  i);
     }

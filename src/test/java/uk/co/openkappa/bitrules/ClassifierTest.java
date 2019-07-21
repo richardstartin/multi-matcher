@@ -110,6 +110,39 @@ public class ClassifierTest {
   }
 
   @Test
+  public void testBuildClassifierWithStringNotEqualRule() throws IOException {
+    Classifier<TestDomainObject, String> engine = buildStringMatcher(
+            () -> Arrays.asList(
+                    MatchingConstraint.<String, String>named("rule1")
+                            .eq("field1", "foo")
+                            .eq("field2", "qux")
+                            .priority(0)
+                            .classification("RED")
+                            .build(),
+                    MatchingConstraint.<String, String>named("rule2")
+                            .neq("field1", "bar")
+                            .eq("field2", "qux")
+                            .priority(1)
+                            .classification("BLUE")
+                            .build()
+            )
+    );
+
+    assertFalse(engine.classification(TestDomainObject.random()).isPresent());
+    TestDomainObject testTrigger = TestDomainObject.random();
+    testTrigger.setField1("foo");
+    testTrigger.setField2("qux");
+    List<String> classifications = engine.classifications(testTrigger).collect(toList());
+    assertEquals(2, classifications.size());
+    assertEquals("BLUE", classifications.get(0));
+    assertEquals("RED", classifications.get(1));
+    testTrigger.setField1("bar");
+    System.out.println(testTrigger);
+    //System.out.println(engine.classification(testTrigger).orElse("none"));
+    assertFalse(engine.classification(testTrigger).isPresent());
+  }
+
+  @Test
   public void testBuildClassifierTwoOverlappingRules() throws IOException {
     Classifier<TestDomainObject, String> engine = buildSimple(
             () -> Arrays.asList(

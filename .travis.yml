@@ -3,14 +3,29 @@ sudo: false
 
 jdk:
   - openjdk11
+  - openjdk12
+  - openjdk13
+
+
+# from https://docs.travis-ci.com/user/languages/java/#caching
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
 
 # Install silently to ensure all pom are installed and compilation is OK: actual checks will be processed by script:
-install: "mvn -P ci clean install --quiet -DskipTests -Dcheckstyle.skip=true -Dmaven.javadoc.skip=true -Dgpg.skip=true"
+# Including testClasses so tests will compile too.
+install: "./gradlew assemble testClasses"
 
 branches:
   only:
     - master
 
-script: "mvn clean verify -Dgpg.skip=true"
+script:
+  - ./gradlew test jacocoTestReport
+
 after_success:
-  - mvn jacoco:report coveralls:report --debug
+  - ./gradlew coveralls

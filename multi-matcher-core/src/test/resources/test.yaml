@@ -1,0 +1,20 @@
+- id: "rule1"
+  constraints:
+    field1:
+      operation: EQ
+      value: "foo"
+    measure1:
+      operation: GT
+      value: 0
+  priority: 0
+  classification: "RED"
+- id: "rule2"
+  constraints:
+    field1:
+      operation: EQ
+      value: "bar"
+    measure1:
+      operation: GT
+      value: 1
+  priority: 1
+  classification: "BLUE"

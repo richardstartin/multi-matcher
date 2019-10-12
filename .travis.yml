@@ -15,6 +15,9 @@ cache:
   directories:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
+    
+before_install:
+ - chmod +x gradlew
 
 # Install silently to ensure all pom are installed and compilation is OK: actual checks will be processed by script:
 # Including testClasses so tests will compile too.

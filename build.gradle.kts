@@ -40,7 +40,7 @@ subprojects {
     configure<JavaPluginConvention> {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
-        group = "uk.co.openkappa"
+        group = "io.github.richardstartin"
     }
 
     tasks.named<JacocoReport>("jacocoTestReport") {
@@ -101,7 +101,7 @@ subprojects.filter { listOf("multi-matcher-core").contains(it.name) }.forEach { 
                                 id.set("richardstartin")
                                 name.set("Richard Startin")
                                 email.set("richard@openkappa.co.uk")
-                                url.set("https://github.com/richardstartin/multi-matcher")
+                                url.set("https://richardstartin.github.io/multi-matcher")
                                 roles.addAll("architect", "developer", "maintainer")
                                 timezone.set("0")
                             }

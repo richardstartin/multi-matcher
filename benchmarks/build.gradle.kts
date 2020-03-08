@@ -23,7 +23,7 @@ dependencies {
 }
 
 jmh {
-    jmhVersion = "1.21"
+    jmhVersion = "1.23"
     // tests depend on jmh, not the other way around
     isIncludeTests = false
     warmupIterations = 5

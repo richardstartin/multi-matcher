@@ -1,9 +1,6 @@
 package uk.co.openkappa.bitrules.masks;
 
 import org.junit.jupiter.api.Test;
-import uk.co.openkappa.bitrules.masks.HugeMask;
-import uk.co.openkappa.bitrules.masks.SmallMask;
-import uk.co.openkappa.bitrules.masks.TinyMask;
 
 import static org.junit.jupiter.api.Assertions.*;
 

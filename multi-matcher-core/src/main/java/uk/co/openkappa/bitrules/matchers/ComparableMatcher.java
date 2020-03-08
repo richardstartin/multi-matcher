@@ -4,7 +4,9 @@ import uk.co.openkappa.bitrules.*;
 import uk.co.openkappa.bitrules.masks.MaskFactory;
 import uk.co.openkappa.bitrules.matchers.nodes.ComparableNode;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.function.Function;
 
 import static uk.co.openkappa.bitrules.matchers.SelectivityHeuristics.avgCardinality;

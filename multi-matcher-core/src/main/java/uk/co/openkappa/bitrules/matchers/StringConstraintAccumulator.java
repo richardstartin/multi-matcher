@@ -5,7 +5,6 @@ import uk.co.openkappa.bitrules.Mask;
 import uk.co.openkappa.bitrules.Matcher;
 import uk.co.openkappa.bitrules.Operation;
 import uk.co.openkappa.bitrules.masks.MaskFactory;
-import uk.co.openkappa.bitrules.matchers.nodes.ComparableNode;
 import uk.co.openkappa.bitrules.matchers.nodes.PrefixNode;
 
 import java.util.EnumMap;
@@ -14,8 +13,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static java.util.Comparator.naturalOrder;
-import static java.util.Comparator.nullsFirst;
 import static uk.co.openkappa.bitrules.Operation.*;
 
 public class StringConstraintAccumulator<Input, MaskType extends Mask<MaskType>>

@@ -1,7 +1,7 @@
 package uk.co.openkappa.bitrules.schema;
 
-import uk.co.openkappa.bitrules.Mask;
 import uk.co.openkappa.bitrules.ConstraintAccumulator;
+import uk.co.openkappa.bitrules.Mask;
 import uk.co.openkappa.bitrules.masks.MaskFactory;
 import uk.co.openkappa.bitrules.matchers.GenericConstraintAccumulator;
 

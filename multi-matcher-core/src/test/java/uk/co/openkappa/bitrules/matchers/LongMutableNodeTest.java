@@ -1,15 +1,15 @@
 package uk.co.openkappa.bitrules.matchers;
 
 import org.junit.jupiter.api.Test;
-import uk.co.openkappa.bitrules.masks.SmallMask;
 import uk.co.openkappa.bitrules.Operation;
+import uk.co.openkappa.bitrules.masks.SmallMask;
 import uk.co.openkappa.bitrules.matchers.nodes.LongNode;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static uk.co.openkappa.bitrules.masks.SmallMask.FACTORY;
 import static uk.co.openkappa.bitrules.Mask.with;
 import static uk.co.openkappa.bitrules.Mask.without;
+import static uk.co.openkappa.bitrules.masks.SmallMask.FACTORY;
 
 public class LongMutableNodeTest {
 

@@ -16,7 +16,7 @@ public class LargeClassifierTest {
 
   @Test
   public void testLargeClassifier() {
-    Classifier<int[], String> classifier = ImmutableClassifier.
+    Classifier<int[], String> classifier = Classifier.
             <Integer, int[], String>builder(Schema.<Integer, int[]>create()
                     .withAttribute(0, extract(0))
                     .withAttribute(1, extract(1))
@@ -49,7 +49,7 @@ public class LargeClassifierTest {
 
   @Test
   public void testLargeDiscreteClassifier() {
-    Classifier<Map<String, Object>, String> classifier = ImmutableClassifier.
+    Classifier<Map<String, Object>, String> classifier = Classifier.
             <String, Map<String, Object>, String>builder(Schema.<String, Map<String, Object>>create()
               .withStringAttribute("attr1", (Map<String, Object> map) -> (String)map.get("attr1"))
               .withStringAttribute("attr2", (Map<String, Object> map) -> (String)map.get("attr2"))

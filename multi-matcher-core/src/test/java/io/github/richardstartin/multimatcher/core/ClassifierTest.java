@@ -206,7 +206,7 @@ public class ClassifierTest {
   @Test
   public void testIntegerRules() {
     Classifier<TestDomainObject, String> classifier =
-            ImmutableClassifier.<String, TestDomainObject, String>builder(Schema.<String, TestDomainObject>create()
+            Classifier.<String, TestDomainObject, String>builder(Schema.<String, TestDomainObject>create()
                     .withAttribute("measure2", TestDomainObject::getMeasure2)
             ).build(Arrays.asList(
                     MatchingConstraint.<String, String>named("rule1").eq("measure2", 999).priority(0).classification("RED").build(),
@@ -222,7 +222,7 @@ public class ClassifierTest {
 
   @Test
   public void testLongRules() throws IOException {
-    Classifier<TestDomainObject, String> classifier = ImmutableClassifier.<String, TestDomainObject, String>
+    Classifier<TestDomainObject, String> classifier = Classifier.<String, TestDomainObject, String>
             builder(Schema.<String, TestDomainObject>create()
             .withAttribute("measure3", TestDomainObject::getMeasure3)
     ).build(Arrays.asList(
@@ -271,7 +271,7 @@ public class ClassifierTest {
   @Test
   public void testBuildRuleClassifierFromInvalidYAML() {
     assertThrows(IOException.class, () ->
-    ImmutableClassifier.<String, TestDomainObject, String>builder(Schema.create())
+    Classifier.<String, TestDomainObject, String>builder(Schema.create())
             .build(new FileRules("invalid.yaml", new YAMLMapper()).constraints()));
   }
 
@@ -290,7 +290,7 @@ public class ClassifierTest {
   @Test
   public void testBuildFromEnumSchema() {
     Classifier<TestDomainObject, Duration> classifier =
-            ImmutableClassifier.<TestDomainObject.Fields, TestDomainObject, Duration>builder(Schema.<TestDomainObject.Fields, TestDomainObject>create(TestDomainObject.Fields.class)
+            Classifier.<TestDomainObject.Fields, TestDomainObject, Duration>builder(Schema.<TestDomainObject.Fields, TestDomainObject>create(TestDomainObject.Fields.class)
                     .withAttribute(TestDomainObject.Fields.FIELD1, TestDomainObject::getField1)
                     .withAttribute(TestDomainObject.Fields.MEASURE1, TestDomainObject::getMeasure1))
                     .build(Arrays.asList(
@@ -355,7 +355,7 @@ public class ClassifierTest {
   }
 
   private Classifier<TestDomainObject, String> buildSimple(RuleSet<String, String> repo) throws IOException {
-    return ImmutableClassifier.<String, TestDomainObject, String>builder(Schema.<String, TestDomainObject>create()
+    return Classifier.<String, TestDomainObject, String>builder(Schema.<String, TestDomainObject>create()
             .withAttribute("field1", TestDomainObject::getField1)
             .withStringAttribute("field2", TestDomainObject::getField2)
             .withAttribute("measure1", TestDomainObject::getMeasure1)
@@ -364,14 +364,14 @@ public class ClassifierTest {
 
 
   private Classifier<TestDomainObject, String> buildComparable(RuleSet<String, String> repo) throws IOException {
-    return ImmutableClassifier.<String, TestDomainObject, String>builder(Schema.<String, TestDomainObject>create()
+    return Classifier.<String, TestDomainObject, String>builder(Schema.<String, TestDomainObject>create()
             .withAttribute("field1", TestDomainObject::getField1, Comparator.naturalOrder())
             .withAttribute("field2", TestDomainObject::getField2, Comparator.naturalOrder())
     ).build(repo.constraints());
   }
 
   private Classifier<TestDomainObject, String> buildWithContinuousAttributes(RuleSet<String, String> repo) throws IOException {
-    return ImmutableClassifier.<String, TestDomainObject, String>builder(Schema.<String, TestDomainObject>create()
+    return Classifier.<String, TestDomainObject, String>builder(Schema.<String, TestDomainObject>create()
             .withAttribute("measure1", TestDomainObject::getMeasure1)
             .withAttribute("measure2", TestDomainObject::getMeasure2)
             .withAttribute("measure3", TestDomainObject::getMeasure3)
@@ -380,7 +380,7 @@ public class ClassifierTest {
 
 
   private Classifier<TestDomainObject, String> buildStringMatcher(RuleSet<String, String> repo) throws IOException {
-    return ImmutableClassifier.<String, TestDomainObject, String>builder(Schema.<String, TestDomainObject>create()
+    return Classifier.<String, TestDomainObject, String>builder(Schema.<String, TestDomainObject>create()
             .withStringAttribute("field1", TestDomainObject::getField1)
             .withStringAttribute("field2", TestDomainObject::getField2)
             .withStringAttribute("field3", TestDomainObject::getField3)
@@ -388,7 +388,7 @@ public class ClassifierTest {
   }
 
   private Classifier<TestDomainObject, String> buildStringAndEnumMatcher(RuleSet<String, String> repo) throws IOException {
-    return ImmutableClassifier.<String, TestDomainObject, String>builder(Schema.<String, TestDomainObject>create()
+    return Classifier.<String, TestDomainObject, String>builder(Schema.<String, TestDomainObject>create()
             .withStringAttribute("field1", TestDomainObject::getField1)
             .withStringAttribute("field2", TestDomainObject::getField2)
             .withStringAttribute("field3", TestDomainObject::getField3)

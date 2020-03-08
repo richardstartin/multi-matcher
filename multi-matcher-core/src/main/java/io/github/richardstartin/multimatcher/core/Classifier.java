@@ -1,6 +1,8 @@
 package io.github.richardstartin.multimatcher.core;
 
 
+import io.github.richardstartin.multimatcher.core.schema.Schema;
+
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -25,5 +27,20 @@ public interface Classifier<T, C> {
    * @return the best classification, or empty if no constraints are satisfied
    */
   Optional<C> classification(T value);
+
+
+  /**
+   * Gets a new builder for a classifier
+   *
+   * @param <Key>            the create key type
+   * @param <Input>          the type named the classified objects
+   * @param <Classification> the classification type
+   * @param schema the schema
+   * @return a new classifier builder
+   */
+  static <Key, Input, Classification>
+  MaskedClassifier.ClassifierBuilder<Key, Input, Classification> builder(Schema<Key, Input> schema) {
+    return new MaskedClassifier.ClassifierBuilder<>(schema);
+  }
 
 }

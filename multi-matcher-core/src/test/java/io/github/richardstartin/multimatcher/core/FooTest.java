@@ -41,7 +41,7 @@ public class FooTest {
             .withAttribute("qty", Foo::getQuantity)
             .withAttribute("price", Foo::getPrice);
     // build the classifier from the rules and the schema
-    ImmutableClassifier<Foo, String> classifier = ImmutableClassifier.<String, Foo, String>builder(schema).build(
+    Classifier<Foo, String> classifier = Classifier.<String, Foo, String>builder(schema).build(
             Arrays.asList(
               MatchingConstraint.<String, String>anonymous()
                       .eq("productType", "electronics")

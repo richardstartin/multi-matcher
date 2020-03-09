@@ -15,11 +15,13 @@ public class MaskedClassifier<MaskType extends Mask<MaskType>, Input, Classifica
     private final Classification[] classifications;
     private final Matcher<Input, MaskType>[] matchers;
     private final Mask<MaskType> mask;
+    private final MaskType context;
 
     public MaskedClassifier(Classification[] classifications, Matcher<Input, MaskType>[] matchers, Mask<MaskType> mask) {
         this.classifications = classifications;
         this.matchers = matchers;
         this.mask = mask;
+        this.context = mask.clone();
     }
 
     @Override
@@ -36,10 +38,10 @@ public class MaskedClassifier<MaskType extends Mask<MaskType>, Input, Classifica
     }
 
     private MaskType match(Input value) {
-        MaskType context = mask.clone();
+        var ctx = context.resetTo(mask);
         for (Matcher<Input, MaskType> matcher : matchers) {
-            context = matcher.match(value, context);
-            if (context.isEmpty()) {
+            ctx = matcher.match(value, ctx);
+            if (ctx.isEmpty()) {
                 break;
             }
         }

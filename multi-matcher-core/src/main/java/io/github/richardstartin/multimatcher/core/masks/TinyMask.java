@@ -65,6 +65,17 @@ public class TinyMask implements Mask<TinyMask> {
   }
 
   @Override
+  public TinyMask resetTo(Mask<TinyMask> other) {
+    this.mask = other.unwrap().mask;
+    return this;
+  }
+
+  @Override
+  public TinyMask unwrap() {
+    return this;
+  }
+
+  @Override
   public IntStream stream() {
     return LongStream.iterate(mask, mask -> mask & (mask - 1))
                      .limit(Long.bitCount(mask))

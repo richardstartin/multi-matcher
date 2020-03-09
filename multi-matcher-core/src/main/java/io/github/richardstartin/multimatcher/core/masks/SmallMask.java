@@ -47,7 +47,10 @@ public class SmallMask implements Mask<SmallMask> {
 
   @Override
   public SmallMask inPlaceAndNot(SmallMask other) {
-    this.container = this.container.andNot(other.container);
+    var andNot = this.container.andNot(other.container);
+    if (container != andNot) {
+      this.container = andNot;
+    }
     return this;
   }
 
@@ -56,7 +59,10 @@ public class SmallMask implements Mask<SmallMask> {
     if (other.isEmpty()) {
       return FACTORY.empty();
     }
-    this.container = container.iand(other.container);
+    var and = container.iand(other.container);
+    if (and != container) {
+      this.container = and;
+    }
     return this;
   }
 
@@ -81,7 +87,20 @@ public class SmallMask implements Mask<SmallMask> {
     if (other.isEmpty()) {
       return this;
     }
-    this.container = container.ior(other.container);
+    var or = container.ior(other.container);
+    if (or != container) {
+      this.container = or;
+    }
+    return this;
+  }
+
+  @Override
+  public SmallMask resetTo(Mask<SmallMask> other) {
+    return inPlaceOr(other.unwrap());
+  }
+
+  @Override
+  public SmallMask unwrap() {
     return this;
   }
 

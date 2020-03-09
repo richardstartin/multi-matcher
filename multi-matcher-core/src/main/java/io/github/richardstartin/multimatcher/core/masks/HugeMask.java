@@ -84,6 +84,16 @@ public class HugeMask implements Mask<HugeMask> {
   }
 
   @Override
+  public HugeMask resetTo(Mask<HugeMask> other) {
+    return inPlaceOr(other.unwrap());
+  }
+
+  @Override
+  public HugeMask unwrap() {
+    return this;
+  }
+
+  @Override
   public IntStream stream() {
     IntIterator it = bitmap.getIntIterator();
     return IntStream.range(0, bitmap.getCardinality())

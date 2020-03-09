@@ -23,6 +23,8 @@ public interface Mask<T extends Mask> {
   T orNot(T other, int max);
   T inPlaceAnd(T other);
   T inPlaceOr(T other);
+  T resetTo(Mask<T> other);
+  T unwrap();
   IntStream stream();
   int first();
   T clone();

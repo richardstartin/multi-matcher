@@ -26,8 +26,8 @@ public class DoubleMatcher<T, MaskType extends Mask<MaskType>> implements Constr
 
   @Override
   public MaskType match(T value, MaskType context) {
-    MaskType result = match(accessor.applyAsDouble(value), context);
-    return context.inPlaceAnd(result.inPlaceOr(wildcards));
+    MaskType result = match(accessor.applyAsDouble(value));
+    return context.inPlaceAnd(result).inPlaceOr(wildcards);
   }
 
   @Override
@@ -51,12 +51,12 @@ public class DoubleMatcher<T, MaskType extends Mask<MaskType>> implements Constr
             .add(threshold, priority);
   }
 
-  private MaskType match(double value, MaskType result) {
+  private MaskType match(double value) {
     MaskType temp = empty.clone();
     for (DoubleNode<MaskType> component : children.values()) {
       temp.inPlaceOr(component.match(value, empty));
     }
-    return result.inPlaceAnd(temp);
+    return temp;
   }
 
   private void optimise() {

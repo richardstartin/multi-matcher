@@ -26,8 +26,8 @@ public class IntMatcher<T, MaskType extends Mask<MaskType>> implements Constrain
 
   @Override
   public MaskType match(T value, MaskType context) {
-    MaskType result = match(accessor.applyAsInt(value), context);
-    return context.inPlaceAnd(result.inPlaceOr(wildcards));
+    MaskType result = match(accessor.applyAsInt(value));
+    return context.inPlaceAnd(result).inPlaceOr(wildcards);
   }
 
   @Override
@@ -56,12 +56,12 @@ public class IntMatcher<T, MaskType extends Mask<MaskType>> implements Constrain
     children.computeIfAbsent(relation, r -> new IntNode<>(r, empty)).add(threshold, priority);
   }
 
-  private MaskType match(int value, MaskType result) {
+  private MaskType match(int value) {
     MaskType temp = empty.clone();
     for (IntNode<MaskType> component : children.values()) {
       temp.inPlaceOr(component.apply(value, empty));
     }
-    return result.inPlaceAnd(temp);
+    return temp;
   }
 
   private void optimise() {

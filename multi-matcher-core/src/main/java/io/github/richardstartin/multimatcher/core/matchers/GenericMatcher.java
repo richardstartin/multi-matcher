@@ -26,15 +26,10 @@ class GenericMatcher<T, U, MaskType extends Mask<MaskType>> implements Matcher<T
   @Override
   public MaskType match(T input, MaskType context) {
     U value = accessor.apply(input);
-    for (var component : nodes.entrySet()) {
-      var op = component.getKey();
-      var node = component.getValue();
+    for (var node : nodes.values()) {
       context.inPlaceAnd(node.match(value));
-      if (op != Operation.NE) {
-        context.inPlaceOr(wildcard);
-      }
     }
-    return context;
+    return context.inPlaceOr(wildcard);
   }
 
   @Override

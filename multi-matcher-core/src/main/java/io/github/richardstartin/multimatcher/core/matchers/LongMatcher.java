@@ -26,8 +26,8 @@ public class LongMatcher<T, MaskType extends Mask<MaskType>> implements Constrai
 
   @Override
   public MaskType match(T value, MaskType context) {
-    MaskType result = match(accessor.applyAsLong(value), context);
-    return context.inPlaceAnd(result.inPlaceOr(wildcards));
+    MaskType result = match(accessor.applyAsLong(value));
+    return context.inPlaceAnd(result).inPlaceOr(wildcards);
   }
 
   @Override
@@ -51,12 +51,12 @@ public class LongMatcher<T, MaskType extends Mask<MaskType>> implements Constrai
     children.computeIfAbsent(relation, r -> new LongNode<>(r, empty)).add(threshold, priority);
   }
 
-  private MaskType match(long value, MaskType result) {
+  private MaskType match(long value) {
     var temp = empty.clone();
     for (LongNode<MaskType> component : children.values()) {
       temp.inPlaceOr(component.apply(value, empty));
     }
-    return result.inPlaceAnd(temp);
+    return temp;
   }
 
   private void optimise() {

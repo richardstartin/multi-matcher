@@ -52,9 +52,9 @@ public class LongMatcher<T, MaskType extends Mask<MaskType>> implements Constrai
   }
 
   private MaskType match(long value, MaskType result) {
-    MaskType temp = empty.clone();
+    var temp = empty.clone();
     for (LongNode<MaskType> component : children.values()) {
-      temp = temp.inPlaceOr(component.apply(value, result.clone()));
+      temp.inPlaceOr(component.apply(value, empty));
     }
     return result.inPlaceAnd(temp);
   }

@@ -79,18 +79,18 @@ public class DoubleNode<MaskType extends Mask<MaskType>> {
     return avgCardinality(sets);
   }
 
-  public MaskType match(double value, MaskType context) {
+  public MaskType match(double value, MaskType defaultValue) {
     switch (relation) {
       case GT:
       case GE:
-        return context.inPlaceAnd(findRangeEncoded(value));
+        return findRangeEncoded(value);
       case LT:
       case LE:
-        return context.inPlaceAnd(findReverseRangeEncoded(value));
+        return findReverseRangeEncoded(value);
       case EQ:
-        return context.inPlaceAnd(findEqualityEncoded(value));
+        return findEqualityEncoded(value);
       default:
-        return context;
+        return defaultValue;
     }
   }
 

@@ -59,7 +59,7 @@ public class IntMatcher<T, MaskType extends Mask<MaskType>> implements Constrain
   private MaskType match(int value, MaskType result) {
     MaskType temp = empty.clone();
     for (IntNode<MaskType> component : children.values()) {
-      temp = temp.inPlaceOr(component.apply(value, result.clone()));
+      temp.inPlaceOr(component.apply(value, empty));
     }
     return result.inPlaceAnd(temp);
   }

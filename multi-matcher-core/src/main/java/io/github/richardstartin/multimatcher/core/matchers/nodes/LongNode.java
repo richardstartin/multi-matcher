@@ -59,20 +59,20 @@ public class LongNode<MaskType extends Mask<MaskType>> {
     }
   }
 
-  public MaskType apply(long value, MaskType context) {
+  public MaskType apply(long value, MaskType defaultValue) {
     switch (relation) {
       case GT:
-        return context.inPlaceAnd(findRangeEncoded(value));
+        return findRangeEncoded(value);
       case GE:
-        return context.inPlaceAnd(findRangeEncodedInclusive(value));
+        return findRangeEncodedInclusive(value);
       case LT:
-        return context.inPlaceAnd(findReverseRangeEncoded(value));
+        return findReverseRangeEncoded(value);
       case LE:
-        return context.inPlaceAnd(findReverseRangeEncodedInclusive(value));
+        return findReverseRangeEncodedInclusive(value);
       case EQ:
-        return context.inPlaceAnd(findEqualityEncoded(value));
+        return findEqualityEncoded(value);
       default:
-        return context;
+        return defaultValue;
     }
   }
 

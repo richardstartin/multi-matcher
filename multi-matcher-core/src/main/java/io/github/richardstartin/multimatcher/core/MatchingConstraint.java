@@ -97,7 +97,7 @@ public class MatchingConstraint<Key, Classification> {
     this.classification = classification;
   }
 
-  public MatchingConstraint() {
+  private MatchingConstraint() {
   }
 
   public String getId() {

@@ -25,9 +25,8 @@ public class IntMatcher<T, MaskType extends Mask<MaskType>> implements Constrain
   }
 
   @Override
-  public MaskType match(T value, MaskType context) {
-    MaskType result = match(accessor.applyAsInt(value));
-    return context.inPlaceAnd(result);
+  public void match(T value, MaskType context) {
+    context.inPlaceAnd(match(accessor.applyAsInt(value)));
   }
 
   @Override

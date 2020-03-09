@@ -31,7 +31,7 @@ public class StringSchemaMatcherState {
     private Schema<String, DomainObject> stringSchema() {
         return Schema.<String, DomainObject>create()
                 .withAttribute(AMOUNT.name(), DomainObject::getAmount)
-                .withAttribute(CURRENCY.name(), DomainObject::getCurrency)
+                .withStringAttribute(CURRENCY.name(), DomainObject::getCurrency)
                 .withAttribute(ID.name(), DomainObject::getId)
                 .withAttribute(IP_ADDRESS.name(), DomainObject::getIpAddress)
                 .withAttribute(RATING.name(), DomainObject::getRating)

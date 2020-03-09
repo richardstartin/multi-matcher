@@ -3,6 +3,7 @@ package io.github.richardstartin.multimatcher.core.masks;
 import io.github.richardstartin.multimatcher.core.Mask;
 import org.roaringbitmap.*;
 
+import java.util.Arrays;
 import java.util.stream.IntStream;
 
 
@@ -178,6 +179,15 @@ public class SmallMask implements Mask<SmallMask> {
     @Override
     public SmallMask emptySingleton() {
       return EMPTY;
+    }
+
+    @Override
+    public SmallMask memoryStableContiguousMask(int max) {
+      int lastWord = max >>> 6;
+      long[] bitmap = new long[1024];
+      Arrays.fill(bitmap, 0, lastWord, -1L);
+      bitmap[lastWord] |= ((1L << max) - 1);
+      return new SmallMask(new BitmapContainer(bitmap, max));
     }
   }
 }

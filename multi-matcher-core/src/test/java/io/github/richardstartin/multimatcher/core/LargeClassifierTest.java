@@ -76,14 +76,7 @@ public class LargeClassifierTest {
     msg.put("attr5", "value0");
     msg.put("attr6", "value9");
 
-
-    String classification = null;
-    long start = System.nanoTime();
-    for (int i = 0; i < 1_000_000; ++i) {
-      classification = classifier.classification(msg).orElseThrow(RuntimeException::new);
-    }
-    long end = System.nanoTime();
-    System.out.println(1_000_000 / ((end - start) / 1e6) + "ops/ms");
+    String classification = classifier.classification(msg).orElseThrow(RuntimeException::new);
     assertEquals("SEGMENT90", classification);
   }
 }

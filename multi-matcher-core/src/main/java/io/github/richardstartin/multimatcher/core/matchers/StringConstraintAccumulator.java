@@ -52,7 +52,7 @@ public class StringConstraintAccumulator<Input, MaskType extends Mask<MaskType>>
     EnumMap<Operation, ClassificationNode<String, MaskType>> frozen = new EnumMap<>(Operation.class);
     nodes.forEach((op, node) -> node.link(nodes));
     nodes.forEach((op, node) -> frozen.put(op, node.freeze()));
-    return new StringMatcher<>(accessor, frozen, wildcard);
+    return new StringMatcher<>(accessor, frozen, wildcard, empty);
   }
 
   private static class StringMatcher<T, MaskType extends Mask<MaskType>> implements Matcher<T, MaskType> {
@@ -60,33 +60,40 @@ public class StringConstraintAccumulator<Input, MaskType extends Mask<MaskType>>
     private final Function<T, String> accessor;
     private final EnumMap<Operation, ClassificationNode<String, MaskType>> nodes;
     private final MaskType wildcard;
+    private final MaskType empty;
 
-    StringMatcher(Function<T, String> accessor, EnumMap<Operation, ClassificationNode<String, MaskType>> nodes, MaskType wildcard) {
+    StringMatcher(Function<T, String> accessor,
+                  EnumMap<Operation, ClassificationNode<String, MaskType>> nodes,
+                  MaskType wildcard,
+                  MaskType empty) {
       this.accessor = accessor;
       this.nodes = nodes;
       this.wildcard = wildcard;
+      this.empty = empty;
     }
 
     @Override
-    public MaskType match(T input, MaskType context) {
+    public void match(T input, MaskType context) {
       String value = accessor.apply(input);
-      MaskType result = context.clone();
-      var eq = nodes.get(EQ);
-      var prefix = nodes.get(STARTS_WITH);
-      if (null != prefix) {
-        result = result.inPlaceAnd(prefix.match(value));
-        if (null != eq) {
-          result = result.inPlaceOr(eq.match(value));
-        }
-        result = result.inPlaceOr(wildcard);
-      } else if (null != eq) {
-        result = result.inPlaceAnd(eq.match(value)).inPlaceOr(wildcard);
+      var temp = empty.clone();
+      match(EQ, temp, value);
+      match(STARTS_WITH, temp, value);
+      matchNotEquals(context, value);
+      context.inPlaceAnd(temp.inPlaceOr(wildcard));
+    }
+
+    private void matchNotEquals(MaskType context, String value) {
+      var node = nodes.get(NE);
+      if (null != node) {
+        context.inPlaceAnd(node.match(value));
       }
-      var neq = nodes.get(NE);
-      if (null != neq) {
-        result = result.inPlaceAnd(neq.match(value));
+    }
+
+    private void match(Operation op, MaskType context, String value) {
+      var node = nodes.get(op);
+      if (null != node) {
+        context.inPlaceOr(node.match(value));
       }
-      return context.inPlaceAnd(result);
     }
   }
 

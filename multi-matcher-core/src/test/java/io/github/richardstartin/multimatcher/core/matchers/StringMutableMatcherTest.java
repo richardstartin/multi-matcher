@@ -19,7 +19,8 @@ public class StringMutableMatcherTest {
     matcher.addConstraint(equalTo("bar"), 1);
     matcher.addConstraint(startsWith("foo"), 2);
     matcher.addConstraint(startsWith("f"), 3);
-    TinyMask mask = matcher.freeze().match("foo", FACTORY.contiguous(63));
+    var mask = FACTORY.contiguous(63);
+    matcher.freeze().match("foo", mask);
     assertEquals(FACTORY.of(0, 2, 3), mask);
   }
 }

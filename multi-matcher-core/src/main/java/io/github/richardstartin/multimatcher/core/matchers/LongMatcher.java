@@ -25,9 +25,8 @@ public class LongMatcher<T, MaskType extends Mask<MaskType>> implements Constrai
   }
 
   @Override
-  public MaskType match(T value, MaskType context) {
-    MaskType result = match(accessor.applyAsLong(value));
-    return context.inPlaceAnd(result);
+  public void match(T value, MaskType context) {
+    context.inPlaceAnd(match(accessor.applyAsLong(value)));
   }
 
   @Override

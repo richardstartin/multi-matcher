@@ -25,9 +25,8 @@ public class DoubleMatcher<T, MaskType extends Mask<MaskType>> implements Constr
   }
 
   @Override
-  public MaskType match(T value, MaskType context) {
-    MaskType result = match(accessor.applyAsDouble(value));
-    return context.inPlaceAnd(result);
+  public void match(T value, MaskType context) {
+    context.inPlaceAnd(match(accessor.applyAsDouble(value)));
   }
 
   @Override

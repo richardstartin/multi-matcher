@@ -28,9 +28,8 @@ public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements
   }
 
   @Override
-  public MaskType match(T value, MaskType context) {
-    MaskType result = matchValue(accessor.apply(value));
-    return context.inPlaceAnd(result);
+  public void match(T value, MaskType context) {
+    context.inPlaceAnd(matchValue(accessor.apply(value)));
   }
 
   @Override

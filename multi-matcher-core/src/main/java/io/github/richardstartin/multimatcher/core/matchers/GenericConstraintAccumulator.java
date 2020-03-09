@@ -43,7 +43,7 @@ public class GenericConstraintAccumulator<T, U, MaskType extends Mask<MaskType>>
         return true;
       case EQ:
         ((EqualityNode<U, MaskType>)nodes
-                .computeIfAbsent(constraint.getOperation(), op -> new EqualityNode<>(mapSupplier.get(), empty, maskFactory.contiguous(max))))
+                .computeIfAbsent(constraint.getOperation(), op -> new EqualityNode<>(mapSupplier.get(), empty)))
                 .add(constraint.getValue(), priority);
         wildcard.remove(priority);
         return true;

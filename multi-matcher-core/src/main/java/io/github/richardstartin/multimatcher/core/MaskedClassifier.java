@@ -15,13 +15,16 @@ public class MaskedClassifier<MaskType extends Mask<MaskType>, Input, Classifica
     private final Classification[] classifications;
     private final Matcher<Input, MaskType>[] matchers;
     private final Mask<MaskType> mask;
-    private final MaskType context;
+    private final Mask<MaskType> context;
 
-    public MaskedClassifier(Classification[] classifications, Matcher<Input, MaskType>[] matchers, Mask<MaskType> mask) {
+    public MaskedClassifier(Classification[] classifications,
+                            Matcher<Input, MaskType>[] matchers,
+                            Mask<MaskType> mask,
+                            Mask<MaskType> context) {
         this.classifications = classifications;
         this.matchers = matchers;
         this.mask = mask;
-        this.context = mask.clone();
+        this.context = context;
     }
 
     @Override
@@ -40,12 +43,12 @@ public class MaskedClassifier<MaskType extends Mask<MaskType>, Input, Classifica
     private MaskType match(Input value) {
         var ctx = context.resetTo(mask);
         for (Matcher<Input, MaskType> matcher : matchers) {
-            ctx = matcher.match(value, ctx);
-            if (ctx.isEmpty()) {
+            matcher.match(value, ctx);
+            if (context.isEmpty()) {
                 break;
             }
         }
-        return context;
+        return ctx;
     }
 
     public static class ClassifierBuilder<Key, Input, Classification> {
@@ -80,7 +83,8 @@ public class MaskedClassifier<MaskType extends Mask<MaskType>, Input, Classifica
             PrimitiveIterator.OfInt sequence = IntStream.iterate(0, i -> i + 1).iterator();
             specs.stream().sorted(Comparator.comparingInt(rd -> order(rd.getPriority())))
                     .forEach(rule -> addMatchingConstraint(rule, sequence.nextInt(), maskFactory, max));
-            return new MaskedClassifier<>((Classification[]) classifications.toArray(), freezeMatchers(), maskFactory.contiguous(max));
+            return new MaskedClassifier<>((Classification[]) classifications.toArray(), freezeMatchers(),
+                    maskFactory.contiguous(max), maskFactory.memoryStableContiguousMask(max));
         }
 
         private <MaskType extends Mask<MaskType>>

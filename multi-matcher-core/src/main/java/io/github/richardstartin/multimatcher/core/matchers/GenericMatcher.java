@@ -24,12 +24,12 @@ class GenericMatcher<T, U, MaskType extends Mask<MaskType>> implements Matcher<T
   }
 
   @Override
-  public MaskType match(T input, MaskType context) {
+  public void match(T input, MaskType context) {
     U value = accessor.apply(input);
     for (var node : nodes.values()) {
       context.inPlaceAnd(node.match(value));
     }
-    return context.inPlaceOr(wildcard);
+    context.inPlaceOr(wildcard);
   }
 
   @Override

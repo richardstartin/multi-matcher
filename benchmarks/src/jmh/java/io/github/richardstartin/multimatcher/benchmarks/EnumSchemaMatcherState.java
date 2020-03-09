@@ -30,7 +30,7 @@ public class EnumSchemaMatcherState {
     private Schema<FieldsEnum, DomainObject> enumSchema() {
         return Schema.<FieldsEnum, DomainObject>create()
                 .withAttribute(AMOUNT, DomainObject::getAmount)
-                .withAttribute(CURRENCY, DomainObject::getCurrency)
+                .withStringAttribute(CURRENCY, DomainObject::getCurrency)
                 .withAttribute(ID, DomainObject::getId)
                 .withAttribute(IP_ADDRESS, DomainObject::getIpAddress)
                 .withAttribute(RATING, DomainObject::getRating)

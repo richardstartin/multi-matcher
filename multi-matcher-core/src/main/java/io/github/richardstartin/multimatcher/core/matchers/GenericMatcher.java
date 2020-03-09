@@ -30,12 +30,9 @@ class GenericMatcher<T, U, MaskType extends Mask<MaskType>> implements Matcher<T
     for (var component : nodes.entrySet()) {
       var op = component.getKey();
       var node = component.getValue();
-      switch (op) {
-        case NE:
-          result = result.inPlaceAnd(node.match(value));
-          break;
-        default:
-          result = result.inPlaceAnd(node.match(value)).inPlaceOr(wildcard);
+      result.inPlaceAnd(node.match(value));
+      if (op != Operation.NE) {
+        result.inPlaceOr(wildcard);
       }
     }
     return context.inPlaceAnd(result);

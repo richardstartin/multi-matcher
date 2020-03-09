@@ -18,7 +18,9 @@ public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements
   private final EnumMap<Operation, ComparableNode<U, MaskType>> children = new EnumMap<>(Operation.class);
   private final MaskType empty;
 
-  public ComparableMatcher(Function<T, U> accessor, Comparator<U> comparator, MaskFactory<MaskType> maskFactory, int max) {
+  public ComparableMatcher(Function<T, U> accessor,
+                           Comparator<U> comparator, MaskFactory<MaskType> maskFactory,
+                           int max) {
     this.accessor = accessor;
     this.comparator = comparator;
     this.empty = maskFactory.emptySingleton();
@@ -27,8 +29,8 @@ public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements
 
   @Override
   public MaskType match(T value, MaskType context) {
-    MaskType result = matchValue(accessor.apply(value), context);
-    return context.inPlaceAnd(result.or(wildcards));
+    MaskType result = matchValue(accessor.apply(value));
+    return context.inPlaceAnd(result);
   }
 
   @Override
@@ -59,12 +61,12 @@ public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements
     children.computeIfAbsent(relation, r -> new ComparableNode<>(comparator, r, empty)).add(threshold, priority);
   }
 
-  private MaskType matchValue(U value, MaskType context) {
-    MaskType temp = empty.clone();
+  private MaskType matchValue(U value) {
+    MaskType temp = empty.clone().inPlaceOr(wildcards);
     for (ComparableNode<U, MaskType> component : children.values()) {
       temp = temp.inPlaceOr(component.match(value));
     }
-    return context.inPlaceAnd(temp.inPlaceOr(wildcards));
+    return temp;
   }
 
   public void optimise() {

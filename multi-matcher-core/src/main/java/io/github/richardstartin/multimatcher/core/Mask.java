@@ -4,12 +4,12 @@ import java.util.stream.IntStream;
 
 public interface Mask<T extends Mask<T>> {
 
-  static <U extends Mask> U with(U mask, int priority) {
+  static <U extends Mask<U>> U with(U mask, int priority) {
     mask.add(priority);
     return mask;
   }
 
-  static <U extends Mask> U without(U mask, int priority) {
+  static <U extends Mask<U>> U without(U mask, int priority) {
     mask.remove(priority);
     return mask;
   }

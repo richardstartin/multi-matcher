@@ -2,9 +2,7 @@ package io.github.richardstartin.multimatcher.core.matchers;
 
 import io.github.richardstartin.multimatcher.core.Mask;
 import io.github.richardstartin.multimatcher.core.Matcher;
-import io.github.richardstartin.multimatcher.core.Operation;
 
-import java.util.EnumMap;
 import java.util.function.Function;
 
 import static io.github.richardstartin.multimatcher.core.matchers.SelectivityHeuristics.avgCardinality;

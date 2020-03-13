@@ -9,9 +9,12 @@ public interface RuleSet<Key, Classification> {
   List<MatchingConstraint<Key, Classification>> constraints() throws IOException;
 
   default Optional<MatchingConstraint<Key, Classification>> specification(String ruleId) throws IOException {
-    return constraints().stream()
-            .filter(rule -> rule.getId().equals(ruleId))
-            .findFirst();
+    for (var constraint : constraints()) {
+      if (ruleId.equals(constraint.getId())) {
+        return Optional.of(constraint);
+      }
+    }
+    return Optional.empty();
   }
 
 }

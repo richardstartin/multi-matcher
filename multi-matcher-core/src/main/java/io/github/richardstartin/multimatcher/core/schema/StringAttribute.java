@@ -16,7 +16,8 @@ public class StringAttribute<Input> implements Attribute<Input> {
   }
 
   @Override
-  public <MaskType extends Mask<MaskType>> ConstraintAccumulator<Input, MaskType> newAccumulator(MaskFactory<MaskType> maskFactory, int max) {
+  public <MaskType extends Mask<MaskType>>
+  ConstraintAccumulator<Input, MaskType> newAccumulator(MaskFactory<MaskType> maskFactory, int max) {
     return new StringConstraintAccumulator<>(accessor, maskFactory, max);
   }
 }

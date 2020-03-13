@@ -16,10 +16,11 @@ public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements
   private final Function<T, U> accessor;
   private final MaskType wildcards;
   private final Comparator<U> comparator;
-  private ComparableNode<U, MaskType>[] children = (ComparableNode<U, MaskType>[]) newArray(ComparableNode.class, Operation.SIZE);
+  private ComparableNode<U, MaskType>[] children;
   private final MaskFactory<MaskType> factory;
   private final ThreadLocal<MaskType> empty;
 
+  @SuppressWarnings("unchecked")
   public ComparableMatcher(Function<T, U> accessor,
                            Comparator<U> comparator, MaskFactory<MaskType> maskFactory,
                            int max) {
@@ -28,6 +29,7 @@ public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements
     this.factory = maskFactory;
     this.wildcards = maskFactory.contiguous(max);
     this.empty = ThreadLocal.withInitial(factory::newMask);
+    this.children = (ComparableNode<U, MaskType>[]) newArray(ComparableNode.class, Operation.SIZE);
   }
 
   @Override
@@ -74,6 +76,7 @@ public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements
     existing.add(threshold, priority);
   }
 
+  @SuppressWarnings("unchecked")
   public void optimise() {
     int nullCount = nullCount(children);
     if (nullCount > 0) {

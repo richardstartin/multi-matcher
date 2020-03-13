@@ -87,6 +87,10 @@ public class MatchingConstraint<Key, Classification> {
   private int priority;
   private Classification classification;
 
+
+  @SuppressWarnings("unused")
+  private MatchingConstraint() { }
+
   public MatchingConstraint(String id,
                             Map<Key, Constraint> constraints,
                             int priority,
@@ -95,9 +99,6 @@ public class MatchingConstraint<Key, Classification> {
     this.constraints = constraints;
     this.priority = priority;
     this.classification = classification;
-  }
-
-  private MatchingConstraint() {
   }
 
   public String getId() {

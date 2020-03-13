@@ -1,8 +1,5 @@
 package io.github.richardstartin.multimatcher.core.matchers;
 
-import io.github.richardstartin.multimatcher.core.Operation;
-import io.github.richardstartin.multimatcher.core.matchers.nodes.ComparableNode;
-
 import java.lang.reflect.Array;
 
 public class Utils {

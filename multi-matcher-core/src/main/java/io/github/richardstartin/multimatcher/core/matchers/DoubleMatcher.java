@@ -14,16 +14,18 @@ public class DoubleMatcher<T, MaskType extends Mask<MaskType>> implements Constr
         Matcher<T, MaskType> {
 
   private final ToDoubleFunction<T> accessor;
-  private DoubleNode<MaskType>[] children = (DoubleNode<MaskType>[])newArray(DoubleNode.class, Operation.SIZE);
+  private DoubleNode<MaskType>[] children;
   private final MaskFactory<MaskType> factory;
   private final ThreadLocal<MaskType> empty;
   private final MaskType wildcards;
 
+  @SuppressWarnings("unchecked")
   public DoubleMatcher(ToDoubleFunction<T> accessor, MaskFactory<MaskType> maskFactory, int max) {
     this.accessor = accessor;
     this.wildcards = maskFactory.contiguous(max);
     this.factory = maskFactory;
     this.empty = ThreadLocal.withInitial(factory::newMask);
+    this.children = (DoubleNode<MaskType>[])newArray(DoubleNode.class, Operation.SIZE);
   }
 
   @Override
@@ -62,6 +64,7 @@ public class DoubleMatcher<T, MaskType extends Mask<MaskType>> implements Constr
     existing.add(threshold, priority);
   }
 
+  @SuppressWarnings("unchecked")
   private void optimise() {
     int nullCount = nullCount(children);
     if (nullCount > 0) {

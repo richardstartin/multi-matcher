@@ -1,10 +1,12 @@
 package io.github.richardstartin.multimatcher.core;
 
-import io.github.richardstartin.multimatcher.core.masks.*;
+import io.github.richardstartin.multimatcher.core.masks.BitmapMask;
+import io.github.richardstartin.multimatcher.core.masks.MaskFactory;
+import io.github.richardstartin.multimatcher.core.masks.RoaringMask;
+import io.github.richardstartin.multimatcher.core.masks.TinyMask;
 import io.github.richardstartin.multimatcher.core.schema.Schema;
 
 import java.util.*;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class MaskedClassifier<MaskType extends Mask<MaskType>, Input, Classification>
@@ -86,12 +88,13 @@ public class MaskedClassifier<MaskType extends Mask<MaskType>, Input, Classifica
         MaskedClassifier<MaskType, Input, Classification> build(List<MatchingConstraint<Key, Classification>> specs,
                                                                 MaskFactory<MaskType> maskFactory,
                                                                 int max) {
-            var sequence = IntStream.iterate(0, i -> i + 1).iterator();
+            int sequence = 0;
             specs.sort(Comparator.comparingInt(rd -> order(rd.getPriority())));
             for (var spec : specs) {
-                addMatchingConstraint(spec, sequence.nextInt(), maskFactory, max);
+                addMatchingConstraint(spec, sequence++, maskFactory, max);
             }
-            return new MaskedClassifier<>((Classification[]) classifications.toArray(), freezeMatchers(),
+            return new MaskedClassifier<>((Classification[]) classifications.toArray(),
+                    freezeMatchers(),
                     maskFactory.contiguous(max));
         }
 

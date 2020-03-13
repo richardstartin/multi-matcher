@@ -14,16 +14,18 @@ public class IntMatcher<T, MaskType extends Mask<MaskType>> implements Constrain
         Matcher<T, MaskType> {
 
   private final ToIntFunction<T> accessor;
-  private IntNode<MaskType>[] children = (IntNode<MaskType>[])newArray(IntNode.class, Operation.SIZE);
+  private IntNode<MaskType>[] children;
   private final MaskType wildcards;
   private final ThreadLocal<MaskType> empty;
   private final MaskFactory<MaskType> factory;
 
+  @SuppressWarnings("unchecked")
   public IntMatcher(ToIntFunction<T> accessor, MaskFactory<MaskType> maskFactory, int max) {
     this.accessor = accessor;
     this.factory = maskFactory;
     this.empty = ThreadLocal.withInitial(factory::newMask);
     this.wildcards = maskFactory.contiguous(max);
+    this.children = (IntNode<MaskType>[])newArray(IntNode.class, Operation.SIZE);
   }
 
   @Override

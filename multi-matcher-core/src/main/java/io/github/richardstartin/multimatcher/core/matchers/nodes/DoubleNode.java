@@ -19,6 +19,7 @@ public class DoubleNode<MaskType extends Mask<MaskType>> {
   private MaskType[] sets;
   private int count = 0;
 
+  @SuppressWarnings("unchecked")
   public DoubleNode(MaskFactory<MaskType> factory, Operation relation) {
     this.relation = relation;
     this.factory = factory;

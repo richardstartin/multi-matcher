@@ -9,14 +9,7 @@ public enum Operation {
   NE("≠"),
   STARTS_WITH("starts_with");
 
-
-
-  static Operation[] VALUES = values();
-  public static int SIZE = VALUES.length;
-
-  public static Operation valueOf(int ordinal) {
-    return VALUES[ordinal];
-  }
+  public static int SIZE = values().length;
 
   private final String symbol;
 

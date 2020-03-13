@@ -14,16 +14,18 @@ public class LongMatcher<T, MaskType extends Mask<MaskType>> implements Constrai
         Matcher<T, MaskType> {
 
   private final ToLongFunction<T> accessor;
-  private LongNode<MaskType>[] children = (LongNode<MaskType>[])newArray(LongNode.class, Operation.SIZE);
+  private LongNode<MaskType>[] children;
   private final ThreadLocal<MaskType> empty;
   private final MaskType wildcards;
   private final MaskFactory<MaskType> factory;
 
+  @SuppressWarnings("unchecked")
   public LongMatcher(ToLongFunction<T> accessor, MaskFactory<MaskType> maskFactory, int max) {
     this.accessor = accessor;
     this.factory = maskFactory;
     this.empty = ThreadLocal.withInitial(factory::newMask);
     this.wildcards = maskFactory.contiguous(max);
+    this.children = (LongNode<MaskType>[])newArray(LongNode.class, Operation.SIZE);
   }
 
   @Override

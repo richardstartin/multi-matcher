@@ -29,20 +29,23 @@ public class InequalityNode<T, MaskType extends Mask<MaskType>> implements Mutab
   }
 
   public void remove(T segment, MaskType mask) {
-    segments.forEach((seg, priorities) -> {
+    for (var entry : segments.entrySet()) {
       // the mask associated with "seg" is the set of rules which will not be violated by attr = seg
-      if (!seg.equals(segment) && !mask.isEmpty()) {
+      if (!entry.getKey().equals(segment) && !mask.isEmpty()) {
         // but there are rules represented by the mask which require that attr == segment
         // therefore if attr = seg, these rules will be violated, so we remove them from the mask for attr = seg
-        priorities.inPlaceAndNot(mask);
+        entry.getValue().inPlaceAndNot(mask);
       }
-    });
+    }
   }
 
   public void add(T segment, int priority) {
-    segments.compute(segment, (seg, priorities) -> null == priorities
-            ? newMaskWithout(priority)
-            : without(priorities, priority));
+    MaskType priorities = segments.get(segment);
+    if (null == priorities) {
+      segments.put(segment, newMaskWithout(priority));
+    } else {
+      priorities.remove(priority);
+    }
   }
 
   @Override

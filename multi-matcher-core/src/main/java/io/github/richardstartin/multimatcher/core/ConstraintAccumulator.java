@@ -6,8 +6,6 @@ package io.github.richardstartin.multimatcher.core;
  */
 public interface ConstraintAccumulator<T, MaskType> {
 
-
-
   /**
    * Adds a constraint to the rule
    * @param constraint a condition which must be matched by inputs

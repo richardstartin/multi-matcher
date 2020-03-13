@@ -9,7 +9,6 @@ import io.github.richardstartin.multimatcher.core.matchers.MutableNode;
 import java.util.Map;
 import java.util.function.Function;
 
-import static io.github.richardstartin.multimatcher.core.Mask.with;
 import static io.github.richardstartin.multimatcher.core.Operation.NE;
 import static io.github.richardstartin.multimatcher.core.matchers.SelectivityHeuristics.avgCardinality;
 
@@ -32,9 +31,12 @@ public class EqualityNode<T, MaskType extends Mask<MaskType>> implements Mutable
   }
 
   public void add(T segment, int priority) {
-    segments.compute(segment, (seg, priorities) -> null == priorities
-            ? maskWith(priority)
-            : with(priorities, priority));
+    MaskType priorities = segments.get(segment);
+    if (null == priorities) {
+      segments.put(segment, maskWith(priority));
+    } else {
+      priorities.add(priority);
+    }
   }
 
   @Override

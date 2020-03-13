@@ -16,7 +16,7 @@ subprojects {
                 "jupiter" to "5.5.2",
                 "jackson" to "2.10.0",
                 "guava"  to "28.1-jre",
-                "roaringbitmap" to "0.8.11",
+                "roaringbitmap" to "0.8.13",
                 "commons-collections" to "4.2"
         )
     }

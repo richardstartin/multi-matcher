@@ -2,67 +2,68 @@ package io.github.richardstartin.multimatcher.core.masks;
 
 import io.github.richardstartin.multimatcher.core.Mask;
 import org.roaringbitmap.IntIterator;
-import org.roaringbitmap.RoaringBitmap;
+import org.roaringbitmap.buffer.ImmutableRoaringBitmap;
+import org.roaringbitmap.buffer.MutableRoaringBitmap;
 
+import java.nio.ByteBuffer;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
 public class RoaringMask implements Mask<RoaringMask> {
 
-  public static MaskFactory<RoaringMask> FACTORY = new Factory();
+  public static MaskFactory<RoaringMask> factory(int maxBufferSize, boolean direct) {
+    return new Factory(maxBufferSize, direct);
+  }
 
-  private final RoaringBitmap bitmap;
+  private final OptimisedStorage storage;
+  private ImmutableRoaringBitmap bitmap;
 
-  private RoaringMask(RoaringBitmap bitmap) {
+  private RoaringMask(OptimisedStorage storage, MutableRoaringBitmap bitmap) {
+    this.storage = storage;
     this.bitmap = bitmap;
   }
 
-  public RoaringMask() {
-    this(new RoaringBitmap());
+  public RoaringMask(OptimisedStorage storage) {
+    this(storage, new MutableRoaringBitmap());
   }
 
   @Override
   public void add(int id) {
-    bitmap.add(id);
+    ((MutableRoaringBitmap)bitmap).add(id);
   }
 
   @Override
   public void remove(int id) {
-    bitmap.remove(id);
+    ((MutableRoaringBitmap)bitmap).remove(id);
   }
 
   @Override
   public RoaringMask inPlaceAndNot(RoaringMask other) {
-    bitmap.andNot(other.bitmap);
+    ((MutableRoaringBitmap)bitmap).andNot(other.bitmap);
     return this;
   }
 
   @Override
   public RoaringMask inPlaceAnd(RoaringMask other) {
-    if (other.isEmpty()) {
-      return FACTORY.newMask();
-    }
-    bitmap.and(other.bitmap);
+    ((MutableRoaringBitmap)bitmap).and(other.bitmap);
     return this;
   }
 
   @Override
   public RoaringMask inPlaceOr(RoaringMask other) {
-    if (other.isEmpty()) {
-      return this;
-    }
-    bitmap.or(other.bitmap);
+    ((MutableRoaringBitmap)bitmap).or(other.bitmap);
     return this;
   }
 
   @Override
   public RoaringMask resetTo(Mask<RoaringMask> other) {
-    return inPlaceOr(other.unwrap());
+    this.bitmap = other.unwrap().bitmap.toMutableRoaringBitmap().clone();
+    return this;
   }
 
   @Override
   public void clear() {
-    bitmap.clear();
+    ((MutableRoaringBitmap)bitmap).clear();
   }
 
   @Override
@@ -84,12 +85,14 @@ public class RoaringMask implements Mask<RoaringMask> {
 
   @Override
   public RoaringMask clone() {
-    return new RoaringMask(bitmap.clone());
+    return new RoaringMask(storage, bitmap.toMutableRoaringBitmap().clone());
   }
 
   @Override
   public void optimise() {
-    bitmap.runOptimize();
+    ((MutableRoaringBitmap)bitmap).trim();
+    ((MutableRoaringBitmap)bitmap).runOptimize();
+    this.bitmap = storage.consolidate(((MutableRoaringBitmap)bitmap));
   }
 
   @Override
@@ -116,28 +119,59 @@ public class RoaringMask implements Mask<RoaringMask> {
   }
 
   private static final class Factory implements MaskFactory<RoaringMask> {
-    private final RoaringMask EMPTY = newMask();
+    private final RoaringMask empty = newMask();
+
+    private final OptimisedStorage storage;
+
+    private Factory(int bufferSize, boolean direct) {
+      this.storage = new OptimisedStorage(direct
+              ? ByteBuffer.allocateDirect(bufferSize)
+              : ByteBuffer.allocate(bufferSize));
+    }
 
     @Override
     public RoaringMask newMask() {
-      return new RoaringMask();
+      return new RoaringMask(storage);
     }
 
     @Override
     public RoaringMask contiguous(int max) {
-      RoaringBitmap range = new RoaringBitmap();
+      MutableRoaringBitmap range = new MutableRoaringBitmap();
       range.add(0L, max & 0xFFFFFFFFL);
-      return new RoaringMask(range);
+      return new RoaringMask(storage, range);
     }
 
     @Override
     public RoaringMask of(int... values) {
-      return new RoaringMask(RoaringBitmap.bitmapOf(values));
+      return new RoaringMask(storage, MutableRoaringBitmap.bitmapOf(values));
     }
 
     @Override
     public RoaringMask emptySingleton() {
-      return EMPTY;
+      return empty;
+    }
+  }
+
+  private static class OptimisedStorage {
+    private final ByteBuffer allocatedSpace;
+
+    private OptimisedStorage(ByteBuffer allocatedSpace) {
+      this.allocatedSpace = allocatedSpace;
+    }
+
+    ImmutableRoaringBitmap consolidate(MutableRoaringBitmap bitmap) {
+      int requiredSize = bitmap.serializedSizeInBytes();
+      if (allocatedSpace.remaining() < requiredSize) {
+        // can't consolidate
+        return bitmap;
+      } else {
+        int pos = allocatedSpace.position();
+        bitmap.serialize(allocatedSpace);
+        allocatedSpace.position(pos);
+        var consolidated = new ImmutableRoaringBitmap(allocatedSpace);
+        allocatedSpace.position(pos + requiredSize);
+        return consolidated;
+      }
     }
   }
 }

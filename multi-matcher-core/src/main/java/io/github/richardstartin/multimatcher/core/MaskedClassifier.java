@@ -62,9 +62,21 @@ public class MaskedClassifier<MaskType extends Mask<MaskType>, Input, Classifica
         private final Schema<Key, Input> registry;
         private final Map<Key, ConstraintAccumulator<Input, ? extends Mask<?>>> accumulators = new HashMap<>();
         private final List<Classification> classifications = new ArrayList<>();
+        private boolean useDirectBuffers = false;
+        private int optimisedStorageSpace = 0;
 
         public ClassifierBuilder(Schema<Key, Input> registry) {
             this.registry = registry;
+        }
+
+        public ClassifierBuilder<Key, Input, Classification> useDirectBuffers(boolean useDirectBuffers) {
+            this.useDirectBuffers = useDirectBuffers;
+            return this;
+        }
+
+        public ClassifierBuilder<Key, Input, Classification> withOptimisedStorageSpace(int optimisedStorageSpace) {
+            this.optimisedStorageSpace = optimisedStorageSpace;
+            return this;
         }
 
         /**
@@ -81,7 +93,7 @@ public class MaskedClassifier<MaskType extends Mask<MaskType>, Input, Classifica
             if (maxPriority < BitmapMask.MAX_CAPACITY) {
                 return build(constraints, BitmapMask.factory(maxPriority), maxPriority);
             }
-            return build(constraints, RoaringMask.FACTORY, maxPriority);
+            return build(constraints, RoaringMask.factory(optimisedStorageSpace, useDirectBuffers), maxPriority);
         }
 
         private <MaskType extends Mask<MaskType>>

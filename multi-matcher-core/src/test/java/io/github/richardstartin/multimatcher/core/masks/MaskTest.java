@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class MaskTest {
   
   private final BitmapMask.Factory BITMAP_MASK_FACTORY = BitmapMask.factory(1 << 12);
+  private final MaskFactory<RoaringMask> ROARING_MASK_FACTORY = RoaringMask.factory(1024 * 1024, false);
 
   @Test
   public void testTinyMask() {
@@ -60,27 +61,41 @@ class MaskTest {
 
   @Test
   public void testHugeMask() {
-    RoaringMask range = RoaringMask.FACTORY.contiguous(1 << 22);
-    RoaringMask set = RoaringMask.FACTORY.of(1, 1 << 11);
+    RoaringMask range = ROARING_MASK_FACTORY.contiguous(1 << 22);
+    RoaringMask set = ROARING_MASK_FACTORY.of(1, 1 << 11);
     assertEquals(set, range.and(set));
     assertEquals(range, range.or(set));
-    assertEquals(RoaringMask.FACTORY.of(), set.andNot(range));
-    assertTrue(RoaringMask.FACTORY.of().isEmpty());
-    assertFalse(RoaringMask.FACTORY.contiguous(1).isEmpty());
+    assertEquals(ROARING_MASK_FACTORY.of(), set.andNot(range));
+    assertTrue(ROARING_MASK_FACTORY.of().isEmpty());
+    assertFalse(ROARING_MASK_FACTORY.contiguous(1).isEmpty());
+  }
+
+
+
+  @Test
+  public void testOptimiseRoaringMask() {
+    RoaringMask range = ROARING_MASK_FACTORY.contiguous(1 << 22);
+    range.optimise();
+    RoaringMask set = ROARING_MASK_FACTORY.of(1, 1 << 11);
+    assertEquals(set, range.and(set));
+    assertEquals(range, range.or(set));
+    assertEquals(ROARING_MASK_FACTORY.of(), set.andNot(range));
+    assertTrue(ROARING_MASK_FACTORY.of().isEmpty());
+    assertFalse(ROARING_MASK_FACTORY.contiguous(1).isEmpty());
   }
 
   @Test
   public void testStreamHugeMask() {
-    assertEquals(1 << 22, RoaringMask.FACTORY.contiguous(1 << 22).stream().count());
-    assertEquals(1 << 22, RoaringMask.FACTORY.contiguous(1 << 22).stream().distinct().count());
-    assertEquals((1 << 22) - 2, RoaringMask.FACTORY.contiguous(1 << 22).andNot(RoaringMask.FACTORY.of(1, 2)).stream().count());
-    assertEquals((1 << 22) - 2, RoaringMask.FACTORY.contiguous(1 << 22).andNot(RoaringMask.FACTORY.of(1, 2)).stream().distinct().count());
+    assertEquals(1 << 22, ROARING_MASK_FACTORY.contiguous(1 << 22).stream().count());
+    assertEquals(1 << 22, ROARING_MASK_FACTORY.contiguous(1 << 22).stream().distinct().count());
+    assertEquals((1 << 22) - 2, ROARING_MASK_FACTORY.contiguous(1 << 22).andNot(ROARING_MASK_FACTORY.of(1, 2)).stream().count());
+    assertEquals((1 << 22) - 2, ROARING_MASK_FACTORY.contiguous(1 << 22).andNot(ROARING_MASK_FACTORY.of(1, 2)).stream().distinct().count());
   }
 
   @Test
   public void testHugeMaskInPlace() {
-    assertEquals(RoaringMask.FACTORY.contiguous(1 << 11).and(RoaringMask.FACTORY.of(1, 2)), RoaringMask.FACTORY.contiguous(1 << 11).inPlaceAnd(RoaringMask.FACTORY.of(1, 2)));
-    assertEquals(RoaringMask.FACTORY.contiguous(100).or(RoaringMask.FACTORY.of(101, 102)), RoaringMask.FACTORY.contiguous(100).inPlaceOr(RoaringMask.FACTORY.of(101, 102)));
+    assertEquals(ROARING_MASK_FACTORY.contiguous(1 << 11).and(ROARING_MASK_FACTORY.of(1, 2)), ROARING_MASK_FACTORY.contiguous(1 << 11).inPlaceAnd(ROARING_MASK_FACTORY.of(1, 2)));
+    assertEquals(ROARING_MASK_FACTORY.contiguous(100).or(ROARING_MASK_FACTORY.of(101, 102)), ROARING_MASK_FACTORY.contiguous(100).inPlaceOr(ROARING_MASK_FACTORY.of(101, 102)));
   }
 
 

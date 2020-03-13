@@ -5,80 +5,82 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class MaskTest {
+  
+  private final BitmapMask.Factory BITMAP_MASK_FACTORY = BitmapMask.factory(1 << 12);
 
   @Test
   public void testTinyMask() {
-    SmallMask range = SmallMask.FACTORY.contiguous(50);
-    SmallMask set = SmallMask.FACTORY.of(1, 10);
+    var range = TinyMask.FACTORY.contiguous(50);
+    var set = TinyMask.FACTORY.of(1, 10);
     assertEquals(set, range.and(set));
     assertEquals(range, range.or(set));
-    assertEquals(SmallMask.FACTORY.of(), set.andNot(range));
-    assertTrue(SmallMask.FACTORY.of().isEmpty());
-    assertFalse(SmallMask.FACTORY.contiguous(1).isEmpty());
+    assertEquals(TinyMask.FACTORY.of(), set.andNot(range));
+    assertTrue(TinyMask.FACTORY.of().isEmpty());
+    assertFalse(TinyMask.FACTORY.contiguous(1).isEmpty());
   }
 
   @Test
   public void testStreamTinyMask() {
-    assertEquals(50, SmallMask.FACTORY.contiguous(50).stream().count());
-    assertEquals(50, SmallMask.FACTORY.contiguous(50).stream().distinct().count());
-    assertEquals(48, SmallMask.FACTORY.contiguous(50).andNot(SmallMask.FACTORY.of(1, 2)).stream().count());
-    assertEquals(48, SmallMask.FACTORY.contiguous(50).andNot(SmallMask.FACTORY.of(1, 2)).stream().distinct().count());
+    assertEquals(50, TinyMask.FACTORY.contiguous(50).stream().count());
+    assertEquals(50, TinyMask.FACTORY.contiguous(50).stream().distinct().count());
+    assertEquals(48, TinyMask.FACTORY.contiguous(50).inPlaceAndNot(TinyMask.FACTORY.of(1, 2)).stream().count());
+    assertEquals(48, TinyMask.FACTORY.contiguous(50).inPlaceAndNot(TinyMask.FACTORY.of(1, 2)).stream().distinct().count());
   }
 
   @Test
   public void testTinyMaskInPlace() {
-    assertEquals(TinyMask.FACTORY.contiguous(11).and(TinyMask.FACTORY.of(1, 2)), TinyMask.FACTORY.contiguous(11).inPlaceAnd(TinyMask.FACTORY.of(1, 2)));
-    assertEquals(TinyMask.FACTORY.contiguous(10).or(TinyMask.FACTORY.of(11, 12)), TinyMask.FACTORY.contiguous(10).inPlaceOr(TinyMask.FACTORY.of(11, 12)));
+    assertEquals(TinyMask.FACTORY.contiguous(11).inPlaceAnd(TinyMask.FACTORY.of(1, 2)), TinyMask.FACTORY.contiguous(11).inPlaceAnd(TinyMask.FACTORY.of(1, 2)));
+    assertEquals(TinyMask.FACTORY.contiguous(10).inPlaceOr(TinyMask.FACTORY.of(11, 12)), TinyMask.FACTORY.contiguous(10).inPlaceOr(TinyMask.FACTORY.of(11, 12)));
   }
 
   @Test
-  public void testSmallMask() {
-    SmallMask range = SmallMask.FACTORY.contiguous(1 << 12);
-    SmallMask set = SmallMask.FACTORY.of(1, 1 << 11);
+  public void testBitmapMask() {
+    BitmapMask range = BITMAP_MASK_FACTORY.contiguous(1 << 12);
+    BitmapMask set = BITMAP_MASK_FACTORY.of(1, 1 << 11);
     assertEquals(set, range.and(set));
     assertEquals(range, range.or(set));
-    assertEquals(SmallMask.FACTORY.of(), set.andNot(range));
-    assertTrue(SmallMask.FACTORY.of().isEmpty());
-    assertFalse(SmallMask.FACTORY.contiguous(1).isEmpty());
+    assertEquals(BITMAP_MASK_FACTORY.of(), set.andNot(range));
+    assertTrue(BITMAP_MASK_FACTORY.of().isEmpty());
+    assertFalse(BITMAP_MASK_FACTORY.contiguous(1).isEmpty());
   }
 
   @Test
-  public void testStreamSmallMask() {
-    assertEquals(1 << 12, SmallMask.FACTORY.contiguous(1 << 12).stream().count());
-    assertEquals(1 << 12, SmallMask.FACTORY.contiguous(1 << 12).stream().distinct().count());
-    assertEquals((1 << 12) - 2, SmallMask.FACTORY.contiguous(1 << 12).andNot(SmallMask.FACTORY.of(1, 2)).stream().count());
-    assertEquals((1 << 12) - 2, SmallMask.FACTORY.contiguous(1 << 12).andNot(SmallMask.FACTORY.of(1, 2)).stream().distinct().count());
+  public void testStreamBitmapMask() {
+    assertEquals(1 << 12, BITMAP_MASK_FACTORY.contiguous(1 << 12).stream().count());
+    assertEquals(1 << 12, BITMAP_MASK_FACTORY.contiguous(1 << 12).stream().distinct().count());
+    assertEquals((1 << 12) - 2, BITMAP_MASK_FACTORY.contiguous(1 << 12).inPlaceAndNot(BITMAP_MASK_FACTORY.of(1, 2)).stream().count());
+    assertEquals((1 << 12) - 2, BITMAP_MASK_FACTORY.contiguous(1 << 12).inPlaceAndNot(BITMAP_MASK_FACTORY.of(1, 2)).stream().distinct().count());
   }
 
   @Test
-  public void testSmallMaskInPlace() {
-    assertEquals(SmallMask.FACTORY.contiguous(1 << 11).and(SmallMask.FACTORY.of(1, 2)), SmallMask.FACTORY.contiguous(1 << 11).inPlaceAnd(SmallMask.FACTORY.of(1, 2)));
-    assertEquals(SmallMask.FACTORY.contiguous(100).or(SmallMask.FACTORY.of(101, 102)), SmallMask.FACTORY.contiguous(100).inPlaceOr(SmallMask.FACTORY.of(101, 102)));
+  public void testBitmapMaskInPlace() {
+    assertEquals(BITMAP_MASK_FACTORY.contiguous(1 << 11).and(BITMAP_MASK_FACTORY.of(1, 2)), BITMAP_MASK_FACTORY.contiguous(1 << 11).inPlaceAnd(BITMAP_MASK_FACTORY.of(1, 2)));
+    assertEquals(BITMAP_MASK_FACTORY.contiguous(100).or(BITMAP_MASK_FACTORY.of(101, 102)), BITMAP_MASK_FACTORY.contiguous(100).inPlaceOr(BITMAP_MASK_FACTORY.of(101, 102)));
   }
 
   @Test
   public void testHugeMask() {
-    HugeMask range = HugeMask.FACTORY.contiguous(1 << 22);
-    HugeMask set = HugeMask.FACTORY.of(1, 1 << 11);
+    RoaringMask range = RoaringMask.FACTORY.contiguous(1 << 22);
+    RoaringMask set = RoaringMask.FACTORY.of(1, 1 << 11);
     assertEquals(set, range.and(set));
     assertEquals(range, range.or(set));
-    assertEquals(HugeMask.FACTORY.of(), set.andNot(range));
-    assertTrue(HugeMask.FACTORY.of().isEmpty());
-    assertFalse(HugeMask.FACTORY.contiguous(1).isEmpty());
+    assertEquals(RoaringMask.FACTORY.of(), set.andNot(range));
+    assertTrue(RoaringMask.FACTORY.of().isEmpty());
+    assertFalse(RoaringMask.FACTORY.contiguous(1).isEmpty());
   }
 
   @Test
   public void testStreamHugeMask() {
-    assertEquals(1 << 22, HugeMask.FACTORY.contiguous(1 << 22).stream().count());
-    assertEquals(1 << 22, HugeMask.FACTORY.contiguous(1 << 22).stream().distinct().count());
-    assertEquals((1 << 22) - 2, HugeMask.FACTORY.contiguous(1 << 22).andNot(HugeMask.FACTORY.of(1, 2)).stream().count());
-    assertEquals((1 << 22) - 2, HugeMask.FACTORY.contiguous(1 << 22).andNot(HugeMask.FACTORY.of(1, 2)).stream().distinct().count());
+    assertEquals(1 << 22, RoaringMask.FACTORY.contiguous(1 << 22).stream().count());
+    assertEquals(1 << 22, RoaringMask.FACTORY.contiguous(1 << 22).stream().distinct().count());
+    assertEquals((1 << 22) - 2, RoaringMask.FACTORY.contiguous(1 << 22).andNot(RoaringMask.FACTORY.of(1, 2)).stream().count());
+    assertEquals((1 << 22) - 2, RoaringMask.FACTORY.contiguous(1 << 22).andNot(RoaringMask.FACTORY.of(1, 2)).stream().distinct().count());
   }
 
   @Test
   public void testHugeMaskInPlace() {
-    assertEquals(HugeMask.FACTORY.contiguous(1 << 11).and(HugeMask.FACTORY.of(1, 2)), HugeMask.FACTORY.contiguous(1 << 11).inPlaceAnd(HugeMask.FACTORY.of(1, 2)));
-    assertEquals(HugeMask.FACTORY.contiguous(100).or(HugeMask.FACTORY.of(101, 102)), HugeMask.FACTORY.contiguous(100).inPlaceOr(HugeMask.FACTORY.of(101, 102)));
+    assertEquals(RoaringMask.FACTORY.contiguous(1 << 11).and(RoaringMask.FACTORY.of(1, 2)), RoaringMask.FACTORY.contiguous(1 << 11).inPlaceAnd(RoaringMask.FACTORY.of(1, 2)));
+    assertEquals(RoaringMask.FACTORY.contiguous(100).or(RoaringMask.FACTORY.of(101, 102)), RoaringMask.FACTORY.contiguous(100).inPlaceOr(RoaringMask.FACTORY.of(101, 102)));
   }
 
 

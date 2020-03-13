@@ -20,7 +20,7 @@ public class IntAttribute<T> implements Attribute<T> {
   }
 
   @Override
-  public <MaskType extends Mask<MaskType>> ConstraintAccumulator<T, MaskType> toMatcher(MaskFactory<MaskType> maskFactory, int max) {
+  public <MaskType extends Mask<MaskType>> ConstraintAccumulator<T, MaskType> newAccumulator(MaskFactory<MaskType> maskFactory, int max) {
     return new IntMatcher<>(accessor, maskFactory, max);
   }
 }

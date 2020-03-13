@@ -14,14 +14,14 @@ public class DoubleNode<MaskType extends Mask<MaskType>> {
   private final Operation relation;
   private final MaskType empty;
 
-  private double[] thresholds = new double[16];
+  private double[] thresholds = new double[4];
   private MaskType[] sets;
   private int count = 0;
 
   public DoubleNode(Operation relation, MaskType empty) {
     this.relation = relation;
     this.empty = empty;
-    this.sets = (MaskType[]) Array.newInstance(empty.getClass(), 16);
+    this.sets = (MaskType[]) Array.newInstance(empty.getClass(), 4);
   }
 
   public void add(double value, int priority) {

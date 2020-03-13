@@ -1,30 +1,28 @@
 package io.github.richardstartin.multimatcher.core;
 
-import io.github.richardstartin.multimatcher.core.masks.HugeMask;
-import io.github.richardstartin.multimatcher.core.masks.MaskFactory;
-import io.github.richardstartin.multimatcher.core.masks.SmallMask;
-import io.github.richardstartin.multimatcher.core.masks.TinyMask;
+import io.github.richardstartin.multimatcher.core.masks.*;
 import io.github.richardstartin.multimatcher.core.schema.Schema;
 
 import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class MaskedClassifier<MaskType extends Mask<MaskType>, Input, Classification> implements Classifier<Input, Classification> {
+public class MaskedClassifier<MaskType extends Mask<MaskType>, Input, Classification>
+        implements Classifier<Input, Classification> {
 
     private final Classification[] classifications;
     private final Matcher<Input, MaskType>[] matchers;
     private final Mask<MaskType> mask;
-    private final Mask<MaskType> context;
+    private final ThreadLocal<MaskType> context;
 
     public MaskedClassifier(Classification[] classifications,
                             Matcher<Input, MaskType>[] matchers,
-                            Mask<MaskType> mask,
-                            Mask<MaskType> context) {
+                            Mask<MaskType> mask) {
         this.classifications = classifications;
         this.matchers = matchers;
         this.mask = mask;
-        this.context = context;
+        this.context = ThreadLocal.withInitial(mask::clone);
+        mask.optimise();
     }
 
     @Override
@@ -34,27 +32,33 @@ public class MaskedClassifier<MaskType extends Mask<MaskType>, Input, Classifica
 
     @Override
     public Optional<Classification> classification(Input value) {
-        MaskType matches = match(value);
+        return Optional.ofNullable(classificationOrNull(value));
+    }
+
+    @Override
+    public Classification classificationOrNull(Input value) {
+        var matches = match(value);
         return matches.isEmpty()
-                ? Optional.empty()
-                : Optional.of(classifications[matches.first()]);
+                ? null
+                : classifications[matches.first()];
     }
 
     private MaskType match(Input value) {
-        var ctx = context.resetTo(mask);
-        for (Matcher<Input, MaskType> matcher : matchers) {
+        var ctx = context.get().resetTo(mask);
+        for (var matcher : matchers) {
             matcher.match(value, ctx);
-            if (context.isEmpty()) {
+            if (ctx.isEmpty()) {
                 break;
             }
         }
         return ctx;
     }
 
+    @SuppressWarnings("unchecked")
     public static class ClassifierBuilder<Key, Input, Classification> {
 
         private final Schema<Key, Input> registry;
-        private final Map<Key, ConstraintAccumulator<Input, ? extends Mask>> matchers = new HashMap<>();
+        private final Map<Key, ConstraintAccumulator<Input, ? extends Mask<?>>> accumulators = new HashMap<>();
         private final List<Classification> classifications = new ArrayList<>();
 
         public ClassifierBuilder(Schema<Key, Input> registry) {
@@ -69,22 +73,26 @@ public class MaskedClassifier<MaskType extends Mask<MaskType>, Input, Classifica
          */
         public Classifier<Input, Classification> build(List<MatchingConstraint<Key, Classification>> constraints) {
             int maxPriority = constraints.size();
-            return maxPriority < TinyMask.MAX_CAPACITY
-                    ? build(constraints, TinyMask.FACTORY, maxPriority)
-                    : maxPriority < SmallMask.MAX_CAPACITY
-                    ? build(constraints, SmallMask.FACTORY, maxPriority)
-                    : build(constraints, HugeMask.FACTORY, maxPriority);
+            if (maxPriority < TinyMask.MAX_CAPACITY) {
+                return build(constraints, TinyMask.FACTORY, maxPriority);
+            }
+            if (maxPriority < BitmapMask.MAX_CAPACITY) {
+                return build(constraints, BitmapMask.factory(maxPriority), maxPriority);
+            }
+            return build(constraints, RoaringMask.FACTORY, maxPriority);
         }
 
         private <MaskType extends Mask<MaskType>>
         MaskedClassifier<MaskType, Input, Classification> build(List<MatchingConstraint<Key, Classification>> specs,
                                                                 MaskFactory<MaskType> maskFactory,
                                                                 int max) {
-            PrimitiveIterator.OfInt sequence = IntStream.iterate(0, i -> i + 1).iterator();
-            specs.stream().sorted(Comparator.comparingInt(rd -> order(rd.getPriority())))
-                    .forEach(rule -> addMatchingConstraint(rule, sequence.nextInt(), maskFactory, max));
+            var sequence = IntStream.iterate(0, i -> i + 1).iterator();
+            specs.sort(Comparator.comparingInt(rd -> order(rd.getPriority())));
+            for (var spec : specs) {
+                addMatchingConstraint(spec, sequence.nextInt(), maskFactory, max);
+            }
             return new MaskedClassifier<>((Classification[]) classifications.toArray(), freezeMatchers(),
-                    maskFactory.contiguous(max), maskFactory.memoryStableContiguousMask(max));
+                    maskFactory.contiguous(max));
         }
 
         private <MaskType extends Mask<MaskType>>
@@ -93,28 +101,33 @@ public class MaskedClassifier<MaskType extends Mask<MaskType>, Input, Classifica
                                    MaskFactory<MaskType> maskFactory,
                                    int max) {
             classifications.add(matchInfo.getClassification());
-            matchInfo.getConstraints().forEach((key, condition) -> memoisedMatcher(key, maskFactory, max).addConstraint(condition, priority));
+            for (var pair : matchInfo.getConstraints().entrySet()) {
+                getOrCreateAccumulator(pair.getKey(), maskFactory, max)
+                        .addConstraint(pair.getValue(), priority);
+            }
         }
 
         private <MaskType extends Mask<MaskType>>
-        ConstraintAccumulator<Input, MaskType> memoisedMatcher(Key key, MaskFactory<MaskType> maskFactory, int max) {
-            ConstraintAccumulator<Input, MaskType> matcher = (ConstraintAccumulator<Input, MaskType>) matchers.get(key);
-            if (null == matcher) {
-                matcher = registry.getAttribute(key).toMatcher(maskFactory, max);
-                matchers.put(key, matcher);
+        ConstraintAccumulator<Input, MaskType> getOrCreateAccumulator(Key key,
+                                                                      MaskFactory<MaskType> maskFactory,
+                                                                      int max) {
+            var accumulator = (ConstraintAccumulator<Input, MaskType>) accumulators.get(key);
+            if (null == accumulator) {
+                accumulator = registry.getAttribute(key).newAccumulator(maskFactory, max);
+                accumulators.put(key, accumulator);
             }
-            return matcher;
+            return accumulator;
         }
 
         private <MaskType extends Mask<MaskType>>
         Matcher<Input, MaskType>[] freezeMatchers() {
-            List<Matcher<Input, MaskType>> frozen = new ArrayList<>(matchers.size());
-            for (ConstraintAccumulator<Input, ? extends Mask> matcher : matchers.values()) {
-                frozen.add((Matcher<Input, MaskType>) matcher.freeze());
+            var frozen = new Matcher[accumulators.size()];
+            int i = 0;
+            for (var matcher : accumulators.values()) {
+                frozen[i++] = matcher.freeze();
             }
-            return frozen.stream()
-                    .sorted(Comparator.comparingInt(x -> (int) (x.averageSelectivity() * 1000)))
-                    .toArray(Matcher[]::new);
+            Arrays.sort(frozen, Comparator.comparingInt(x -> (int) (x.averageSelectivity() * 1000)));
+            return (Matcher<Input, MaskType>[])frozen;
         }
 
         private static int order(int priority) {

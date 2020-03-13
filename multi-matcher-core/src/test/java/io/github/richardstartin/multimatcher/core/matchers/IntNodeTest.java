@@ -1,50 +1,52 @@
 package io.github.richardstartin.multimatcher.core.matchers;
 
 import io.github.richardstartin.multimatcher.core.Operation;
-import io.github.richardstartin.multimatcher.core.masks.SmallMask;
+import io.github.richardstartin.multimatcher.core.masks.BitmapMask;
 import io.github.richardstartin.multimatcher.core.matchers.nodes.IntNode;
 import org.junit.jupiter.api.Test;
 
 import static io.github.richardstartin.multimatcher.core.Mask.with;
 import static io.github.richardstartin.multimatcher.core.Mask.without;
-import static io.github.richardstartin.multimatcher.core.masks.SmallMask.FACTORY;
+import static io.github.richardstartin.multimatcher.core.masks.BitmapMask.factory;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class IntNodeTest {
+  
+  private static BitmapMask.Factory factory = factory(200);
 
   @Test
   public void testGreaterThan() {
-    IntNode<SmallMask> node = build(100, Operation.GT);
-    SmallMask mask = FACTORY.contiguous(100);
+    IntNode<BitmapMask> node = build(100, Operation.GT);
+    BitmapMask mask = factory.contiguous(100);
     assertTrue(node.apply(0, mask.clone()).isEmpty());
-    assertEquals(with(new SmallMask(), 0), node.apply(1, mask.clone()));
+    assertEquals(with(factory.empty(), 0), node.apply(1, mask.clone()));
   }
 
 
   @Test
   public void testGreaterThanOrEqual() {
-    IntNode<SmallMask> node = build(100, Operation.GE);
-    SmallMask mask = FACTORY.contiguous(100);
+    IntNode<BitmapMask> node = build(100, Operation.GE);
+    BitmapMask mask = factory.contiguous(100);
     assertTrue(node.apply(-1, mask.clone()).isEmpty());
-    assertEquals(with(new SmallMask(), 0), node.apply(0, mask.clone()));
-    assertEquals(with(with(new SmallMask(), 1), 0), node.apply(10, mask.clone()));
+    assertEquals(with(factory.empty(), 0), node.apply(0, mask.clone()));
+    assertEquals(with(with(factory.empty(), 1), 0), node.apply(10, mask.clone()));
   }
 
   @Test
   public void testEqual() {
-    IntNode<SmallMask> node = build(100, Operation.EQ);
-    SmallMask mask = FACTORY.contiguous(100);
+    IntNode<BitmapMask> node = build(100, Operation.EQ);
+    BitmapMask mask = factory.contiguous(100);
     assertTrue(node.apply(-1, mask.clone()).isEmpty());
-    assertEquals(with(new SmallMask(), 0), node.apply(0, mask.clone()));
-    assertEquals(with(new SmallMask(), 1), node.apply(10, mask.clone()));
+    assertEquals(with(factory.empty(), 0), node.apply(0, mask.clone()));
+    assertEquals(with(factory.empty(), 1), node.apply(10, mask.clone()));
   }
 
 
   @Test
   public void testLessThanOrEqual() {
-    IntNode<SmallMask> node = build(100, Operation.LE);
-    SmallMask mask = FACTORY.contiguous(100);
+    IntNode<BitmapMask> node = build(100, Operation.LE);
+    BitmapMask mask = factory.contiguous(100);
     assertTrue(node.apply(1001, mask.clone()).isEmpty());
     assertEquals(mask, node.apply(0, mask.clone()));
     assertEquals(without(mask.clone(), 0), node.apply(10, mask.clone()));
@@ -52,8 +54,8 @@ public class IntNodeTest {
 
   @Test
   public void testLessThan() {
-    IntNode<SmallMask> node = build(100, Operation.LT);
-    SmallMask mask = FACTORY.contiguous(100);
+    IntNode<BitmapMask> node = build(100, Operation.LT);
+    BitmapMask mask = factory.contiguous(100);
     assertTrue(node.apply(1001, mask.clone()).isEmpty());
     assertEquals(without(mask.clone(), 0), node.apply(0, mask.clone()));
     assertEquals(without(without(mask.clone(), 0), 1), node.apply(10, mask.clone()));
@@ -61,36 +63,36 @@ public class IntNodeTest {
 
   @Test
   public void testGreaterThanRev() {
-    IntNode<SmallMask> node = buildRev(100, Operation.GT);
-    SmallMask mask = FACTORY.contiguous(100);
+    IntNode<BitmapMask> node = buildRev(100, Operation.GT);
+    BitmapMask mask = factory.contiguous(100);
     assertTrue(node.apply(0, mask.clone()).isEmpty());
-    assertEquals(with(new SmallMask(), 0), node.apply(1, mask.clone()));
+    assertEquals(with(factory.empty(), 0), node.apply(1, mask.clone()));
   }
 
 
   @Test
   public void testGreaterThanOrEqualRev() {
-    IntNode<SmallMask> node = buildRev(100, Operation.GE);
-    SmallMask mask = FACTORY.contiguous(100);
+    IntNode<BitmapMask> node = buildRev(100, Operation.GE);
+    BitmapMask mask = factory.contiguous(100);
     assertTrue(node.apply(-1, mask.clone()).isEmpty());
-    assertEquals(with(new SmallMask(), 0), node.apply(0, mask.clone()));
-    assertEquals(with(with(new SmallMask(), 0), 1), node.apply(10, mask.clone()));
+    assertEquals(with(factory.empty(), 0), node.apply(0, mask.clone()));
+    assertEquals(with(with(factory.empty(), 0), 1), node.apply(10, mask.clone()));
   }
 
   @Test
   public void testEqualRev() {
-    IntNode<SmallMask> node = buildRev(100, Operation.EQ);
-    SmallMask mask = FACTORY.contiguous(100);
+    IntNode<BitmapMask> node = buildRev(100, Operation.EQ);
+    BitmapMask mask = factory.contiguous(100);
     assertTrue(node.apply(-1, mask.clone()).isEmpty());
-    assertEquals(with(new SmallMask(), 0), node.apply(0, mask.clone()));
-    assertEquals(with(new SmallMask(), 1), node.apply(10, mask.clone()));
+    assertEquals(with(factory.empty(), 0), node.apply(0, mask.clone()));
+    assertEquals(with(factory.empty(), 1), node.apply(10, mask.clone()));
   }
 
 
   @Test
   public void testLessThanOrEqualRev() {
-    IntNode<SmallMask> node = buildRev(100, Operation.LE);
-    SmallMask mask = FACTORY.contiguous(100);
+    IntNode<BitmapMask> node = buildRev(100, Operation.LE);
+    BitmapMask mask = factory.contiguous(100);
     assertTrue(node.apply(1001, mask.clone()).isEmpty());
     assertEquals(mask, node.apply(0, mask.clone()));
     assertEquals(without(mask.clone(), 0), node.apply(10, mask.clone()));
@@ -98,8 +100,8 @@ public class IntNodeTest {
 
   @Test
   public void testLessThanRev() {
-    IntNode<SmallMask> node = buildRev(100, Operation.LT);
-    SmallMask mask = FACTORY.contiguous(100);
+    IntNode<BitmapMask> node = buildRev(100, Operation.LT);
+    BitmapMask mask = factory.contiguous(100);
     assertTrue(node.apply(1001, mask.clone()).isEmpty());
     assertEquals(without(mask.clone(), 0), node.apply(0, mask.clone()));
     assertEquals(without(without(mask.clone(), 0), 1), node.apply(10, mask.clone()));
@@ -107,23 +109,23 @@ public class IntNodeTest {
 
   @Test
   public void testBuildNode() {
-    IntNode<SmallMask> node = new IntNode<>(Operation.EQ, new SmallMask());
+    IntNode<BitmapMask> node = new IntNode<>(Operation.EQ, factory.empty());
     node.add(0, 0);
-    assertEquals(FACTORY.contiguous( 1), node.apply(0, FACTORY.contiguous( 1)));
+    assertEquals(factory.contiguous( 1), node.apply(0, factory.contiguous( 1)));
     node.add(0, 1);
-    assertEquals(FACTORY.contiguous( 2), node.apply(0, FACTORY.contiguous( 2)));
+    assertEquals(factory.contiguous( 2), node.apply(0, factory.contiguous( 2)));
   }
 
-  private IntNode<SmallMask> build(int count, Operation relation) {
-    IntNode<SmallMask> node = new IntNode<>(relation, new SmallMask());
+  private IntNode<BitmapMask> build(int count, Operation relation) {
+    IntNode<BitmapMask> node = new IntNode<>(relation, factory.empty());
     for (int i = 0; i < count; ++i) {
       node.add(i * 10, i);
     }
     return node.optimise();
   }
 
-  private IntNode<SmallMask> buildRev(int count, Operation relation) {
-    IntNode<SmallMask> node = new IntNode<>(relation, new SmallMask());
+  private IntNode<BitmapMask> buildRev(int count, Operation relation) {
+    IntNode<BitmapMask> node = new IntNode<>(relation, factory.empty());
     for (int i = count - 1; i >= 0; --i) {
       node.add(i * 10, i);
     }

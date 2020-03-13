@@ -2,6 +2,7 @@ package io.github.richardstartin.multimatcher.core.matchers;
 
 import io.github.richardstartin.multimatcher.core.*;
 import io.github.richardstartin.multimatcher.core.masks.MaskFactory;
+import io.github.richardstartin.multimatcher.core.matchers.nodes.IntNode;
 import io.github.richardstartin.multimatcher.core.matchers.nodes.LongNode;
 
 import java.util.EnumMap;
@@ -9,24 +10,34 @@ import java.util.Map;
 import java.util.function.ToLongFunction;
 
 import static io.github.richardstartin.multimatcher.core.matchers.SelectivityHeuristics.avgCardinality;
+import static io.github.richardstartin.multimatcher.core.matchers.Utils.newArray;
+import static io.github.richardstartin.multimatcher.core.matchers.Utils.nullCount;
 
 public class LongMatcher<T, MaskType extends Mask<MaskType>> implements ConstraintAccumulator<T, MaskType>,
         Matcher<T, MaskType> {
 
   private final ToLongFunction<T> accessor;
-  private final Map<Operation, LongNode<MaskType>> children = new EnumMap<>(Operation.class);
-  private final MaskType empty;
+  private LongNode<MaskType>[] children = (LongNode<MaskType>[])newArray(LongNode.class, Operation.SIZE);
+  private final ThreadLocal<MaskType> empty;
   private final MaskType wildcards;
+  private final MaskType emptySingleton;
 
   public LongMatcher(ToLongFunction<T> accessor, MaskFactory<MaskType> maskFactory, int max) {
     this.accessor = accessor;
-    this.empty = maskFactory.emptySingleton();
+    this.emptySingleton = maskFactory.emptySingleton();
+    this.empty = ThreadLocal.withInitial(emptySingleton::clone);
     this.wildcards = maskFactory.contiguous(max);
   }
 
   @Override
   public void match(T value, MaskType context) {
-    context.inPlaceAnd(match(accessor.applyAsLong(value)));
+    MaskType temp = empty.get().inPlaceOr(wildcards);
+    long l = accessor.applyAsLong(value);
+    for (var component : children) {
+      temp.inPlaceOr(component.apply(l, emptySingleton));
+    }
+    context.inPlaceAnd(temp);
+    temp.clear();
   }
 
   @Override
@@ -47,26 +58,31 @@ public class LongMatcher<T, MaskType extends Mask<MaskType>> implements Constrai
 
 
   private void add(Operation relation, long threshold, int priority) {
-    children.computeIfAbsent(relation, r -> new LongNode<>(r, empty)).add(threshold, priority);
-  }
-
-  private MaskType match(long value) {
-    var temp = empty.clone().inPlaceOr(wildcards);
-    for (LongNode<MaskType> component : children.values()) {
-      temp.inPlaceOr(component.apply(value, empty));
+    var existing = children[relation.ordinal()];
+    if (null == existing) {
+      existing  = children[relation.ordinal()]
+              = new LongNode<>(relation, emptySingleton);
     }
-    return temp;
+    existing.add(threshold, priority);
   }
 
   private void optimise() {
-    Map<Operation, LongNode<MaskType>> optimised = new EnumMap<>(Operation.class);
-    children.forEach((op, node) -> optimised.put(op, node.optimise()));
-    children.putAll(optimised);
+    int nullCount = nullCount(children);
+    if (nullCount > 0) {
+      var newChildren = (LongNode<MaskType>[]) newArray(LongNode.class, children.length - nullCount);
+      int i = 0;
+      for (var child : children) {
+        if (null != child) {
+          newChildren[i++] = child.optimise();
+        }
+      }
+      children = newChildren;
+    }
   }
 
   @Override
   public float averageSelectivity() {
-    return avgCardinality(children.values(), LongNode::averageSelectivity);
+    return avgCardinality(children, LongNode::averageSelectivity);
   }
 
 }

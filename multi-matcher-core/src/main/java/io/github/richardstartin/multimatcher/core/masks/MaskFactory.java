@@ -28,13 +28,4 @@ public interface MaskFactory<MaskType extends Mask<MaskType>> {
    * @return an empty mask
    */
   MaskType emptySingleton();
-
-  /**
-   * Create a contiguous mask starting at zero, which may need less allocation.
-   * @param max the exclusive upper bound of the contiguous set
-   * @return a contiguous mask with <code>max</code> bits set.
-   */
-  default MaskType memoryStableContiguousMask(int max) {
-    return contiguous(max);
-  }
 }

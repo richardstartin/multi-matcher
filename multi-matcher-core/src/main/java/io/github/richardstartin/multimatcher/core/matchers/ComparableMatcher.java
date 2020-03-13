@@ -4,10 +4,14 @@ import io.github.richardstartin.multimatcher.core.*;
 import io.github.richardstartin.multimatcher.core.masks.MaskFactory;
 import io.github.richardstartin.multimatcher.core.matchers.nodes.ComparableNode;
 
+import java.lang.reflect.Array;
 import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.Function;
+
+import static io.github.richardstartin.multimatcher.core.matchers.Utils.newArray;
+import static io.github.richardstartin.multimatcher.core.matchers.Utils.nullCount;
 
 public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements ConstraintAccumulator<T, MaskType>,
         Matcher<T, MaskType> {
@@ -15,21 +19,29 @@ public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements
   private final Function<T, U> accessor;
   private final MaskType wildcards;
   private final Comparator<U> comparator;
-  private final EnumMap<Operation, ComparableNode<U, MaskType>> children = new EnumMap<>(Operation.class);
-  private final MaskType empty;
+  private ComparableNode<U, MaskType>[] children = (ComparableNode<U, MaskType>[]) newArray(ComparableNode.class, Operation.SIZE);
+  private final MaskType emptySingleton;
+  private final ThreadLocal<MaskType> empty;
 
   public ComparableMatcher(Function<T, U> accessor,
                            Comparator<U> comparator, MaskFactory<MaskType> maskFactory,
                            int max) {
     this.accessor = accessor;
     this.comparator = comparator;
-    this.empty = maskFactory.emptySingleton();
+    this.emptySingleton = maskFactory.emptySingleton();
     this.wildcards = maskFactory.contiguous(max);
+    this.empty = ThreadLocal.withInitial(emptySingleton::clone);
   }
 
   @Override
   public void match(T value, MaskType context) {
-    context.inPlaceAnd(matchValue(accessor.apply(value)));
+    MaskType temp = empty.get().inPlaceOr(wildcards);
+    U comparable = accessor.apply(value);
+    for (var component : children) {
+      temp = temp.inPlaceOr(component.match(comparable));
+    }
+    context.inPlaceAnd(temp);
+    temp.clear();
   }
 
   @Override
@@ -48,7 +60,7 @@ public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements
 
   @Override
   public float averageSelectivity() {
-    return SelectivityHeuristics.avgCardinality(children.values(), ComparableNode::averageSelectivity);
+    return SelectivityHeuristics.avgCardinality(children, ComparableNode::averageSelectivity);
   }
 
   @Override
@@ -57,21 +69,26 @@ public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements
   }
 
   private void add(Operation relation, U threshold, int priority) {
-    children.computeIfAbsent(relation, r -> new ComparableNode<>(comparator, r, empty)).add(threshold, priority);
-  }
-
-  private MaskType matchValue(U value) {
-    MaskType temp = empty.clone().inPlaceOr(wildcards);
-    for (ComparableNode<U, MaskType> component : children.values()) {
-      temp = temp.inPlaceOr(component.match(value));
+    var existing = children[relation.ordinal()];
+    if (null == existing) {
+      existing  = children[relation.ordinal()]
+                = new ComparableNode<>(comparator, relation, emptySingleton);
     }
-    return temp;
+    existing.add(threshold, priority);
   }
 
   public void optimise() {
-    Map<Operation, ComparableNode<U, MaskType>> optimised = new EnumMap<>(Operation.class);
-    children.forEach((op, node) -> optimised.put(op, node.freeze()));
-    children.putAll(optimised);
+    int nullCount = nullCount(children);
+    if (nullCount > 0) {
+       var newChildren = (ComparableNode<U, MaskType>[]) newArray(ComparableNode.class, children.length - nullCount);
+       int i = 0;
+       for (var child : children) {
+         if (null != child) {
+           newChildren[i++] = child.freeze();
+         }
+       }
+       children = newChildren;
+    }
   }
 
 }

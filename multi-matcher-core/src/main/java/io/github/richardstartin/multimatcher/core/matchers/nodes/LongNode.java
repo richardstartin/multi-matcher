@@ -14,14 +14,14 @@ public class LongNode<MaskType extends Mask<MaskType>> {
   private final Operation relation;
   private final MaskType empty;
 
-  private long[] thresholds = new long[16];
+  private long[] thresholds = new long[4];
   private MaskType[] sets;
   private int count = 0;
 
   public LongNode(Operation relation, MaskType empty) {
     this.relation = relation;
     this.empty = empty;
-    this.sets = (MaskType[]) Array.newInstance(empty.getClass(), 16);
+    this.sets = (MaskType[]) Array.newInstance(empty.getClass(), 4);
   }
 
   public void add(long value, int priority) {

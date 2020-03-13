@@ -15,5 +15,5 @@ public interface Attribute<T> {
    * @param max the maximum number named constraints supported
    * @return a new matcher
    */
-  <MaskType extends Mask<MaskType>> ConstraintAccumulator<T, MaskType> toMatcher(MaskFactory<MaskType> maskFactory, int max);
+  <MaskType extends Mask<MaskType>> ConstraintAccumulator<T, MaskType> newAccumulator(MaskFactory<MaskType> maskFactory, int max);
 }

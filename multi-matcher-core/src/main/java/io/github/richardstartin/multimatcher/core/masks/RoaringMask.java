@@ -7,17 +7,17 @@ import org.roaringbitmap.RoaringBitmap;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
-public class HugeMask implements Mask<HugeMask> {
+public class RoaringMask implements Mask<RoaringMask> {
 
-  public static MaskFactory<HugeMask> FACTORY = new Factory();
+  public static MaskFactory<RoaringMask> FACTORY = new Factory();
 
   private final RoaringBitmap bitmap;
 
-  private HugeMask(RoaringBitmap bitmap) {
+  private RoaringMask(RoaringBitmap bitmap) {
     this.bitmap = bitmap;
   }
 
-  public HugeMask() {
+  public RoaringMask() {
     this(new RoaringBitmap());
   }
 
@@ -32,41 +32,13 @@ public class HugeMask implements Mask<HugeMask> {
   }
 
   @Override
-  public HugeMask and(HugeMask other) {
-    if (other.isEmpty()) {
-      return FACTORY.empty();
-    }
-    return new HugeMask(RoaringBitmap.and(bitmap, other.bitmap));
-  }
-
-  @Override
-  public HugeMask andNot(HugeMask other) {
-    return new HugeMask(RoaringBitmap.andNot(bitmap, other.bitmap));
-  }
-
-  @Override
-  public HugeMask inPlaceAndNot(HugeMask other) {
+  public RoaringMask inPlaceAndNot(RoaringMask other) {
     bitmap.andNot(other.bitmap);
     return this;
   }
 
   @Override
-  public HugeMask or(HugeMask other) {
-    if (other.isEmpty()) {
-      return this;
-    }
-    return new HugeMask(RoaringBitmap.or(bitmap, other.bitmap));
-  }
-
-  @Override
-  public HugeMask orNot(HugeMask other, int max) {
-    RoaringBitmap not = other.bitmap.clone();
-    not.flip(0, max & 0xFFFFFFFFL);
-    return new HugeMask(RoaringBitmap.or(bitmap, not));
-  }
-
-  @Override
-  public HugeMask inPlaceAnd(HugeMask other) {
+  public RoaringMask inPlaceAnd(RoaringMask other) {
     if (other.isEmpty()) {
       return FACTORY.empty();
     }
@@ -75,7 +47,7 @@ public class HugeMask implements Mask<HugeMask> {
   }
 
   @Override
-  public HugeMask inPlaceOr(HugeMask other) {
+  public RoaringMask inPlaceOr(RoaringMask other) {
     if (other.isEmpty()) {
       return this;
     }
@@ -84,12 +56,17 @@ public class HugeMask implements Mask<HugeMask> {
   }
 
   @Override
-  public HugeMask resetTo(Mask<HugeMask> other) {
+  public RoaringMask resetTo(Mask<RoaringMask> other) {
     return inPlaceOr(other.unwrap());
   }
 
   @Override
-  public HugeMask unwrap() {
+  public void clear() {
+    bitmap.clear();
+  }
+
+  @Override
+  public RoaringMask unwrap() {
     return this;
   }
 
@@ -106,8 +83,8 @@ public class HugeMask implements Mask<HugeMask> {
   }
 
   @Override
-  public HugeMask clone() {
-    return new HugeMask(bitmap.clone());
+  public RoaringMask clone() {
+    return new RoaringMask(bitmap.clone());
   }
 
   @Override
@@ -129,7 +106,7 @@ public class HugeMask implements Mask<HugeMask> {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    HugeMask that = (HugeMask) o;
+    RoaringMask that = (RoaringMask) o;
     return Objects.equals(bitmap, that.bitmap);
   }
 
@@ -138,28 +115,28 @@ public class HugeMask implements Mask<HugeMask> {
     return Objects.hash(bitmap);
   }
 
-  private static final class Factory implements MaskFactory<HugeMask> {
-    private final HugeMask EMPTY = empty();
+  private static final class Factory implements MaskFactory<RoaringMask> {
+    private final RoaringMask EMPTY = empty();
 
     @Override
-    public HugeMask empty() {
-      return new HugeMask();
+    public RoaringMask empty() {
+      return new RoaringMask();
     }
 
     @Override
-    public HugeMask contiguous(int max) {
+    public RoaringMask contiguous(int max) {
       RoaringBitmap range = new RoaringBitmap();
       range.add(0L, max & 0xFFFFFFFFL);
-      return new HugeMask(range);
+      return new RoaringMask(range);
     }
 
     @Override
-    public HugeMask of(int... values) {
-      return new HugeMask(RoaringBitmap.bitmapOf(values));
+    public RoaringMask of(int... values) {
+      return new RoaringMask(RoaringBitmap.bitmapOf(values));
     }
 
     @Override
-    public HugeMask emptySingleton() {
+    public RoaringMask emptySingleton() {
       return EMPTY;
     }
   }

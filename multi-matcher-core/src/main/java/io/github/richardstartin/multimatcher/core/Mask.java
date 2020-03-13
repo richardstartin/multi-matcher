@@ -2,7 +2,7 @@ package io.github.richardstartin.multimatcher.core;
 
 import java.util.stream.IntStream;
 
-public interface Mask<T extends Mask> {
+public interface Mask<T extends Mask<T>> {
 
   static <U extends Mask> U with(U mask, int priority) {
     mask.add(priority);
@@ -16,14 +16,12 @@ public interface Mask<T extends Mask> {
 
   void add(int id);
   void remove(int id);
-  T and(T other);
-  T andNot(T other);
+
   T inPlaceAndNot(T other);
-  T or(T other);
-  T orNot(T other, int max);
   T inPlaceAnd(T other);
   T inPlaceOr(T other);
   T resetTo(Mask<T> other);
+  void clear();
   T unwrap();
   IntStream stream();
   int first();
@@ -31,5 +29,14 @@ public interface Mask<T extends Mask> {
   void optimise();
   boolean isEmpty();
   int cardinality();
+  default T and(T other) {
+    return clone().inPlaceAnd(other);
+  }
+  default T andNot(T other) {
+    return clone().inPlaceAndNot(other);
+  }
+  default T or(T other) {
+    return clone().inPlaceOr(other);
+  }
 
 }

@@ -13,14 +13,14 @@ public class IntNode<MaskType extends Mask<MaskType>> {
   private final Operation relation;
   private final MaskType empty;
 
-  private int[] thresholds = new int[16];
+  private int[] thresholds = new int[4];
   private MaskType[] sets;
   private int count = 0;
 
   public IntNode(Operation relation, MaskType empty) {
     this.relation = relation;
     this.empty = empty;
-    this.sets = (MaskType[]) Array.newInstance(empty.getClass(), 16);
+    this.sets = (MaskType[]) Array.newInstance(empty.getClass(), 4);
   }
 
   public void add(int value, int priority) {

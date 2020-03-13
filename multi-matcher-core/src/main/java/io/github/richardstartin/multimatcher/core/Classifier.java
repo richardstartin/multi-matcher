@@ -30,6 +30,14 @@ public interface Classifier<T, C> {
 
 
   /**
+   * Gets the highest priority classification, or none if no constraints are satisfied.
+   * @param value the value to classifications.
+   * @return the best classification, or null if no constraints are satisfied
+   */
+  C classificationOrNull(T value);
+
+
+  /**
    * Gets a new builder for a classifier
    *
    * @param <Key>            the create key type

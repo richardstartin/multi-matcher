@@ -2,31 +2,43 @@ package io.github.richardstartin.multimatcher.core.matchers;
 
 import io.github.richardstartin.multimatcher.core.*;
 import io.github.richardstartin.multimatcher.core.masks.MaskFactory;
+import io.github.richardstartin.multimatcher.core.matchers.nodes.ComparableNode;
 import io.github.richardstartin.multimatcher.core.matchers.nodes.DoubleNode;
 
+import java.lang.reflect.Array;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.ToDoubleFunction;
 
 import static io.github.richardstartin.multimatcher.core.matchers.SelectivityHeuristics.avgCardinality;
+import static io.github.richardstartin.multimatcher.core.matchers.Utils.newArray;
+import static io.github.richardstartin.multimatcher.core.matchers.Utils.nullCount;
 
 public class DoubleMatcher<T, MaskType extends Mask<MaskType>> implements ConstraintAccumulator<T, MaskType>,
         Matcher<T, MaskType> {
 
   private final ToDoubleFunction<T> accessor;
-  private final Map<Operation, DoubleNode<MaskType>> children = new EnumMap<>(Operation.class);
-  private final MaskType empty;
+  private DoubleNode<MaskType>[] children = (DoubleNode<MaskType>[])newArray(DoubleNode.class, Operation.SIZE);
+  private final MaskType emptySingleton;
+  private final ThreadLocal<MaskType> empty;
   private final MaskType wildcards;
 
   public DoubleMatcher(ToDoubleFunction<T> accessor, MaskFactory<MaskType> maskFactory, int max) {
     this.accessor = accessor;
-    this.empty = maskFactory.emptySingleton();
+    this.emptySingleton = maskFactory.emptySingleton();
     this.wildcards = maskFactory.contiguous(max);
+    this.empty = ThreadLocal.withInitial(emptySingleton::clone);
   }
 
   @Override
   public void match(T value, MaskType context) {
-    context.inPlaceAnd(match(accessor.applyAsDouble(value)));
+    MaskType temp = empty.get().inPlaceOr(wildcards);
+    double d = accessor.applyAsDouble(value);
+    for (var component : children) {
+      temp.inPlaceOr(component.match(d, emptySingleton));
+    }
+    context.inPlaceAnd(temp);
+    temp.clear();
   }
 
   @Override
@@ -46,28 +58,31 @@ public class DoubleMatcher<T, MaskType extends Mask<MaskType>> implements Constr
   }
 
   private void add(Operation relation, double threshold, int priority) {
-    children.computeIfAbsent(relation, r -> new DoubleNode<>(r, empty))
-            .add(threshold, priority);
-  }
-
-  private MaskType match(double value) {
-    MaskType temp = empty.clone().inPlaceOr(wildcards);
-    for (DoubleNode<MaskType> component : children.values()) {
-      temp.inPlaceOr(component.match(value, empty));
+    var existing = children[relation.ordinal()];
+    if (null == existing) {
+      existing  = children[relation.ordinal()]
+              = new DoubleNode<>(relation, emptySingleton);
     }
-    return temp;
+    existing.add(threshold, priority);
   }
 
   private void optimise() {
-    Map<Operation, DoubleNode<MaskType>> optimised = new EnumMap<>(Operation.class);
-    children.forEach((op, node) -> optimised.put(op, node.optimise()));
-    children.putAll(optimised);
+    int nullCount = nullCount(children);
+    if (nullCount > 0) {
+      var newChildren = (DoubleNode<MaskType>[]) newArray(DoubleNode.class, children.length - nullCount);
+      int i = 0;
+      for (var child : children) {
+        if (null != child) {
+          newChildren[i++] = child.optimise();
+        }
+      }
+      children = newChildren;
+    }
   }
 
   @Override
   public float averageSelectivity() {
-    return avgCardinality(children.values(), DoubleNode::averageSelectivity);
+    return avgCardinality(children, DoubleNode::averageSelectivity);
   }
-
 
 }

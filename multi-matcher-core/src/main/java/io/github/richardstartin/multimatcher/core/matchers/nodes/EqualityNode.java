@@ -31,7 +31,9 @@ public class EqualityNode<T, MaskType extends Mask<MaskType>> implements Mutable
   }
 
   public void add(T segment, int priority) {
-    segments.compute(segment, (seg, priorities) -> null == priorities ? maskWith(priority) : with(priorities, priority));
+    segments.compute(segment, (seg, priorities) -> null == priorities
+            ? maskWith(priority)
+            : with(priorities, priority));
   }
 
   @Override

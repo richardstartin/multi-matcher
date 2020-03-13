@@ -2,6 +2,7 @@ package io.github.richardstartin.multimatcher.core.matchers;
 
 import io.github.richardstartin.multimatcher.core.*;
 import io.github.richardstartin.multimatcher.core.masks.MaskFactory;
+import io.github.richardstartin.multimatcher.core.matchers.nodes.DoubleNode;
 import io.github.richardstartin.multimatcher.core.matchers.nodes.IntNode;
 
 import java.util.EnumMap;
@@ -9,24 +10,34 @@ import java.util.Map;
 import java.util.function.ToIntFunction;
 
 import static io.github.richardstartin.multimatcher.core.matchers.SelectivityHeuristics.avgCardinality;
+import static io.github.richardstartin.multimatcher.core.matchers.Utils.newArray;
+import static io.github.richardstartin.multimatcher.core.matchers.Utils.nullCount;
 
 public class IntMatcher<T, MaskType extends Mask<MaskType>> implements ConstraintAccumulator<T, MaskType>,
         Matcher<T, MaskType> {
 
   private final ToIntFunction<T> accessor;
-  private final EnumMap<Operation, IntNode<MaskType>> children = new EnumMap<>(Operation.class);
+  private IntNode<MaskType>[] children = (IntNode<MaskType>[])newArray(IntNode.class, Operation.SIZE);
   private final MaskType wildcards;
-  private final MaskType empty;
+  private final ThreadLocal<MaskType> empty;
+  private final MaskType emptySingleton;
 
   public IntMatcher(ToIntFunction<T> accessor, MaskFactory<MaskType> maskFactory, int max) {
     this.accessor = accessor;
-    this.empty = maskFactory.emptySingleton();
+    this.empty = ThreadLocal.withInitial(maskFactory::empty);
+    this.emptySingleton = maskFactory.emptySingleton();
     this.wildcards = maskFactory.contiguous(max);
   }
 
   @Override
   public void match(T value, MaskType context) {
-    context.inPlaceAnd(match(accessor.applyAsInt(value)));
+    MaskType temp = empty.get().inPlaceOr(wildcards);
+    int i = accessor.applyAsInt(value);
+    for (var component : children) {
+      temp.inPlaceOr(component.apply(i, emptySingleton));
+    }
+    context.inPlaceAnd(temp);
+    temp.clear();
   }
 
   @Override
@@ -45,28 +56,31 @@ public class IntMatcher<T, MaskType extends Mask<MaskType>> implements Constrain
     return this;
   }
 
-
   public float averageSelectivity() {
-    return avgCardinality(children.values(), IntNode::averageSelectivity);
+    return avgCardinality(children, IntNode::averageSelectivity);
   }
-
 
   private void add(Operation relation, int threshold, int priority) {
-    children.computeIfAbsent(relation, r -> new IntNode<>(r, empty)).add(threshold, priority);
-  }
-
-  private MaskType match(int value) {
-    MaskType temp = empty.clone().inPlaceOr(wildcards);
-    for (IntNode<MaskType> component : children.values()) {
-      temp.inPlaceOr(component.apply(value, empty));
+    var existing = children[relation.ordinal()];
+    if (null == existing) {
+      existing  = children[relation.ordinal()]
+                = new IntNode<>(relation, emptySingleton);
     }
-    return temp;
+    existing.add(threshold, priority);
   }
 
   private void optimise() {
-    Map<Operation, IntNode<MaskType>> optimised = new EnumMap<>(Operation.class);
-    children.forEach((op, node) -> optimised.put(op, node.optimise()));
-    children.putAll(optimised);
+    int nullCount = nullCount(children);
+    if (nullCount > 0) {
+      var newChildren = (IntNode<MaskType>[]) newArray(IntNode.class, children.length - nullCount);
+      int i = 0;
+      for (var child : children) {
+        if (null != child) {
+          newChildren[i++] = child.optimise();
+        }
+      }
+      children = newChildren;
+    }
   }
 
 

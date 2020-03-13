@@ -75,7 +75,9 @@ public class ComparableNode<T, MaskType extends Mask<MaskType>> implements Mutab
     MaskType prev = null;
     for (Map.Entry<T, MaskType> set : sets.entrySet()) {
       if (prev != null) {
-        sets.put(set.getKey(), set.getValue().inPlaceOr(prev));
+        var optimised = set.getValue().inPlaceOr(prev);
+        optimised.optimise();
+        sets.put(set.getKey(), optimised);
       }
       prev = set.getValue();
     }
@@ -83,9 +85,11 @@ public class ComparableNode<T, MaskType extends Mask<MaskType>> implements Mutab
 
   private void reverseRangeEncode() {
     MaskType prev = null;
-    for (Map.Entry<T, MaskType> set : sets.descendingMap().entrySet()) {
+    for (var set : sets.descendingMap().entrySet()) {
       if (prev != null) {
-        sets.put(set.getKey(), set.getValue().inPlaceOr(prev));
+        var optimised = set.getValue().inPlaceOr(prev);
+        optimised.optimise();
+        sets.put(set.getKey(), optimised);
       }
       prev = set.getValue();
     }

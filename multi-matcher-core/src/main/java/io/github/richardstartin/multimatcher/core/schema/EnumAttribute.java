@@ -19,7 +19,7 @@ public class EnumAttribute<E extends Enum<E>, Input> implements Attribute<Input>
   }
 
   @Override
-  public <MaskType extends Mask<MaskType>> ConstraintAccumulator<Input, MaskType> toMatcher(MaskFactory<MaskType> maskFactory, int max) {
+  public <MaskType extends Mask<MaskType>> ConstraintAccumulator<Input, MaskType> newAccumulator(MaskFactory<MaskType> maskFactory, int max) {
     return new GenericConstraintAccumulator<>(() -> new EnumMap<>(type), accessor, maskFactory, max);
   }
 }

@@ -32,4 +32,14 @@ public class SelectivityHeuristics {
     }
     return avg / count;
   }
+
+  public static <Node> float avgCardinality(Node[] nodes, ToDoubleFunction<Node> selectivity) {
+    float avg = 0;
+    int count = 0;
+    for (Node node : nodes) {
+      avg += selectivity.applyAsDouble(node);
+      ++count;
+    }
+    return avg / count;
+  }
 }

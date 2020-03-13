@@ -14,18 +14,23 @@ import static java.util.stream.Collectors.toList;
 @State(Scope.Benchmark)
 public class LargeClassifierBenchmark {
 
+
+    @Param({"15000", "20000", "50000"})
+    int size;
+
+
     private Map<String, Object> message;
     private Classifier<Map<String, Object>, String> classifier;
 
     @Setup(Level.Trial)
     public void init() {
         this.message = message();
-        this.classifier = largeDiscreteClassifier();
+        this.classifier = largeDiscreteClassifier(size);
     }
 
     @Benchmark
     public String match() {
-        return classifier.classification(message).orElse("no match");
+        return classifier.classificationOrNull(message);
     }
 
     public static Map<String, Object> message() {
@@ -39,7 +44,7 @@ public class LargeClassifierBenchmark {
         return msg;
     }
 
-    public static Classifier<Map<String, Object>, String> largeDiscreteClassifier() {
+    public static Classifier<Map<String, Object>, String> largeDiscreteClassifier(int size) {
         return Classifier.
                 <String, Map<String, Object>, String>builder(Schema.<String, Map<String, Object>>create()
                         .withStringAttribute("attr1", (Map<String, Object> map) -> (String)map.get("attr1"))
@@ -48,7 +53,7 @@ public class LargeClassifierBenchmark {
                         .withStringAttribute("attr4", (Map<String, Object> map) -> (String)map.get("attr4"))
                         .withStringAttribute("attr5", (Map<String, Object> map) -> (String)map.get("attr5"))
                         .withStringAttribute("attr6", (Map<String, Object> map) -> (String)map.get("attr6"))
-                ).build(IntStream.range(0, 50000)
+                ).build(IntStream.range(0, size)
                 .mapToObj(i -> MatchingConstraint.<String, String>anonymous()
                         .eq("attr1", "value" + (i / 10000))
                         .eq("attr2", "value" + (i / 1000))

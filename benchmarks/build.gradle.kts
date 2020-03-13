@@ -13,9 +13,10 @@ repositories {
 
 dependencies {
 
-    // tests and benchmarks both need dependencies: javaEWAH, extendedset, etc.
+
     listOf(
-            project(":multi-matcher-core")
+            project(":multi-matcher-core"),
+            "org.openjdk.jol:jol-core:0.10"
     ).forEach {
         jmh(it)
         testRuntime(it)

@@ -30,15 +30,6 @@ public class TinyMask implements Mask<TinyMask> {
     mask ^= (1L << id);
   }
 
-  public TinyMask and(TinyMask other) {
-    return new TinyMask(this.mask & other.mask);
-  }
-
-  @Override
-  public TinyMask andNot(TinyMask other) {
-    return new TinyMask(mask &~ other.mask);
-  }
-
   @Override
   public TinyMask inPlaceAndNot(TinyMask other) {
     this.mask &= ~other.mask;
@@ -54,11 +45,6 @@ public class TinyMask implements Mask<TinyMask> {
     return new TinyMask(this.mask | other.mask);
   }
 
-  @Override
-  public TinyMask orNot(TinyMask other, int max) {
-    return new TinyMask(mask | ((~other.mask) & ((1L << max) - 1)));
-  }
-
   public TinyMask inPlaceOr(TinyMask other) {
     this.mask |= other.mask;
     return this;
@@ -68,6 +54,11 @@ public class TinyMask implements Mask<TinyMask> {
   public TinyMask resetTo(Mask<TinyMask> other) {
     this.mask = other.unwrap().mask;
     return this;
+  }
+
+  @Override
+  public void clear() {
+    this.mask = 0;
   }
 
   @Override

@@ -12,11 +12,11 @@ import static io.github.richardstartin.multimatcher.core.matchers.SelectivityHeu
 class GenericMatcher<T, U, MaskType extends Mask<MaskType>> implements Matcher<T, MaskType> {
 
   private final Function<T, U> accessor;
-  private final EnumMap<Operation, ClassificationNode<U, MaskType>> nodes;
+  private final ClassificationNode<U, MaskType>[] nodes;
   private final MaskType wildcard;
 
   GenericMatcher(Function<T, U> accessor,
-                 EnumMap<Operation, ClassificationNode<U, MaskType>> nodes,
+                 ClassificationNode<U, MaskType>[] nodes,
                  MaskType wildcard) {
     this.accessor = accessor;
     this.nodes = nodes;
@@ -26,7 +26,7 @@ class GenericMatcher<T, U, MaskType extends Mask<MaskType>> implements Matcher<T
   @Override
   public void match(T input, MaskType context) {
     U value = accessor.apply(input);
-    for (var node : nodes.values()) {
+    for (var node : nodes) {
       context.inPlaceAnd(node.match(value));
     }
     context.inPlaceOr(wildcard);
@@ -34,6 +34,6 @@ class GenericMatcher<T, U, MaskType extends Mask<MaskType>> implements Matcher<T
 
   @Override
   public float averageSelectivity() {
-    return avgCardinality(nodes.values(), ClassificationNode::averageSelectivity);
+    return avgCardinality(nodes, ClassificationNode::averageSelectivity);
   }
 }

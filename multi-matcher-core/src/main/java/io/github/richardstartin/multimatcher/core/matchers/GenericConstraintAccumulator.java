@@ -19,19 +19,17 @@ public class GenericConstraintAccumulator<T, U, MaskType extends Mask<MaskType>>
   protected final Supplier<Map<U, MaskType>> mapSupplier;
   protected final EnumMap<Operation, MutableNode<U, MaskType>> nodes = new EnumMap<>(Operation.class);
   protected final MaskType wildcard;
-  protected final MaskType empty;
   protected final int max;
-  private final MaskFactory<MaskType> maskFactory;
+  protected final MaskFactory<MaskType> factory;
 
   public GenericConstraintAccumulator(Supplier<Map<U, MaskType>> mapSupplier,
                                       Function<T, U> accessor,
-                                      MaskFactory<MaskType> maskFactory,
+                                      MaskFactory<MaskType> factory,
                                       int max) {
     this.accessor = accessor;
     this.mapSupplier = mapSupplier;
-    this.wildcard = maskFactory.contiguous(max);
-    this.empty = maskFactory.emptySingleton();
-    this.maskFactory = maskFactory;
+    this.wildcard = factory.contiguous(max);
+    this.factory = factory;
     this.max = max;
   }
 
@@ -40,12 +38,14 @@ public class GenericConstraintAccumulator<T, U, MaskType extends Mask<MaskType>>
     switch (constraint.getOperation()) {
       case NE:
         ((InequalityNode<U, MaskType>)nodes
-                .computeIfAbsent(constraint.getOperation(), op -> new InequalityNode<>(mapSupplier.get(), maskFactory.contiguous(max))))
+                .computeIfAbsent(constraint.getOperation(),
+                        op -> new InequalityNode<>(mapSupplier.get(), factory.contiguous(max))))
                 .add(constraint.getValue(), priority);
         return true;
       case EQ:
         ((EqualityNode<U, MaskType>)nodes
-                .computeIfAbsent(constraint.getOperation(), op -> new EqualityNode<>(mapSupplier.get(), empty)))
+                .computeIfAbsent(constraint.getOperation(),
+                        op -> new EqualityNode<>(factory, mapSupplier.get())))
                 .add(constraint.getValue(), priority);
         wildcard.remove(priority);
         return true;
@@ -55,6 +55,7 @@ public class GenericConstraintAccumulator<T, U, MaskType extends Mask<MaskType>>
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public Matcher<T, MaskType> freeze() {
     wildcard.optimise();
     var frozen = (ClassificationNode<U, MaskType>[]) newArray(ClassificationNode.class, nodes.size());

@@ -2,12 +2,8 @@ package io.github.richardstartin.multimatcher.core.matchers;
 
 import io.github.richardstartin.multimatcher.core.*;
 import io.github.richardstartin.multimatcher.core.masks.MaskFactory;
-import io.github.richardstartin.multimatcher.core.matchers.nodes.ComparableNode;
 import io.github.richardstartin.multimatcher.core.matchers.nodes.DoubleNode;
 
-import java.lang.reflect.Array;
-import java.util.EnumMap;
-import java.util.Map;
 import java.util.function.ToDoubleFunction;
 
 import static io.github.richardstartin.multimatcher.core.matchers.SelectivityHeuristics.avgCardinality;
@@ -19,15 +15,15 @@ public class DoubleMatcher<T, MaskType extends Mask<MaskType>> implements Constr
 
   private final ToDoubleFunction<T> accessor;
   private DoubleNode<MaskType>[] children = (DoubleNode<MaskType>[])newArray(DoubleNode.class, Operation.SIZE);
-  private final MaskType emptySingleton;
+  private final MaskFactory<MaskType> factory;
   private final ThreadLocal<MaskType> empty;
   private final MaskType wildcards;
 
   public DoubleMatcher(ToDoubleFunction<T> accessor, MaskFactory<MaskType> maskFactory, int max) {
     this.accessor = accessor;
-    this.emptySingleton = maskFactory.emptySingleton();
     this.wildcards = maskFactory.contiguous(max);
-    this.empty = ThreadLocal.withInitial(emptySingleton::clone);
+    this.factory = maskFactory;
+    this.empty = ThreadLocal.withInitial(factory::newMask);
   }
 
   @Override
@@ -35,7 +31,7 @@ public class DoubleMatcher<T, MaskType extends Mask<MaskType>> implements Constr
     MaskType temp = empty.get().inPlaceOr(wildcards);
     double d = accessor.applyAsDouble(value);
     for (var component : children) {
-      temp.inPlaceOr(component.match(d, emptySingleton));
+      temp.inPlaceOr(component.match(d, factory.emptySingleton()));
     }
     context.inPlaceAnd(temp);
     temp.clear();
@@ -61,7 +57,7 @@ public class DoubleMatcher<T, MaskType extends Mask<MaskType>> implements Constr
     var existing = children[relation.ordinal()];
     if (null == existing) {
       existing  = children[relation.ordinal()]
-              = new DoubleNode<>(relation, emptySingleton);
+              = new DoubleNode<>(factory, relation);
     }
     existing.add(threshold, priority);
   }

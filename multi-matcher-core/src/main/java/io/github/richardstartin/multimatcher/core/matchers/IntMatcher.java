@@ -2,11 +2,8 @@ package io.github.richardstartin.multimatcher.core.matchers;
 
 import io.github.richardstartin.multimatcher.core.*;
 import io.github.richardstartin.multimatcher.core.masks.MaskFactory;
-import io.github.richardstartin.multimatcher.core.matchers.nodes.DoubleNode;
 import io.github.richardstartin.multimatcher.core.matchers.nodes.IntNode;
 
-import java.util.EnumMap;
-import java.util.Map;
 import java.util.function.ToIntFunction;
 
 import static io.github.richardstartin.multimatcher.core.matchers.SelectivityHeuristics.avgCardinality;
@@ -20,12 +17,12 @@ public class IntMatcher<T, MaskType extends Mask<MaskType>> implements Constrain
   private IntNode<MaskType>[] children = (IntNode<MaskType>[])newArray(IntNode.class, Operation.SIZE);
   private final MaskType wildcards;
   private final ThreadLocal<MaskType> empty;
-  private final MaskType emptySingleton;
+  private final MaskFactory<MaskType> factory;
 
   public IntMatcher(ToIntFunction<T> accessor, MaskFactory<MaskType> maskFactory, int max) {
     this.accessor = accessor;
-    this.empty = ThreadLocal.withInitial(maskFactory::empty);
-    this.emptySingleton = maskFactory.emptySingleton();
+    this.factory = maskFactory;
+    this.empty = ThreadLocal.withInitial(factory::newMask);
     this.wildcards = maskFactory.contiguous(max);
   }
 
@@ -34,7 +31,7 @@ public class IntMatcher<T, MaskType extends Mask<MaskType>> implements Constrain
     MaskType temp = empty.get().inPlaceOr(wildcards);
     int i = accessor.applyAsInt(value);
     for (var component : children) {
-      temp.inPlaceOr(component.apply(i, emptySingleton));
+      temp.inPlaceOr(component.apply(i, factory.emptySingleton()));
     }
     context.inPlaceAnd(temp);
     temp.clear();
@@ -64,11 +61,12 @@ public class IntMatcher<T, MaskType extends Mask<MaskType>> implements Constrain
     var existing = children[relation.ordinal()];
     if (null == existing) {
       existing  = children[relation.ordinal()]
-                = new IntNode<>(relation, emptySingleton);
+                = new IntNode<>(factory, relation);
     }
     existing.add(threshold, priority);
   }
 
+  @SuppressWarnings("unchecked")
   private void optimise() {
     int nullCount = nullCount(children);
     if (nullCount > 0) {

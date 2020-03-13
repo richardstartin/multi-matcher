@@ -20,7 +20,7 @@ public class IntNodeTest {
     IntNode<BitmapMask> node = build(100, Operation.GT);
     BitmapMask mask = factory.contiguous(100);
     assertTrue(node.apply(0, mask.clone()).isEmpty());
-    assertEquals(with(factory.empty(), 0), node.apply(1, mask.clone()));
+    assertEquals(with(factory.newMask(), 0), node.apply(1, mask.clone()));
   }
 
 
@@ -29,8 +29,8 @@ public class IntNodeTest {
     IntNode<BitmapMask> node = build(100, Operation.GE);
     BitmapMask mask = factory.contiguous(100);
     assertTrue(node.apply(-1, mask.clone()).isEmpty());
-    assertEquals(with(factory.empty(), 0), node.apply(0, mask.clone()));
-    assertEquals(with(with(factory.empty(), 1), 0), node.apply(10, mask.clone()));
+    assertEquals(with(factory.newMask(), 0), node.apply(0, mask.clone()));
+    assertEquals(with(with(factory.newMask(), 1), 0), node.apply(10, mask.clone()));
   }
 
   @Test
@@ -38,8 +38,8 @@ public class IntNodeTest {
     IntNode<BitmapMask> node = build(100, Operation.EQ);
     BitmapMask mask = factory.contiguous(100);
     assertTrue(node.apply(-1, mask.clone()).isEmpty());
-    assertEquals(with(factory.empty(), 0), node.apply(0, mask.clone()));
-    assertEquals(with(factory.empty(), 1), node.apply(10, mask.clone()));
+    assertEquals(with(factory.newMask(), 0), node.apply(0, mask.clone()));
+    assertEquals(with(factory.newMask(), 1), node.apply(10, mask.clone()));
   }
 
 
@@ -66,7 +66,7 @@ public class IntNodeTest {
     IntNode<BitmapMask> node = buildRev(100, Operation.GT);
     BitmapMask mask = factory.contiguous(100);
     assertTrue(node.apply(0, mask.clone()).isEmpty());
-    assertEquals(with(factory.empty(), 0), node.apply(1, mask.clone()));
+    assertEquals(with(factory.newMask(), 0), node.apply(1, mask.clone()));
   }
 
 
@@ -75,8 +75,8 @@ public class IntNodeTest {
     IntNode<BitmapMask> node = buildRev(100, Operation.GE);
     BitmapMask mask = factory.contiguous(100);
     assertTrue(node.apply(-1, mask.clone()).isEmpty());
-    assertEquals(with(factory.empty(), 0), node.apply(0, mask.clone()));
-    assertEquals(with(with(factory.empty(), 0), 1), node.apply(10, mask.clone()));
+    assertEquals(with(factory.newMask(), 0), node.apply(0, mask.clone()));
+    assertEquals(with(with(factory.newMask(), 0), 1), node.apply(10, mask.clone()));
   }
 
   @Test
@@ -84,8 +84,8 @@ public class IntNodeTest {
     IntNode<BitmapMask> node = buildRev(100, Operation.EQ);
     BitmapMask mask = factory.contiguous(100);
     assertTrue(node.apply(-1, mask.clone()).isEmpty());
-    assertEquals(with(factory.empty(), 0), node.apply(0, mask.clone()));
-    assertEquals(with(factory.empty(), 1), node.apply(10, mask.clone()));
+    assertEquals(with(factory.newMask(), 0), node.apply(0, mask.clone()));
+    assertEquals(with(factory.newMask(), 1), node.apply(10, mask.clone()));
   }
 
 
@@ -109,7 +109,7 @@ public class IntNodeTest {
 
   @Test
   public void testBuildNode() {
-    IntNode<BitmapMask> node = new IntNode<>(Operation.EQ, factory.empty());
+    IntNode<BitmapMask> node = new IntNode<>(factory, Operation.EQ);
     node.add(0, 0);
     assertEquals(factory.contiguous( 1), node.apply(0, factory.contiguous( 1)));
     node.add(0, 1);
@@ -117,7 +117,7 @@ public class IntNodeTest {
   }
 
   private IntNode<BitmapMask> build(int count, Operation relation) {
-    IntNode<BitmapMask> node = new IntNode<>(relation, factory.empty());
+    IntNode<BitmapMask> node = new IntNode<>(factory, relation);
     for (int i = 0; i < count; ++i) {
       node.add(i * 10, i);
     }
@@ -125,7 +125,7 @@ public class IntNodeTest {
   }
 
   private IntNode<BitmapMask> buildRev(int count, Operation relation) {
-    IntNode<BitmapMask> node = new IntNode<>(relation, factory.empty());
+    IntNode<BitmapMask> node = new IntNode<>(factory, relation);
     for (int i = count - 1; i >= 0; --i) {
       node.add(i * 10, i);
     }

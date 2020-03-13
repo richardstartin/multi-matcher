@@ -106,7 +106,7 @@ public class IntNodeTestTiny {
 
   @Test
   public void testBuildNode() {
-    IntNode<TinyMask> node = new IntNode<>(Operation.EQ, new TinyMask());
+    IntNode<TinyMask> node = new IntNode<>(TinyMask.FACTORY, Operation.EQ);
     node.add(0, 0);
     assertEquals(FACTORY.contiguous( 1), node.apply(0, FACTORY.contiguous( 1)));
     node.add(0, 1);
@@ -114,7 +114,7 @@ public class IntNodeTestTiny {
   }
 
   private IntNode<TinyMask> build(int count, Operation relation) {
-    IntNode<TinyMask> node = new IntNode<>(relation, new TinyMask());
+    IntNode<TinyMask> node = new IntNode<>(TinyMask.FACTORY, relation);
     for (int i = 0; i < count; ++i) {
       node.add(i * 10, i);
     }
@@ -122,7 +122,7 @@ public class IntNodeTestTiny {
   }
 
   private IntNode<TinyMask> buildRev(int count, Operation relation) {
-    IntNode<TinyMask> node = new IntNode<>(relation, new TinyMask());
+    IntNode<TinyMask> node = new IntNode<>(TinyMask.FACTORY, relation);
     for (int i = count - 1; i >= 0; --i) {
       node.add(i * 10, i);
     }

@@ -40,7 +40,7 @@ public class RoaringMask implements Mask<RoaringMask> {
   @Override
   public RoaringMask inPlaceAnd(RoaringMask other) {
     if (other.isEmpty()) {
-      return FACTORY.empty();
+      return FACTORY.newMask();
     }
     bitmap.and(other.bitmap);
     return this;
@@ -116,10 +116,10 @@ public class RoaringMask implements Mask<RoaringMask> {
   }
 
   private static final class Factory implements MaskFactory<RoaringMask> {
-    private final RoaringMask EMPTY = empty();
+    private final RoaringMask EMPTY = newMask();
 
     @Override
-    public RoaringMask empty() {
+    public RoaringMask newMask() {
       return new RoaringMask();
     }
 

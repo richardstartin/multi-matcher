@@ -4,10 +4,7 @@ import io.github.richardstartin.multimatcher.core.*;
 import io.github.richardstartin.multimatcher.core.masks.MaskFactory;
 import io.github.richardstartin.multimatcher.core.matchers.nodes.ComparableNode;
 
-import java.lang.reflect.Array;
 import java.util.Comparator;
-import java.util.EnumMap;
-import java.util.Map;
 import java.util.function.Function;
 
 import static io.github.richardstartin.multimatcher.core.matchers.Utils.newArray;
@@ -20,7 +17,7 @@ public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements
   private final MaskType wildcards;
   private final Comparator<U> comparator;
   private ComparableNode<U, MaskType>[] children = (ComparableNode<U, MaskType>[]) newArray(ComparableNode.class, Operation.SIZE);
-  private final MaskType emptySingleton;
+  private final MaskFactory<MaskType> factory;
   private final ThreadLocal<MaskType> empty;
 
   public ComparableMatcher(Function<T, U> accessor,
@@ -28,9 +25,9 @@ public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements
                            int max) {
     this.accessor = accessor;
     this.comparator = comparator;
-    this.emptySingleton = maskFactory.emptySingleton();
+    this.factory = maskFactory;
     this.wildcards = maskFactory.contiguous(max);
-    this.empty = ThreadLocal.withInitial(emptySingleton::clone);
+    this.empty = ThreadLocal.withInitial(factory::newMask);
   }
 
   @Override
@@ -72,7 +69,7 @@ public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements
     var existing = children[relation.ordinal()];
     if (null == existing) {
       existing  = children[relation.ordinal()]
-                = new ComparableNode<>(comparator, relation, emptySingleton);
+                = new ComparableNode<>(factory, comparator, relation);
     }
     existing.add(threshold, priority);
   }

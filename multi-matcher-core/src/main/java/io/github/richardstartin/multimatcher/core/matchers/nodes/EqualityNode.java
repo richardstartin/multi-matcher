@@ -2,6 +2,7 @@ package io.github.richardstartin.multimatcher.core.matchers.nodes;
 
 import io.github.richardstartin.multimatcher.core.Mask;
 import io.github.richardstartin.multimatcher.core.Operation;
+import io.github.richardstartin.multimatcher.core.masks.MaskFactory;
 import io.github.richardstartin.multimatcher.core.matchers.ClassificationNode;
 import io.github.richardstartin.multimatcher.core.matchers.MutableNode;
 
@@ -16,16 +17,16 @@ public class EqualityNode<T, MaskType extends Mask<MaskType>> implements Mutable
 
   private final Function<Map<T, MaskType>, Map<T, MaskType>> segmentOptimiser;
   private final Map<T, MaskType> segments;
-  private final MaskType empty;
+  private final MaskFactory<MaskType> factory;
 
-  public EqualityNode(Map<T, MaskType> segments, MaskType empty) {
-    this(segments, empty, Function.identity());
+  public EqualityNode(MaskFactory<MaskType> factory, Map<T, MaskType> segments) {
+    this(factory, segments, Function.identity());
   }
 
-  public EqualityNode(Map<T, MaskType> segments,
-                      MaskType empty,
+  public EqualityNode(MaskFactory<MaskType> factory,
+                      Map<T, MaskType> segments,
                       Function<Map<T, MaskType>, Map<T, MaskType>> segmentOptimiser) {
-    this.empty = empty;
+    this.factory = factory;
     this.segments = segments;
     this.segmentOptimiser = segmentOptimiser;
   }
@@ -38,7 +39,7 @@ public class EqualityNode<T, MaskType extends Mask<MaskType>> implements Mutable
 
   @Override
   public ClassificationNode<T, MaskType> freeze() {
-    return new OptimisedGeneralEqualityNode<>(segmentOptimiser.apply(segments), empty);
+    return new OptimisedGeneralEqualityNode<>(factory, segmentOptimiser.apply(segments));
   }
 
   @Override
@@ -51,7 +52,7 @@ public class EqualityNode<T, MaskType extends Mask<MaskType>> implements Mutable
   }
 
   private MaskType maskWith(int priority) {
-    MaskType mask = empty.clone();
+    MaskType mask = factory.newMask();
     mask.add(priority);
     return mask;
   }
@@ -59,17 +60,17 @@ public class EqualityNode<T, MaskType extends Mask<MaskType>> implements Mutable
   private static class OptimisedGeneralEqualityNode<Input, MaskType extends Mask<MaskType>>
           implements ClassificationNode<Input, MaskType> {
     private final Map<Input, MaskType> segments;
-    private final MaskType empty;
+    private final MaskFactory<MaskType> factory;
 
 
-    private OptimisedGeneralEqualityNode(Map<Input, MaskType> segments, MaskType empty) {
+    private OptimisedGeneralEqualityNode(MaskFactory<MaskType> factory, Map<Input, MaskType> segments) {
       this.segments = segments;
-      this.empty = empty;
+      this.factory = factory;
     }
 
     @Override
     public MaskType match(Input input) {
-      return segments.getOrDefault(input, empty);
+      return segments.getOrDefault(input, factory.emptySingleton());
     }
 
     @Override

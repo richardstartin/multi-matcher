@@ -34,7 +34,7 @@ public class StringConstraintAccumulator<Input, MaskType extends Mask<MaskType>>
     }
     if (constraint.getOperation() == STARTS_WITH) {
       var prefix = (PrefixNode<MaskType>) nodes.computeIfAbsent(STARTS_WITH,
-              o -> new PrefixNode<>(empty));
+              o -> new PrefixNode<>(factory));
       prefix.add(constraint.getValue(), priority);
     } else {
       return false;
@@ -54,7 +54,7 @@ public class StringConstraintAccumulator<Input, MaskType extends Mask<MaskType>>
     for (var pair : nodes.entrySet()) {
       frozen[pair.getKey().ordinal()] = pair.getValue().freeze();
     }
-    return new StringMatcher<>(accessor, frozen, wildcard, empty);
+    return new StringMatcher<>(factory, accessor, frozen, wildcard);
   }
 
   private static class StringMatcher<T, MaskType extends Mask<MaskType>> implements Matcher<T, MaskType> {
@@ -64,14 +64,14 @@ public class StringConstraintAccumulator<Input, MaskType extends Mask<MaskType>>
     private final MaskType wildcard;
     private final ThreadLocal<MaskType> empty;
 
-    StringMatcher(Function<T, String> accessor,
+    StringMatcher(MaskFactory<MaskType> factory,
+                  Function<T, String> accessor,
                   ClassificationNode<String, MaskType>[] nodes,
-                  MaskType wildcard,
-                  MaskType empty) {
+                  MaskType wildcard) {
       this.accessor = accessor;
       this.nodes = nodes;
       this.wildcard = wildcard;
-      this.empty = ThreadLocal.withInitial(empty::clone);
+      this.empty = ThreadLocal.withInitial(factory::newMask);
     }
 
     @Override

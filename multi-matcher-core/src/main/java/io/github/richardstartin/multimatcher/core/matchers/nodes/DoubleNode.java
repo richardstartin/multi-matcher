@@ -2,6 +2,7 @@ package io.github.richardstartin.multimatcher.core.matchers.nodes;
 
 import io.github.richardstartin.multimatcher.core.Mask;
 import io.github.richardstartin.multimatcher.core.Operation;
+import io.github.richardstartin.multimatcher.core.masks.MaskFactory;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
@@ -12,16 +13,16 @@ public class DoubleNode<MaskType extends Mask<MaskType>> {
 
 
   private final Operation relation;
-  private final MaskType empty;
+  private final MaskFactory<MaskType> factory;
 
   private double[] thresholds = new double[4];
   private MaskType[] sets;
   private int count = 0;
 
-  public DoubleNode(Operation relation, MaskType empty) {
+  public DoubleNode(MaskFactory<MaskType> factory, Operation relation) {
     this.relation = relation;
-    this.empty = empty;
-    this.sets = (MaskType[]) Array.newInstance(empty.getClass(), 4);
+    this.factory = factory;
+    this.sets = (MaskType[]) Array.newInstance(factory.emptySingleton().getClass(), 4);
   }
 
   public void add(double value, int priority) {
@@ -30,7 +31,7 @@ public class DoubleNode<MaskType extends Mask<MaskType>> {
       int position = count;
       MaskType mask = sets[position];
       if (null == mask) {
-        mask = empty.clone();
+        mask = factory.newMask();
       }
       mask.add(priority);
       thresholds[position] = value;
@@ -96,19 +97,19 @@ public class DoubleNode<MaskType extends Mask<MaskType>> {
 
   private MaskType findEqualityEncoded(double value) {
     int index = Arrays.binarySearch(thresholds, 0, count, value);
-    return index >= 0 ? sets[index] : empty;
+    return index >= 0 ? sets[index] : factory.emptySingleton();
   }
 
   private MaskType findRangeEncoded(double value) {
     int pos = Arrays.binarySearch(thresholds, 0, count, value);
     int index = (pos >= 0 ? pos : -(pos + 1)) - 1;
-    return index >= 0 && index < count ? sets[index] : empty;
+    return index >= 0 && index < count ? sets[index] : factory.emptySingleton();
   }
 
   private MaskType findReverseRangeEncoded(double value) {
     int pos = Arrays.binarySearch(thresholds, 0, count, value);
     int index = (pos >= 0 ? pos + 1 : -(pos + 1));
-    return index >= 0 && index < count ? sets[index] : empty;
+    return index >= 0 && index < count ? sets[index] : factory.emptySingleton();
   }
 
   private void reverseRangeEncode() {
@@ -139,7 +140,7 @@ public class DoubleNode<MaskType extends Mask<MaskType>> {
   }
 
   private MaskType maskWith(int value) {
-    MaskType mask = empty.clone();
+    MaskType mask = factory.newMask();
     mask.add(value);
     return mask;
   }

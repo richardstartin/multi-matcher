@@ -1,6 +1,7 @@
 package io.github.richardstartin.multimatcher.core.matchers.nodes;
 
 import io.github.richardstartin.multimatcher.core.Mask;
+import io.github.richardstartin.multimatcher.core.masks.MaskFactory;
 import io.github.richardstartin.multimatcher.core.matchers.ClassificationNode;
 import io.github.richardstartin.multimatcher.core.matchers.MutableNode;
 import org.apache.commons.collections4.trie.PatriciaTrie;
@@ -15,16 +16,16 @@ import static io.github.richardstartin.multimatcher.core.matchers.SelectivityHeu
 public class PrefixNode<MaskType extends Mask<MaskType>> implements MutableNode<String, MaskType>,
         ClassificationNode<String, MaskType> {
 
-  private final MaskType empty;
+  private final MaskFactory<MaskType> factory;
   private final Map<String, MaskType> map;
   private int longest;
 
-  public PrefixNode(MaskType empty) {
-    this(empty, new HashMap<>(), 0);
+  public PrefixNode(MaskFactory<MaskType> factory) {
+    this(factory, new HashMap<>(), 0);
   }
 
-  private PrefixNode(MaskType empty, Map<String, MaskType> map, int longest) {
-    this.empty = empty;
+  private PrefixNode(MaskFactory<MaskType> factory, Map<String, MaskType> map, int longest) {
+    this.factory = factory;
     this.map = map;
     this.longest = longest;
   }
@@ -39,7 +40,7 @@ public class PrefixNode<MaskType extends Mask<MaskType>> implements MutableNode<
       }
       --position;
     }
-    return empty;
+    return factory.emptySingleton();
   }
 
   @Override
@@ -57,11 +58,11 @@ public class PrefixNode<MaskType extends Mask<MaskType>> implements MutableNode<
                }
              });
        });
-    return new PrefixNode<>(empty, map, longest);
+    return new PrefixNode<>(factory, map, longest);
   }
 
   public void add(String prefix, int id) {
-    map.compute(prefix, (p, mask) -> with(null == mask ? empty.clone() : mask, id));
+    map.compute(prefix, (p, mask) -> with(null == mask ? factory.newMask() : mask, id));
   }
 
   @Override

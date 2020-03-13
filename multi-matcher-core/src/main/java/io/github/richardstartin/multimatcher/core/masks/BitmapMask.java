@@ -9,20 +9,20 @@ import java.util.stream.IntStream;
 public class BitmapMask implements Mask<BitmapMask> {
 
     public static final int MAX_CAPACITY = 256 * 64;
-    private static final int UNKNOWN_FIRST_NON_EMPTY = -1;
-    private static final int KNOWN_EMPTY = -2;
+    private static final int UNKNOWN_EMPTY = -2;
+    private static final int KNOWN_EMPTY = -1;
 
     public static Factory factory(int max) {
         return new Factory(max);
     }
 
-    private static final long[] EMPTY = new long[128];
+    private static final long[] EMPTY = new long[256];
 
     private final long[] bitset;
-    private int firstNonEmptyWord = UNKNOWN_FIRST_NON_EMPTY;
+    private int firstNonEmptyWord = UNKNOWN_EMPTY;
 
     BitmapMask(int max) {
-        this(new long[(max + 63) >>> 6], UNKNOWN_FIRST_NON_EMPTY);
+        this(new long[(max + 63) >>> 6], UNKNOWN_EMPTY);
     }
 
     BitmapMask(int max, int from, int to) {
@@ -50,40 +50,53 @@ public class BitmapMask implements Mask<BitmapMask> {
 
     @Override
     public BitmapMask inPlaceAnd(BitmapMask other) {
-        this.firstNonEmptyWord = UNKNOWN_FIRST_NON_EMPTY;
-        int start = Math.max(0, other.firstNonEmptyWord - 1);
-        Arrays.fill(bitset, 0, start, 0L);
-        for (int i = start; i < bitset.length; ++i) {
-            bitset[i] &= other.bitset[i];
+        if (!other.isEmpty()) {
+            this.firstNonEmptyWord = UNKNOWN_EMPTY;
+            int start = Math.max(0, other.firstNonEmptyWord - 1);
+            Arrays.fill(bitset, 0, start, 0L);
+            for (int i = start; i < bitset.length; ++i) {
+                bitset[i] &= other.bitset[i];
+            }
+        } else {
+            Arrays.fill(bitset, 0);
+            this.firstNonEmptyWord = KNOWN_EMPTY;
         }
         return this;
     }
 
     @Override
     public BitmapMask inPlaceAndNot(BitmapMask other) {
-        int start = Math.max(0, firstNonEmptyWord - 1);
-        Arrays.fill(bitset, 0, start, 0L);
-        for (int i = 0; i < bitset.length; ++i) {
-            bitset[i] &= ~other.bitset[i];
+        if (!other.isEmpty()) {
+            int start = Math.max(0, firstNonEmptyWord - 1);
+            Arrays.fill(bitset, 0, start, 0L);
+            for (int i = 0; i < bitset.length; ++i) {
+                bitset[i] &= ~other.bitset[i];
+            }
+            this.firstNonEmptyWord = UNKNOWN_EMPTY;
         }
-        this.firstNonEmptyWord = UNKNOWN_FIRST_NON_EMPTY;
         return this;
     }
 
     @Override
     public BitmapMask inPlaceOr(BitmapMask other) {
-        int start = Math.max(0, other.firstNonEmptyWord - 1);
-        for (int i = start; i < bitset.length; ++i) {
-            bitset[i] |= other.bitset[i];
+        if (!other.isEmpty()) {
+            int start = Math.max(0, other.firstNonEmptyWord - 1);
+            for (int i = start; i < bitset.length; ++i) {
+                bitset[i] |= other.bitset[i];
+            }
+            this.firstNonEmptyWord = Math.min(firstNonEmptyWord, other.firstNonEmptyWord);
         }
-        this.firstNonEmptyWord = Math.min(firstNonEmptyWord, other.firstNonEmptyWord);
         return this;
     }
 
     @Override
     public BitmapMask resetTo(Mask<BitmapMask> other) {
-        System.arraycopy(other.unwrap().bitset, 0, bitset, 0, bitset.length);
-        this.firstNonEmptyWord = other.unwrap().firstNonEmptyWord;
+        if (other.isEmpty()) {
+            this.firstNonEmptyWord = KNOWN_EMPTY;
+        } else {
+            System.arraycopy(other.unwrap().bitset, 0, bitset, 0, bitset.length);
+            this.firstNonEmptyWord = other.unwrap().firstNonEmptyWord;
+        }
         return this;
     }
 
@@ -114,18 +127,16 @@ public class BitmapMask implements Mask<BitmapMask> {
 
     @Override
     public int first() {
-        if (firstNonEmptyWord == UNKNOWN_FIRST_NON_EMPTY) {
-            firstNonEmptyWord = indexOfFirstNonEmptyWord(bitset);
-        }
-        int wordIndex = firstNonEmptyWord;
-        return wordIndex < 0
+        return isEmpty()
                 ? -1
-                : wordIndex * Long.SIZE + Long.numberOfTrailingZeros(bitset[wordIndex]);
+                : firstNonEmptyWord * Long.SIZE + Long.numberOfTrailingZeros(bitset[firstNonEmptyWord]);
     }
 
     @Override
     public BitmapMask clone() {
-        return new BitmapMask(Arrays.copyOf(bitset, bitset.length), firstNonEmptyWord);
+        return null == bitset
+                ? this
+                : new BitmapMask(Arrays.copyOf(bitset, bitset.length), firstNonEmptyWord);
     }
 
     @Override
@@ -135,9 +146,8 @@ public class BitmapMask implements Mask<BitmapMask> {
 
     @Override
     public boolean isEmpty() {
-        if (firstNonEmptyWord == UNKNOWN_FIRST_NON_EMPTY) {
-            int first = indexOfFirstNonEmptyWord(bitset);
-            firstNonEmptyWord = first == UNKNOWN_FIRST_NON_EMPTY ? KNOWN_EMPTY : first;
+        if (firstNonEmptyWord == UNKNOWN_EMPTY) {
+            firstNonEmptyWord = indexOfFirstNonEmptyWord(bitset);
         }
         return firstNonEmptyWord == KNOWN_EMPTY;
     }
@@ -175,17 +185,7 @@ public class BitmapMask implements Mask<BitmapMask> {
     }
 
     private static int indexOfFirstNonEmptyWord(long[] bitset) {
-        int firstNonEmpty = UNKNOWN_FIRST_NON_EMPTY;
-        int i = 0;
-        for (; i + EMPTY.length - 1 < bitset.length && firstNonEmpty == UNKNOWN_FIRST_NON_EMPTY; i += EMPTY.length) {
-            firstNonEmpty = Arrays.mismatch(bitset, i, i + EMPTY.length, EMPTY, 0, EMPTY.length);
-        }
-        for (; i < bitset.length && firstNonEmpty == UNKNOWN_FIRST_NON_EMPTY; ++i) {
-            if (bitset[i] != 0) {
-                firstNonEmpty = i;
-            }
-        }
-        return firstNonEmpty;
+        return Arrays.mismatch(bitset, 0, bitset.length, EMPTY, 0, bitset.length);
     }
 
     public static final class Factory implements MaskFactory<BitmapMask> {
@@ -195,11 +195,11 @@ public class BitmapMask implements Mask<BitmapMask> {
 
         private Factory(int max) {
             this.max = max;
-            this.empty = new BitmapMask(max);
+            this.empty = new BitmapMask(null, KNOWN_EMPTY);
         }
 
         @Override
-        public BitmapMask empty() {
+        public BitmapMask newMask() {
             return new BitmapMask(max);
         }
 

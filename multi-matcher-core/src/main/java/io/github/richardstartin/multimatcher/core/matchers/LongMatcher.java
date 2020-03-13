@@ -2,11 +2,8 @@ package io.github.richardstartin.multimatcher.core.matchers;
 
 import io.github.richardstartin.multimatcher.core.*;
 import io.github.richardstartin.multimatcher.core.masks.MaskFactory;
-import io.github.richardstartin.multimatcher.core.matchers.nodes.IntNode;
 import io.github.richardstartin.multimatcher.core.matchers.nodes.LongNode;
 
-import java.util.EnumMap;
-import java.util.Map;
 import java.util.function.ToLongFunction;
 
 import static io.github.richardstartin.multimatcher.core.matchers.SelectivityHeuristics.avgCardinality;
@@ -20,12 +17,12 @@ public class LongMatcher<T, MaskType extends Mask<MaskType>> implements Constrai
   private LongNode<MaskType>[] children = (LongNode<MaskType>[])newArray(LongNode.class, Operation.SIZE);
   private final ThreadLocal<MaskType> empty;
   private final MaskType wildcards;
-  private final MaskType emptySingleton;
+  private final MaskFactory<MaskType> factory;
 
   public LongMatcher(ToLongFunction<T> accessor, MaskFactory<MaskType> maskFactory, int max) {
     this.accessor = accessor;
-    this.emptySingleton = maskFactory.emptySingleton();
-    this.empty = ThreadLocal.withInitial(emptySingleton::clone);
+    this.factory = maskFactory;
+    this.empty = ThreadLocal.withInitial(factory::newMask);
     this.wildcards = maskFactory.contiguous(max);
   }
 
@@ -34,7 +31,7 @@ public class LongMatcher<T, MaskType extends Mask<MaskType>> implements Constrai
     MaskType temp = empty.get().inPlaceOr(wildcards);
     long l = accessor.applyAsLong(value);
     for (var component : children) {
-      temp.inPlaceOr(component.apply(l, emptySingleton));
+      temp.inPlaceOr(component.apply(l, factory.emptySingleton()));
     }
     context.inPlaceAnd(temp);
     temp.clear();
@@ -61,11 +58,12 @@ public class LongMatcher<T, MaskType extends Mask<MaskType>> implements Constrai
     var existing = children[relation.ordinal()];
     if (null == existing) {
       existing  = children[relation.ordinal()]
-              = new LongNode<>(relation, emptySingleton);
+              = new LongNode<>(factory, relation);
     }
     existing.add(threshold, priority);
   }
 
+  @SuppressWarnings("unchecked")
   private void optimise() {
     int nullCount = nullCount(children);
     if (nullCount > 0) {

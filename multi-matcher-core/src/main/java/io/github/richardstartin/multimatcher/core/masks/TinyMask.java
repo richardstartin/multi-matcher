@@ -120,9 +120,9 @@ public class TinyMask implements Mask<TinyMask> {
   }
 
   private static final class Factory implements MaskFactory<TinyMask> {
-    private final TinyMask EMPTY = empty();
+    private final TinyMask EMPTY = newMask();
     @Override
-    public TinyMask empty() {
+    public TinyMask newMask() {
       return new TinyMask(0L);
     }
 

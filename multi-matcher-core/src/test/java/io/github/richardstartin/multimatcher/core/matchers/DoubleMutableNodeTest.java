@@ -15,8 +15,8 @@ public class DoubleMutableNodeTest {
 
   private static BitmapMask.Factory FACTORY = factory(200);
 
-  private static final BitmapMask ZERO = with(FACTORY.empty(), 0);
-  private static final BitmapMask ONE = with(FACTORY.empty(), 1);
+  private static final BitmapMask ZERO = with(FACTORY.newMask(), 0);
+  private static final BitmapMask ONE = with(FACTORY.newMask(), 1);
   private static final BitmapMask ZERO_OR_ONE = ZERO.or(ONE);
 
   @Test
@@ -74,7 +74,7 @@ public class DoubleMutableNodeTest {
 
   @Test
   public void testBuildNode() {
-    DoubleNode<BitmapMask> node = new DoubleNode<>(Operation.EQ, FACTORY.empty());
+    DoubleNode<BitmapMask> node = new DoubleNode<>(FACTORY, Operation.EQ);
     node.add(0, 0);
     assertEquals(FACTORY.contiguous(1), node.match(0, FACTORY.contiguous(1)));
     node.add(0, 1);
@@ -82,7 +82,7 @@ public class DoubleMutableNodeTest {
   }
 
   private DoubleNode<BitmapMask> build(int count, Operation relation) {
-    DoubleNode<BitmapMask> node = new DoubleNode<>(relation, FACTORY.empty());
+    DoubleNode<BitmapMask> node = new DoubleNode<>(FACTORY, relation);
     for (int i = 0; i < count; ++i) {
       node.add(i * 10,  i);
     }
@@ -90,7 +90,7 @@ public class DoubleMutableNodeTest {
   }
 
   private DoubleNode<BitmapMask> buildRev(int count, Operation relation) {
-    DoubleNode<BitmapMask> node = new DoubleNode<>(relation, FACTORY.empty());
+    DoubleNode<BitmapMask> node = new DoubleNode<>(FACTORY, relation);
     for (int i = count - 1; i >= 0; --i) {
       node.add(i * 10,  i);
     }

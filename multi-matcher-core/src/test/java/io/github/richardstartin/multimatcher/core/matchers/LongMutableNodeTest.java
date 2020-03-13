@@ -20,7 +20,7 @@ public class LongMutableNodeTest {
     LongNode<BitmapMask> node = build(100, Operation.GT);
     BitmapMask mask = FACTORY.contiguous(100);
     assertTrue(node.apply(0L, mask.clone()).isEmpty());
-    assertEquals(with(FACTORY.empty(), 0), node.apply(1L, mask.clone()));
+    assertEquals(with(FACTORY.newMask(), 0), node.apply(1L, mask.clone()));
   }
 
 
@@ -29,8 +29,8 @@ public class LongMutableNodeTest {
     LongNode<BitmapMask> node = build(100, Operation.GE);
     BitmapMask mask = FACTORY.contiguous(100);
     assertTrue(node.apply(-1L, mask.clone()).isEmpty());
-    assertEquals(with(FACTORY.empty(), 0), node.apply(0L, mask.clone()));
-    assertEquals(with(with(FACTORY.empty(), 0), 1), node.apply(10L, mask.clone()));
+    assertEquals(with(FACTORY.newMask(), 0), node.apply(0L, mask.clone()));
+    assertEquals(with(with(FACTORY.newMask(), 0), 1), node.apply(10L, mask.clone()));
   }
 
   @Test
@@ -38,8 +38,8 @@ public class LongMutableNodeTest {
     LongNode<BitmapMask> node = build(100, Operation.EQ);
     BitmapMask mask = FACTORY.contiguous(100);
     assertTrue(node.apply(-1L, mask.clone()).isEmpty());
-    assertEquals(with(FACTORY.empty(), 0), node.apply(0L, mask.clone()));
-    assertEquals(with(FACTORY.empty(), 1), node.apply(10L, mask.clone()));
+    assertEquals(with(FACTORY.newMask(), 0), node.apply(0L, mask.clone()));
+    assertEquals(with(FACTORY.newMask(), 1), node.apply(10L, mask.clone()));
   }
 
 
@@ -66,12 +66,12 @@ public class LongMutableNodeTest {
     LongNode<BitmapMask> node = buildRev(100, Operation.GT);
     BitmapMask mask = FACTORY.contiguous(100);
     assertTrue(node.apply(0L, mask.clone()).isEmpty());
-    assertEquals(with(FACTORY.empty(), 0), node.apply(1L, mask.clone()));
+    assertEquals(with(FACTORY.newMask(), 0), node.apply(1L, mask.clone()));
   }
 
   @Test
   public void testBuildNode() {
-    LongNode<BitmapMask> node = new LongNode<>(Operation.EQ, FACTORY.empty());
+    LongNode<BitmapMask> node = new LongNode<>(FACTORY, Operation.EQ);
     node.add(0, 0);
     assertEquals(FACTORY.contiguous(1), node.apply(0, FACTORY.contiguous(1)));
     node.add(0, 1);
@@ -83,8 +83,8 @@ public class LongMutableNodeTest {
     LongNode<BitmapMask> node = buildRev(100, Operation.GE);
     BitmapMask mask = FACTORY.contiguous(100);
     assertTrue(node.apply(-1L, mask.clone()).isEmpty());
-    assertEquals(with(FACTORY.empty(), 0), node.apply(0L, mask.clone()));
-    assertEquals(with(with(FACTORY.empty(), 0), 1), node.apply(10L, mask.clone()));
+    assertEquals(with(FACTORY.newMask(), 0), node.apply(0L, mask.clone()));
+    assertEquals(with(with(FACTORY.newMask(), 0), 1), node.apply(10L, mask.clone()));
   }
 
   @Test
@@ -92,8 +92,8 @@ public class LongMutableNodeTest {
     LongNode<BitmapMask> node = buildRev(100, Operation.EQ);
     BitmapMask mask = FACTORY.contiguous(100);
     assertTrue(node.apply(-1L, mask.clone()).isEmpty());
-    assertEquals(with(FACTORY.empty(), 0), node.apply(0L, mask.clone()));
-    assertEquals(with(FACTORY.empty(), 1), node.apply(10L, mask.clone()));
+    assertEquals(with(FACTORY.newMask(), 0), node.apply(0L, mask.clone()));
+    assertEquals(with(FACTORY.newMask(), 1), node.apply(10L, mask.clone()));
   }
 
 
@@ -117,7 +117,7 @@ public class LongMutableNodeTest {
 
 
   private LongNode<BitmapMask> build(int count, Operation relation) {
-    LongNode<BitmapMask> node = new LongNode<>(relation, FACTORY.empty());
+    LongNode<BitmapMask> node = new LongNode<>(FACTORY, relation);
     for (int i = 0; i < count; ++i) {
       node.add(i * 10, i);
     }
@@ -125,7 +125,7 @@ public class LongMutableNodeTest {
   }
 
   private LongNode<BitmapMask> buildRev(int count, Operation relation) {
-    LongNode<BitmapMask> node = new LongNode<>(relation, FACTORY.empty());
+    LongNode<BitmapMask> node = new LongNode<>(FACTORY, relation);
     for (int i = count - 1; i >= 0; --i) {
       node.add(i * 10, i);
     }

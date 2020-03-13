@@ -7,7 +7,7 @@ public interface MaskFactory<MaskType extends Mask<MaskType>> {
    * Create an empty mask
    * @return an empty mask
    */
-  MaskType empty();
+  MaskType newMask();
 
   /**
    * Create a contiguous mask starting at zero

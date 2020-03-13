@@ -2,6 +2,7 @@ package io.github.richardstartin.multimatcher.core.matchers.nodes;
 
 import io.github.richardstartin.multimatcher.core.Mask;
 import io.github.richardstartin.multimatcher.core.Operation;
+import io.github.richardstartin.multimatcher.core.masks.MaskFactory;
 import io.github.richardstartin.multimatcher.core.matchers.ClassificationNode;
 import io.github.richardstartin.multimatcher.core.matchers.MutableNode;
 
@@ -14,20 +15,22 @@ import static io.github.richardstartin.multimatcher.core.matchers.SelectivityHeu
 
 public class ComparableNode<T, MaskType extends Mask<MaskType>> implements MutableNode<T, MaskType>, ClassificationNode<T, MaskType> {
 
-  private final MaskType empty;
+  private final MaskFactory<MaskType> factory;
   private final NavigableMap<T, MaskType> sets;
   private final Operation operation;
 
-  public ComparableNode(Comparator<T> comparator, Operation operation, MaskType empty) {
+  public ComparableNode(MaskFactory<MaskType> factory,
+                        Comparator<T> comparator,
+                        Operation operation) {
     this.sets = new TreeMap<>(comparator);
     this.operation = operation;
-    this.empty = empty;
+    this.factory = factory;
   }
 
   public void add(T value, int priority) {
     sets.compute(value, (k, v) -> {
       if (v == null) {
-        v = empty.clone();
+        v = factory.newMask();
       }
       v.add(priority);
       return v;
@@ -40,15 +43,15 @@ public class ComparableNode<T, MaskType extends Mask<MaskType>> implements Mutab
       case GE:
       case EQ:
       case LE:
-        return sets.getOrDefault(value, empty);
+        return sets.getOrDefault(value, factory.emptySingleton());
       case LT:
         Map.Entry<T, MaskType> higher = sets.higherEntry(value);
-        return null == higher ? empty : higher.getValue();
+        return null == higher ? factory.emptySingleton() : higher.getValue();
       case GT:
         Map.Entry<T, MaskType> lower = sets.lowerEntry(value);
-        return null == lower ? empty : lower.getValue();
+        return null == lower ? factory.emptySingleton() : lower.getValue();
       default:
-        return empty;
+        return factory.emptySingleton();
     }
   }
 

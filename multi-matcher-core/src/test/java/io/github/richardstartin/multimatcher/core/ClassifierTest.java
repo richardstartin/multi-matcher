@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.*;
 
-import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ClassifierTest {
@@ -68,7 +67,8 @@ public class ClassifierTest {
     TestDomainObject testTrigger = TestDomainObject.random();
     testTrigger.setField1("foo");
     testTrigger.setMeasure1(-1);
-    List<String> classifications = engine.classifications(testTrigger).collect(toList());
+    List<String> classifications = new ArrayList<>();
+    engine.forEachClassification(testTrigger, classifications::add);
     assertEquals(1, classifications.size());
     assertEquals("RED", classifications.get(0));
     testTrigger.setMeasure1(1);
@@ -99,7 +99,8 @@ public class ClassifierTest {
     TestDomainObject testTrigger = TestDomainObject.random();
     testTrigger.setField1("foo");
     testTrigger.setMeasure1(-1);
-    List<String> classifications = engine.classifications(testTrigger).collect(toList());
+    List<String> classifications = new ArrayList<>();
+    engine.forEachClassification(testTrigger, classifications::add);
     assertEquals(2, classifications.size());
     assertEquals("BLUE", classifications.get(0));
     assertEquals("RED", classifications.get(1));
@@ -130,7 +131,8 @@ public class ClassifierTest {
     TestDomainObject testTrigger = TestDomainObject.random();
     testTrigger.setField1("foo");
     testTrigger.setField2("qux");
-    List<String> classifications = engine.classifications(testTrigger).collect(toList());
+    List<String> classifications = new ArrayList<>();
+    engine.forEachClassification(testTrigger, classifications::add);
     assertEquals(2, classifications.size());
     assertEquals("BLUE", classifications.get(0));
     assertEquals("RED", classifications.get(1));
@@ -164,11 +166,13 @@ public class ClassifierTest {
     testTrigger.setMeasure1(-1);
     assertFalse(engine.classification(testTrigger).isPresent());
     testTrigger.setMeasure1(0.5);
-    List<String> classifications = engine.classifications(testTrigger).collect(toList());
+    List<String> classifications = new ArrayList<>();
+    engine.forEachClassification(testTrigger, classifications::add);
     assertEquals(1, classifications.size());
     assertEquals("RED", classifications.get(0));
     testTrigger.setMeasure1(1.5);
-    classifications = engine.classifications(testTrigger).collect(toList());
+    classifications.clear();
+    engine.forEachClassification(testTrigger, classifications::add);
     assertEquals(2, classifications.size());
     assertEquals("BLUE", classifications.get(0));
     assertEquals("RED", classifications.get(1));
@@ -216,12 +220,14 @@ public class ClassifierTest {
     TestDomainObject test = TestDomainObject.random();
     assertFalse(classifier.classification(test.setMeasure2(1000)).isPresent());
     assertEquals("BLUE", classifier.classification(test.setMeasure2(998)).get());
-    assertEquals(2, classifier.classifications(test.setMeasure2(999)).collect(toList()).size());
-    assertEquals("RED", classifier.classifications(test.setMeasure2(999)).collect(toList()).get(1));
+    List<String> classifications = new ArrayList<>();
+    classifier.forEachClassification(test.setMeasure2(999), classifications::add);
+    assertEquals(2, classifications.size());
+    assertEquals("RED", classifications.get(1));
   }
 
   @Test
-  public void testLongRules() throws IOException {
+  public void testLongRules() {
     Classifier<TestDomainObject, String> classifier = Classifier.<String, TestDomainObject, String>
             builder(Schema.<String, TestDomainObject>create()
             .withAttribute("measure3", TestDomainObject::getMeasure3)
@@ -233,8 +239,10 @@ public class ClassifierTest {
     TestDomainObject test = TestDomainObject.random();
     assertFalse(classifier.classification(test.setMeasure3(1000)).isPresent());
     assertEquals("BLUE", classifier.classification(test.setMeasure3(998)).get());
-    assertEquals(2, classifier.classifications(test.setMeasure3(999)).collect(toList()).size());
-    assertEquals("RED", classifier.classifications(test.setMeasure3(999)).collect(toList()).get(1));
+    List<String> classifications = new ArrayList<>();
+    classifier.forEachClassification(test.setMeasure3(999), classifications::add);
+    assertEquals(2, classifications.size());
+    assertEquals("RED", classifications.get(1));
   }
 
   @Test
@@ -326,10 +334,12 @@ public class ClassifierTest {
                           .classification("BLUE")
                           .build()));
     TestDomainObject test = TestDomainObject.random();
-    assertFalse(classifier.classifications(test).findAny().isPresent());
+    var classifications = new ArrayList<>();
+    classifier.forEachClassification(test, classifications::add);
+    assertTrue(classifications.isEmpty());
     assertFalse(classifier.classification(test).isPresent());
     assertEquals("BLUE", classifier.classification(test.setField1("foo").setField3("bar")).orElse("NONE"));
-    assertEquals(2, classifier.classifications(test.setField1("foo").setField3("bar")).count());
+    assertEquals(2, classifier.matchCount(test.setField1("foo").setField3("bar")));
   }
 
   @Test
@@ -349,7 +359,9 @@ public class ClassifierTest {
                             .classification("BLUEfoo")
                             .build()));
     TestDomainObject test = TestDomainObject.random();
-    assertFalse(classifier.classifications(test).findAny().isPresent());
+    var classifications = new ArrayList<>();
+    classifier.forEachClassification(test, classifications::add);
+    assertTrue(classifications.isEmpty());
     assertFalse(classifier.classification(test).isPresent());
     assertEquals("BLUEfoo", classifier.classification(test.setField1("foo").setField3("bar").setColour(TestDomainObject.Colour.BLUE)).orElse("NONE"));
   }

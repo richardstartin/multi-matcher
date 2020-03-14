@@ -7,6 +7,7 @@ import org.roaringbitmap.buffer.MutableRoaringBitmap;
 
 import java.nio.ByteBuffer;
 import java.util.Objects;
+import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
 
 public class RoaringMask implements Mask<RoaringMask> {
@@ -57,7 +58,7 @@ public class RoaringMask implements Mask<RoaringMask> {
 
   @Override
   public RoaringMask resetTo(Mask<RoaringMask> other) {
-    this.bitmap = other.unwrap().bitmap.toMutableRoaringBitmap().clone();
+    this.bitmap = other.unwrap().bitmap.toMutableRoaringBitmap();
     return this;
   }
 
@@ -79,13 +80,18 @@ public class RoaringMask implements Mask<RoaringMask> {
   }
 
   @Override
+  public void forEach(IntConsumer consumer) {
+    bitmap.forEach((org.roaringbitmap.IntConsumer) consumer::accept);
+  }
+
+  @Override
   public int first() {
     return bitmap.first();
   }
 
   @Override
   public RoaringMask clone() {
-    return new RoaringMask(storage, bitmap.toMutableRoaringBitmap().clone());
+    return new RoaringMask(storage, bitmap.toMutableRoaringBitmap());
   }
 
   @Override

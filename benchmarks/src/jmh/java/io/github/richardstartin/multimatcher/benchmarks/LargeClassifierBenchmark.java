@@ -55,7 +55,7 @@ public class LargeClassifierBenchmark {
                         .withStringAttribute("attr6", (Map<String, Object> map) -> (String)map.get("attr6"))
                 )
                 .useDirectBuffers(true)
-                .withOptimisedStorageSpace(10 * 1024 * 1024)
+                .withOptimisedStorageSpace(100 * 1024 * 1024)
                 .build(IntStream.range(0, size)
                 .mapToObj(i -> MatchingConstraint.<String, String>anonymous()
                         .eq("attr1", "value" + (i / 10000))

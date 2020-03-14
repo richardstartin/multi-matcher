@@ -1,13 +1,7 @@
 package io.github.richardstartin.multimatcher.core.schema;
 
-import java.util.Comparator;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.function.ToDoubleFunction;
-import java.util.function.ToIntFunction;
-import java.util.function.ToLongFunction;
+import java.util.*;
+import java.util.function.*;
 
 /**
  * The attribute registry contains the association between
@@ -18,10 +12,18 @@ import java.util.function.ToLongFunction;
  */
 public class Schema<Key, Input> {
 
-  private final Map<Key, Attribute<Input>> rules;
+
+  private final Supplier<Map<Key, ?>> prototype;
+  private final Map<Key, Attribute<Input>> attributes;
   
-  private Schema(Map<Key, Attribute<Input>> rules) {
-    this.rules = rules;
+  private Schema(Supplier<Map<Key, ?>> prototype, Map<Key, Attribute<Input>> attributes) {
+    this.prototype = prototype;
+    this.attributes = attributes;
+  }
+
+  private Schema(Map<Key, Attribute<Input>> attributes) {
+    this.attributes = attributes;
+    this.prototype = null;
   }
 
   /**
@@ -42,8 +44,10 @@ public class Schema<Key, Input> {
    * @return a new create
    */
   public static <Key extends Enum<Key>, Input> Schema<Key, Input> create(Class<Key> enumType) {
-    return new Schema<>(new EnumMap<>(enumType));
+    return new Schema<>(() -> new EnumMap<>(enumType), new EnumMap<>(enumType));
   }
+
+
 
   /**
    * Registers a generic attribute with equality semantics only
@@ -53,7 +57,7 @@ public class Schema<Key, Input> {
    * @return an attribute registry containing the attribute
    */
   public <U> Schema<Key, Input> withAttribute(Key key, Function<Input, U> accessor) {
-    rules.put(key, new GenericAttribute<>(accessor));
+    attributes.put(key, new GenericAttribute<>(accessor));
     return this;
   }
 
@@ -64,7 +68,7 @@ public class Schema<Key, Input> {
    * @return an attribute registry containing the attribute
    */
   public Schema<Key, Input> withStringAttribute(Key key, Function<Input, String> accessor) {
-    rules.put(key, new StringAttribute<>(accessor));
+    attributes.put(key, new StringAttribute<>(accessor));
     return this;
   }
 
@@ -76,7 +80,7 @@ public class Schema<Key, Input> {
    * @return an attribute registry containing the attribute
    */
   public <E extends Enum<E>> Schema<Key, Input> withEnumAttribute(Key key, Function<Input, E> accessor, Class<E> type) {
-    rules.put(key, new EnumAttribute<>(type, accessor));
+    attributes.put(key, new EnumAttribute<>(type, accessor));
     return this;
   }
 
@@ -88,7 +92,7 @@ public class Schema<Key, Input> {
    * @return an attribute registry containing the attribute
    */
   public <U> Schema<Key, Input> withAttribute(Key key, Function<Input, U> accessor, Comparator<U> comparator) {
-    rules.put(key, new ComparableAttribute<>(comparator, accessor));
+    attributes.put(key, new ComparableAttribute<>(comparator, accessor));
     return this;
   }
 
@@ -99,7 +103,7 @@ public class Schema<Key, Input> {
    * @return an attribute registry containing the attribute
    */
   public Schema<Key, Input> withAttribute(Key key, ToDoubleFunction<Input> accessor) {
-    rules.put(key, new DoubleAttribute<>(accessor));
+    attributes.put(key, new DoubleAttribute<>(accessor));
     return this;
   }
 
@@ -110,7 +114,7 @@ public class Schema<Key, Input> {
    * @return an attribute registry containing the attribute
    */
   public Schema<Key, Input> withAttribute(Key key, ToIntFunction<Input> accessor) {
-    rules.put(key, new IntAttribute<>(accessor));
+    attributes.put(key, new IntAttribute<>(accessor));
     return this;
   }
 
@@ -121,7 +125,7 @@ public class Schema<Key, Input> {
    * @return an attribute registry containing the attribute
    */
   public Schema<Key, Input> withAttribute(Key key, ToLongFunction<Input> accessor) {
-    rules.put(key, new LongAttribute<>(accessor));
+    attributes.put(key, new LongAttribute<>(accessor));
     return this;
   }
 
@@ -131,11 +135,23 @@ public class Schema<Key, Input> {
    * @return the attribute if registered, otherwise null
    */
   public Attribute<Input> getAttribute(Key key) {
-    Attribute<Input> attribute = rules.get(key);
+    Attribute<Input> attribute = attributes.get(key);
     if (null == attribute) {
       throw new AttributeNotRegistered("No attribute " + key + " registered.");
     }
     return attribute;
+  }
+
+  @SuppressWarnings("unchecked")
+  public <T> Map<Key, T> newMap() {
+    if (null == prototype) {
+      return newSizedHashMap();
+    }
+    return (Map<Key, T>)prototype.get();
+  }
+
+  private <T> Map<Key, T> newSizedHashMap() {
+    return new HashMap<>(attributes.size());
   }
 
 }

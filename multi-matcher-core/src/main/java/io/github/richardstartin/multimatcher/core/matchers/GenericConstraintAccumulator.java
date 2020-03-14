@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static io.github.richardstartin.multimatcher.core.matchers.Utils.newArray;
+import static io.github.richardstartin.multimatcher.core.Utils.newArray;
 
 public class GenericConstraintAccumulator<T, U, MaskType extends Mask<MaskType>>
         implements ConstraintAccumulator<T, MaskType> {
@@ -56,7 +56,7 @@ public class GenericConstraintAccumulator<T, U, MaskType extends Mask<MaskType>>
 
   @Override
   @SuppressWarnings("unchecked")
-  public Matcher<T, MaskType> freeze() {
+  public Matcher<T, MaskType> toMatcher() {
     wildcard.optimise();
     var frozen = (ClassificationNode<U, MaskType>[]) newArray(ClassificationNode.class, nodes.size());
     for (var node : nodes.values()) {

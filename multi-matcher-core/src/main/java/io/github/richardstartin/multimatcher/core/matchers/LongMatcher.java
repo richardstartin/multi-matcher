@@ -7,8 +7,8 @@ import io.github.richardstartin.multimatcher.core.matchers.nodes.LongNode;
 import java.util.function.ToLongFunction;
 
 import static io.github.richardstartin.multimatcher.core.matchers.SelectivityHeuristics.avgCardinality;
-import static io.github.richardstartin.multimatcher.core.matchers.Utils.newArray;
-import static io.github.richardstartin.multimatcher.core.matchers.Utils.nullCount;
+import static io.github.richardstartin.multimatcher.core.Utils.newArray;
+import static io.github.richardstartin.multimatcher.core.Utils.nullCount;
 
 public class LongMatcher<T, MaskType extends Mask<MaskType>> implements ConstraintAccumulator<T, MaskType>,
         Matcher<T, MaskType> {
@@ -49,7 +49,7 @@ public class LongMatcher<T, MaskType extends Mask<MaskType>> implements Constrai
   }
 
   @Override
-  public Matcher<T, MaskType> freeze() {
+  public Matcher<T, MaskType> toMatcher() {
     optimise();
     wildcards.optimise();
     return this;

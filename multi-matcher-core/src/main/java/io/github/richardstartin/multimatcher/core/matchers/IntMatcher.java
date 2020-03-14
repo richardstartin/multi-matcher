@@ -7,8 +7,8 @@ import io.github.richardstartin.multimatcher.core.matchers.nodes.IntNode;
 import java.util.function.ToIntFunction;
 
 import static io.github.richardstartin.multimatcher.core.matchers.SelectivityHeuristics.avgCardinality;
-import static io.github.richardstartin.multimatcher.core.matchers.Utils.newArray;
-import static io.github.richardstartin.multimatcher.core.matchers.Utils.nullCount;
+import static io.github.richardstartin.multimatcher.core.Utils.newArray;
+import static io.github.richardstartin.multimatcher.core.Utils.nullCount;
 
 public class IntMatcher<T, MaskType extends Mask<MaskType>> implements ConstraintAccumulator<T, MaskType>,
         Matcher<T, MaskType> {
@@ -49,7 +49,7 @@ public class IntMatcher<T, MaskType extends Mask<MaskType>> implements Constrain
   }
 
   @Override
-  public Matcher<T, MaskType> freeze() {
+  public Matcher<T, MaskType> toMatcher() {
     optimise();
     wildcards.optimise();
     return this;

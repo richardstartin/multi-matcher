@@ -2,6 +2,7 @@ package io.github.richardstartin.multimatcher.core.matchers;
 
 import io.github.richardstartin.multimatcher.core.Mask;
 import io.github.richardstartin.multimatcher.core.Matcher;
+import io.github.richardstartin.multimatcher.core.masks.MaskFactory;
 
 import java.util.function.Function;
 
@@ -12,6 +13,7 @@ class GenericMatcher<T, U, MaskType extends Mask<MaskType>> implements Matcher<T
   private final Function<T, U> accessor;
   private final ClassificationNode<U, MaskType>[] nodes;
   private final MaskType wildcard;
+  private final ThreadLocal<MaskType> empty;
 
   GenericMatcher(Function<T, U> accessor,
                  ClassificationNode<U, MaskType>[] nodes,
@@ -19,19 +21,22 @@ class GenericMatcher<T, U, MaskType extends Mask<MaskType>> implements Matcher<T
     this.accessor = accessor;
     this.nodes = nodes;
     this.wildcard = wildcard;
+    this.empty = ThreadLocal.withInitial(wildcard::clone);
   }
 
   @Override
   public void match(T input, MaskType context) {
     U value = accessor.apply(input);
+    var temp = empty.get().resetTo(wildcard);
     for (var node : nodes) {
-      context.inPlaceAnd(node.match(value));
+      temp.inPlaceOr(node.match(value));
     }
-    context.inPlaceOr(wildcard);
+    context.inPlaceAnd(temp);
   }
 
   @Override
   public float averageSelectivity() {
     return avgCardinality(nodes, ClassificationNode::averageSelectivity);
   }
+
 }

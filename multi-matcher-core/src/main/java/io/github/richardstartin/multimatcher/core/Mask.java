@@ -1,5 +1,6 @@
 package io.github.richardstartin.multimatcher.core;
 
+import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
 
 public interface Mask<T extends Mask<T>> {
@@ -24,6 +25,7 @@ public interface Mask<T extends Mask<T>> {
   void clear();
   T unwrap();
   IntStream stream();
+  void forEach(IntConsumer consumer);
   int first();
   T clone();
   void optimise();

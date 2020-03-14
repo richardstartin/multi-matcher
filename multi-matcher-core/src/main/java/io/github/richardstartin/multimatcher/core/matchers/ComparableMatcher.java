@@ -7,8 +7,8 @@ import io.github.richardstartin.multimatcher.core.matchers.nodes.ComparableNode;
 import java.util.Comparator;
 import java.util.function.Function;
 
-import static io.github.richardstartin.multimatcher.core.matchers.Utils.newArray;
-import static io.github.richardstartin.multimatcher.core.matchers.Utils.nullCount;
+import static io.github.richardstartin.multimatcher.core.Utils.newArray;
+import static io.github.richardstartin.multimatcher.core.Utils.nullCount;
 
 public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements ConstraintAccumulator<T, MaskType>,
         Matcher<T, MaskType> {
@@ -51,7 +51,7 @@ public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements
   }
 
   @Override
-  public Matcher<T, MaskType> freeze() {
+  public Matcher<T, MaskType> toMatcher() {
     optimise();
     wildcards.optimise();
     return this;

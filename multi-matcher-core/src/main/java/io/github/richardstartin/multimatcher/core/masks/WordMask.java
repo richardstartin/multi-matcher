@@ -4,22 +4,23 @@ import io.github.richardstartin.multimatcher.core.Mask;
 
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
-public class TinyMask implements Mask<TinyMask> {
+public class WordMask implements Mask<WordMask> {
 
-  public static final MaskFactory<TinyMask> FACTORY = new Factory();
+  public static final MaskFactory<WordMask> FACTORY = new Factory();
 
   public static final int MAX_CAPACITY = 64;
 
   private long mask;
 
-  public TinyMask(long mask) {
+  public WordMask(long mask) {
     this.mask = mask;
   }
 
-  public TinyMask() { }
+  public WordMask() { }
 
   public void add(int bit) {
     mask |= 1L << bit;
@@ -31,27 +32,27 @@ public class TinyMask implements Mask<TinyMask> {
   }
 
   @Override
-  public TinyMask inPlaceAndNot(TinyMask other) {
+  public WordMask inPlaceAndNot(WordMask other) {
     this.mask &= ~other.mask;
     return this;
   }
 
-  public TinyMask inPlaceAnd(TinyMask other) {
+  public WordMask inPlaceAnd(WordMask other) {
     this.mask &= other.mask;
     return this;
   }
 
-  public TinyMask or(TinyMask other) {
-    return new TinyMask(this.mask | other.mask);
+  public WordMask or(WordMask other) {
+    return new WordMask(this.mask | other.mask);
   }
 
-  public TinyMask inPlaceOr(TinyMask other) {
+  public WordMask inPlaceOr(WordMask other) {
     this.mask |= other.mask;
     return this;
   }
 
   @Override
-  public TinyMask resetTo(Mask<TinyMask> other) {
+  public WordMask resetTo(Mask<WordMask> other) {
     this.mask = other.unwrap().mask;
     return this;
   }
@@ -62,7 +63,7 @@ public class TinyMask implements Mask<TinyMask> {
   }
 
   @Override
-  public TinyMask unwrap() {
+  public WordMask unwrap() {
     return this;
   }
 
@@ -74,6 +75,15 @@ public class TinyMask implements Mask<TinyMask> {
   }
 
   @Override
+  public void forEach(IntConsumer consumer) {
+    long word = mask;
+    while (word != 0) {
+      consumer.accept(Long.numberOfTrailingZeros(word));
+      word &= (word - 1);
+    }
+  }
+
+  @Override
   public int first() {
     if (!isEmpty()) {
       return Long.numberOfTrailingZeros(mask);
@@ -82,8 +92,8 @@ public class TinyMask implements Mask<TinyMask> {
   }
 
   @Override
-  public TinyMask clone() {
-    return new TinyMask(mask);
+  public WordMask clone() {
+    return new WordMask(mask);
   }
 
   @Override
@@ -110,8 +120,8 @@ public class TinyMask implements Mask<TinyMask> {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    TinyMask tinyMask = (TinyMask) o;
-    return mask == tinyMask.mask;
+    WordMask wordMask = (WordMask) o;
+    return mask == wordMask.mask;
   }
 
   @Override
@@ -119,29 +129,29 @@ public class TinyMask implements Mask<TinyMask> {
     return Objects.hash(mask);
   }
 
-  private static final class Factory implements MaskFactory<TinyMask> {
-    private final TinyMask EMPTY = newMask();
+  private static final class Factory implements MaskFactory<WordMask> {
+    private final WordMask EMPTY = newMask();
     @Override
-    public TinyMask newMask() {
-      return new TinyMask(0L);
+    public WordMask newMask() {
+      return new WordMask(0L);
     }
 
     @Override
-    public TinyMask contiguous(int max) {
-      return new TinyMask(((1L << max) - 1));
+    public WordMask contiguous(int max) {
+      return new WordMask(((1L << max) - 1));
     }
 
     @Override
-    public TinyMask of(int... values) {
+    public WordMask of(int... values) {
       long word = 0L;
       for (int v : values) {
         word |= (1L << v);
       }
-      return new TinyMask(word);
+      return new WordMask(word);
     }
 
     @Override
-    public TinyMask emptySingleton() {
+    public WordMask emptySingleton() {
       return EMPTY;
     }
   }

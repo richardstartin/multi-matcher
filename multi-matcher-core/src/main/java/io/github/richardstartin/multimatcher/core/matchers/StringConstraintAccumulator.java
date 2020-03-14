@@ -13,7 +13,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static io.github.richardstartin.multimatcher.core.Operation.*;
-import static io.github.richardstartin.multimatcher.core.matchers.Utils.newArray;
+import static io.github.richardstartin.multimatcher.core.Utils.newArray;
 
 public class StringConstraintAccumulator<Input, MaskType extends Mask<MaskType>>
         extends GenericConstraintAccumulator<Input, String, MaskType> {
@@ -49,7 +49,7 @@ public class StringConstraintAccumulator<Input, MaskType extends Mask<MaskType>>
 
   @Override
   @SuppressWarnings("unchecked")
-  public Matcher<Input, MaskType> freeze() {
+  public Matcher<Input, MaskType> toMatcher() {
     wildcard.optimise();
     var frozen = (ClassificationNode<String, MaskType>[])newArray(ClassificationNode.class, SIZE);
     for (var node : nodes.values()) {

@@ -12,16 +12,9 @@ public class BitsetMask implements Mask<BitsetMask> {
     public static final int MAX_CAPACITY = 256 * 64;
     private static final int UNKNOWN_EMPTY = -2;
     private static final int KNOWN_EMPTY = -1;
-
-    public static MaskFactory<BitsetMask> factory(int max) {
-        return new Factory(max);
-    }
-
     private static final long[] EMPTY = new long[256];
-
     private final long[] bitset;
     private int firstNonEmptyWord = UNKNOWN_EMPTY;
-
     BitsetMask(int max) {
         this(new long[(max + 63) >>> 6], UNKNOWN_EMPTY);
     }
@@ -38,6 +31,13 @@ public class BitsetMask implements Mask<BitsetMask> {
         this.firstNonEmptyWord = firstNonEmptyWord;
     }
 
+    public static MaskFactory<BitsetMask> factory(int max) {
+        return new Factory(max);
+    }
+
+    private static int indexOfFirstNonEmptyWord(long[] bitset) {
+        return Arrays.mismatch(bitset, 0, bitset.length, EMPTY, 0, bitset.length);
+    }
 
     @Override
     public void add(int id) {
@@ -196,10 +196,6 @@ public class BitsetMask implements Mask<BitsetMask> {
             ++i;
         }
         return cardinality;
-    }
-
-    private static int indexOfFirstNonEmptyWord(long[] bitset) {
-        return Arrays.mismatch(bitset, 0, bitset.length, EMPTY, 0, bitset.length);
     }
 
     public static final class Factory implements MaskFactory<BitsetMask> {

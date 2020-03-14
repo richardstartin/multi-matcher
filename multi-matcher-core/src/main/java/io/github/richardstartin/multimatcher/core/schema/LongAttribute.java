@@ -9,19 +9,20 @@ import java.util.function.ToLongFunction;
 
 /**
  * Creates a column named constraints builder long semantics
+ *
  * @param <T> the type named the classified objects
  */
 public class LongAttribute<T> implements Attribute<T> {
 
-  private final ToLongFunction<T> accessor;
+    private final ToLongFunction<T> accessor;
 
-  LongAttribute(ToLongFunction<T> accessor) {
-    this.accessor = accessor;
-  }
+    LongAttribute(ToLongFunction<T> accessor) {
+        this.accessor = accessor;
+    }
 
-  @Override
-  public <MaskType extends Mask<MaskType>>
-  ConstraintAccumulator<T, MaskType> newAccumulator(MaskFactory<MaskType> maskFactory, int max) {
-    return new LongMatcher<>(accessor, maskFactory, max);
-  }
+    @Override
+    public <MaskType extends Mask<MaskType>>
+    ConstraintAccumulator<T, MaskType> newAccumulator(MaskFactory<MaskType> maskFactory, int max) {
+        return new LongMatcher<>(accessor, maskFactory, max);
+    }
 }

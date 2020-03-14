@@ -10,17 +10,17 @@ import java.util.function.Function;
 
 public class EnumAttribute<E extends Enum<E>, Input> implements Attribute<Input> {
 
-  private final Function<Input, E> accessor;
-  private final Class<E> type;
+    private final Function<Input, E> accessor;
+    private final Class<E> type;
 
-  public EnumAttribute(Class<E> type, Function<Input, E> accessor) {
-    this.accessor = accessor;
-    this.type = type;
-  }
+    public EnumAttribute(Class<E> type, Function<Input, E> accessor) {
+        this.accessor = accessor;
+        this.type = type;
+    }
 
-  @Override
-  public <MaskType extends Mask<MaskType>>
-  ConstraintAccumulator<Input, MaskType> newAccumulator(MaskFactory<MaskType> maskFactory, int max) {
-    return new GenericConstraintAccumulator<>(() -> new EnumMap<>(type), accessor, maskFactory, max);
-  }
+    @Override
+    public <MaskType extends Mask<MaskType>>
+    ConstraintAccumulator<Input, MaskType> newAccumulator(MaskFactory<MaskType> maskFactory, int max) {
+        return new GenericConstraintAccumulator<>(() -> new EnumMap<>(type), accessor, maskFactory, max);
+    }
 }

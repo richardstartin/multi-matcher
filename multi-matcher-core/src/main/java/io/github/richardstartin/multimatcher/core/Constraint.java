@@ -2,53 +2,53 @@ package io.github.richardstartin.multimatcher.core;
 
 public class Constraint {
 
-  public static Constraint lessThan(Comparable<?> value) {
-    return condition(Operation.LT, value);
-  }
+    private Operation operation;
+    private Object value;
 
-  public static Constraint lessThanOrEqualTo(Comparable<?> value) {
-    return condition(Operation.LE, value);
-  }
+    public Constraint() {
+    }
 
-  public static Constraint equalTo(Object value) {
-    return condition(Operation.EQ, value);
-  }
+    public static Constraint lessThan(Comparable<?> value) {
+        return condition(Operation.LT, value);
+    }
 
-  public static Constraint notEqualTo(Object value) {
-    return condition(Operation.NE, value);
-  }
+    public static Constraint lessThanOrEqualTo(Comparable<?> value) {
+        return condition(Operation.LE, value);
+    }
 
-  public static Constraint greaterThan(Comparable<?> value) {
-    return condition(Operation.GT, value);
-  }
+    public static Constraint equalTo(Object value) {
+        return condition(Operation.EQ, value);
+    }
 
-  public static Constraint greaterThanOrEqualTo(Comparable<?> value) {
-    return condition(Operation.GE, value);
-  }
+    public static Constraint notEqualTo(Object value) {
+        return condition(Operation.NE, value);
+    }
 
-  public static Constraint startsWith(String prefix) {
-    return condition(Operation.STARTS_WITH, prefix);
-  }
+    public static Constraint greaterThan(Comparable<?> value) {
+        return condition(Operation.GT, value);
+    }
 
-  private static Constraint condition(Operation op, Object value) {
-    Constraint rc = new Constraint();
-    rc.operation = op;
-    rc.value = value;
-    return rc;
-  }
+    public static Constraint greaterThanOrEqualTo(Comparable<?> value) {
+        return condition(Operation.GE, value);
+    }
 
-  private Operation operation;
-  private Object value;
+    public static Constraint startsWith(String prefix) {
+        return condition(Operation.STARTS_WITH, prefix);
+    }
 
-  public Constraint() {
-  }
+    private static Constraint condition(Operation op, Object value) {
+        Constraint rc = new Constraint();
+        rc.operation = op;
+        rc.value = value;
+        return rc;
+    }
 
-  public Operation getOperation() {
-    return operation;
-  }
+    public Operation getOperation() {
+        return operation;
+    }
 
-  public <T> T getValue() {
-    return (T) value;
-  }
+    public <T> T getValue() {
+        return (T) value;
+    }
 
 }

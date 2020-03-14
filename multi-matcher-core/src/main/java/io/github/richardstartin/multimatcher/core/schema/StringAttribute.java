@@ -9,15 +9,15 @@ import java.util.function.Function;
 
 public class StringAttribute<Input> implements Attribute<Input> {
 
-  private final Function<Input, String> accessor;
+    private final Function<Input, String> accessor;
 
-  public StringAttribute(Function<Input, String> accessor) {
-    this.accessor = accessor;
-  }
+    public StringAttribute(Function<Input, String> accessor) {
+        this.accessor = accessor;
+    }
 
-  @Override
-  public <MaskType extends Mask<MaskType>>
-  ConstraintAccumulator<Input, MaskType> newAccumulator(MaskFactory<MaskType> maskFactory, int max) {
-    return new StringConstraintAccumulator<>(accessor, maskFactory, max);
-  }
+    @Override
+    public <MaskType extends Mask<MaskType>>
+    ConstraintAccumulator<Input, MaskType> newAccumulator(MaskFactory<MaskType> maskFactory, int max) {
+        return new StringConstraintAccumulator<>(accessor, maskFactory, max);
+    }
 }

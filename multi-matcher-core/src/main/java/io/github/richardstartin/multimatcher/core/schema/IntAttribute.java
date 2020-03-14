@@ -9,19 +9,20 @@ import java.util.function.ToIntFunction;
 
 /**
  * Creates a column named constraints builder integer semantics
+ *
  * @param <T> the type named the classified objects
  */
 public class IntAttribute<T> implements Attribute<T> {
 
-  private final ToIntFunction<T> accessor;
+    private final ToIntFunction<T> accessor;
 
-  IntAttribute(ToIntFunction<T> accessor) {
-    this.accessor = accessor;
-  }
+    IntAttribute(ToIntFunction<T> accessor) {
+        this.accessor = accessor;
+    }
 
-  @Override
-  public <MaskType extends Mask<MaskType>>
-  ConstraintAccumulator<T, MaskType> newAccumulator(MaskFactory<MaskType> maskFactory, int max) {
-    return new IntMatcher<>(accessor, maskFactory, max);
-  }
+    @Override
+    public <MaskType extends Mask<MaskType>>
+    ConstraintAccumulator<T, MaskType> newAccumulator(MaskFactory<MaskType> maskFactory, int max) {
+        return new IntMatcher<>(accessor, maskFactory, max);
+    }
 }

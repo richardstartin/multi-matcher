@@ -9,19 +9,20 @@ import java.util.function.ToDoubleFunction;
 
 /**
  * Creates a column named constraints builder floating point sematics
+ *
  * @param <T>
  */
 class DoubleAttribute<T> implements Attribute<T> {
 
-  private final ToDoubleFunction<T> accessor;
+    private final ToDoubleFunction<T> accessor;
 
-  DoubleAttribute(ToDoubleFunction<T> accessor) {
-    this.accessor = accessor;
-  }
+    DoubleAttribute(ToDoubleFunction<T> accessor) {
+        this.accessor = accessor;
+    }
 
-  @Override
-  public <MaskType extends Mask<MaskType>>
-  ConstraintAccumulator<T, MaskType> newAccumulator(MaskFactory<MaskType> maskFactory, int max) {
-    return new DoubleMatcher<>(accessor, maskFactory, max);
-  }
+    @Override
+    public <MaskType extends Mask<MaskType>>
+    ConstraintAccumulator<T, MaskType> newAccumulator(MaskFactory<MaskType> maskFactory, int max) {
+        return new DoubleMatcher<>(accessor, maskFactory, max);
+    }
 }

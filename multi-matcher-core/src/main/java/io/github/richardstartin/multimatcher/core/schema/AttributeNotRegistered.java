@@ -5,7 +5,7 @@ package io.github.richardstartin.multimatcher.core.schema;
  */
 public class AttributeNotRegistered extends RuntimeException {
 
-  AttributeNotRegistered(String message) {
-    super(message);
-  }
+    AttributeNotRegistered(String message) {
+        super(message);
+    }
 }

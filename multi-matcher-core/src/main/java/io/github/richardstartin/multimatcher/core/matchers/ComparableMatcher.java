@@ -4,6 +4,7 @@ import io.github.richardstartin.multimatcher.core.*;
 import io.github.richardstartin.multimatcher.core.masks.MaskFactory;
 import io.github.richardstartin.multimatcher.core.matchers.nodes.ComparableNode;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.function.Function;
 
@@ -64,7 +65,7 @@ public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements
 
   @Override
   public String toString() {
-    return children + ", *: " + wildcards;
+    return Arrays.toString(children) + ", *: " + wildcards;
   }
 
   private void add(Operation relation, U threshold, int priority) {

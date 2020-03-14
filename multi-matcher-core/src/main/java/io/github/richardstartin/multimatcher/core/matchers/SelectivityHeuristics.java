@@ -24,22 +24,22 @@ public class SelectivityHeuristics {
   }
 
   public static <Node> float avgCardinality(Collection<Node> nodes, ToDoubleFunction<Node> selectivity) {
-    float avg = 0;
+    double avg = 0;
     int count = 0;
     for (Node node : nodes) {
       avg += selectivity.applyAsDouble(node);
       ++count;
     }
-    return avg / count;
+    return (float)(avg / count);
   }
 
   public static <Node> float avgCardinality(Node[] nodes, ToDoubleFunction<Node> selectivity) {
-    float avg = 0;
+    double avg = 0;
     int count = 0;
     for (Node node : nodes) {
       avg += selectivity.applyAsDouble(node);
       ++count;
     }
-    return avg / count;
+    return (float)(avg / count);
   }
 }

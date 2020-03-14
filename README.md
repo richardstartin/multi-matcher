@@ -4,6 +4,7 @@
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/uk.co.openkappa/bitrules/badge.svg)](https://maven-badges.herokuapp.com/maven-central/uk.co.openkappa/bitrules)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Javadoc](https://javadoc-badge.appspot.com/uk.co.openkappa/multi-matcher.svg?label=javadoc)](http://www.javadoc.io/doc/uk.co.openkappa/multi-matcher)
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/richardstartin/multi-matcher.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/richardstartin/multi-matcher/alerts/)
 
 I have often needed to implement tedious classification logic in data processing projects. The requirements are often ambiguous to the extent that it would be difficult to implement them even in SQL, with aspects such as fallback and overlap. This logic often ends up expressed as large blocks of nested if statements which are hard to read or modify and perform poorly. This small project aims to make such classification logic easier, and improve performance too. 
 

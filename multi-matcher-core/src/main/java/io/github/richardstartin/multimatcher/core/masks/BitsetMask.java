@@ -85,7 +85,9 @@ public class BitsetMask implements Mask<BitsetMask> {
             for (int i = start; i < bitset.length; ++i) {
                 bitset[i] |= other.bitset[i];
             }
-            this.firstNonEmptyWord = Math.min(firstNonEmptyWord, other.firstNonEmptyWord);
+            this.firstNonEmptyWord = firstNonEmptyWord == KNOWN_EMPTY
+                ? other.firstNonEmptyWord
+                : Math.min(firstNonEmptyWord, other.firstNonEmptyWord);
         }
         return this;
     }
@@ -184,6 +186,18 @@ public class BitsetMask implements Mask<BitsetMask> {
         int result = Objects.hash(firstNonEmptyWord);
         result = 31 * result + Arrays.hashCode(bitset);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder()
+                .append(0)
+                .append(':')
+                .append(Long.toBinaryString(bitset[0]));
+        for (int i = 1; i < bitset.length; ++i) {
+            sb.append(',').append(i).append(':').append(Long.toBinaryString(bitset[i]));
+        }
+        return sb.toString();
     }
 
     private int computeCardinality() {

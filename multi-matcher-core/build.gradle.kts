@@ -6,6 +6,7 @@ dependencies {
     testImplementation("com.google.guava:guava:${deps["guava"]}")
     testImplementation("org.junit.jupiter:junit-jupiter-api:${deps["jupiter"]}")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:${deps["jupiter"]}")
+    testCompile("org.junit.jupiter:junit-jupiter-params:${deps["jupiter"]}")
     testImplementation("com.fasterxml.jackson.core:jackson-databind:${deps["jackson"]}")
     testImplementation("com.fasterxml.jackson.core:jackson-annotations:${deps["jackson"]}")
     testImplementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${deps["jackson"]}")

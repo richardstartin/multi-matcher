@@ -14,6 +14,7 @@ public class TestDomainObject {
     private int measure2;
     private long measure3;
     private Colour colour;
+
     public TestDomainObject(String field1,
                             String field2,
                             String field3,
@@ -135,6 +136,18 @@ public class TestDomainObject {
     }
 
     public enum Colour {
-        RED, BLUE, YELLOW
+        RED, BLUE, YELLOW;
+
+        private static Colour[] VALUES = values();
+
+        public static Colour next(Colour colour) {
+            return VALUES[(colour.ordinal() + 1) % VALUES.length];
+        }
+    }
+
+    public TestDomainObject clone() {
+        return new TestDomainObject(
+                field1, field2, field3, field4, field5, measure1, measure2, measure3, colour
+        );
     }
 }

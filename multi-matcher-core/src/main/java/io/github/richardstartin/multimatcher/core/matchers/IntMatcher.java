@@ -1,7 +1,7 @@
 package io.github.richardstartin.multimatcher.core.matchers;
 
 import io.github.richardstartin.multimatcher.core.*;
-import io.github.richardstartin.multimatcher.core.masks.MaskFactory;
+import io.github.richardstartin.multimatcher.core.masks.MaskStore;
 import io.github.richardstartin.multimatcher.core.matchers.nodes.IntNode;
 
 import java.util.function.ToIntFunction;
@@ -14,29 +14,26 @@ public class IntMatcher<T, MaskType extends Mask<MaskType>> implements Constrain
         Matcher<T, MaskType> {
 
     private final ToIntFunction<T> accessor;
-    private final MaskType wildcards;
-    private final ThreadLocal<MaskType> empty;
-    private final MaskFactory<MaskType> factory;
+    private final int wildcards;
+    private final MaskStore<MaskType> store;
     private IntNode<MaskType>[] children;
 
     @SuppressWarnings("unchecked")
-    public IntMatcher(ToIntFunction<T> accessor, MaskFactory<MaskType> maskFactory, int max) {
+    public IntMatcher(ToIntFunction<T> accessor, MaskStore<MaskType> maskStore, int max) {
         this.accessor = accessor;
-        this.factory = maskFactory;
-        this.empty = ThreadLocal.withInitial(factory::newMask);
-        this.wildcards = maskFactory.contiguous(max);
+        this.store = maskStore;
+        this.wildcards = maskStore.newContiguousMaskId(max);
         this.children = (IntNode<MaskType>[]) newArray(IntNode.class, Operation.SIZE);
     }
 
     @Override
     public void match(T value, MaskType context) {
-        MaskType temp = empty.get().inPlaceOr(wildcards);
+        MaskType temp = store.getTemp(wildcards);
         int i = accessor.applyAsInt(value);
         for (var component : children) {
-            temp.inPlaceOr(component.apply(i, factory.emptySingleton()));
+            store.orInto(temp, component.match(i, -1));
         }
         context.inPlaceAnd(temp);
-        temp.clear();
     }
 
     @Override
@@ -44,14 +41,14 @@ public class IntMatcher<T, MaskType extends Mask<MaskType>> implements Constrain
         Number number = constraint.getValue();
         int value = number.intValue();
         add(constraint.getOperation(), value, priority);
-        wildcards.remove(priority);
+        store.remove(wildcards, priority);
         return true;
     }
 
     @Override
     public Matcher<T, MaskType> toMatcher() {
         optimise();
-        wildcards.optimise();
+        store.optimise(wildcards);
         return this;
     }
 
@@ -63,7 +60,7 @@ public class IntMatcher<T, MaskType extends Mask<MaskType>> implements Constrain
         var existing = children[relation.ordinal()];
         if (null == existing) {
             existing = children[relation.ordinal()]
-                    = new IntNode<>(factory, relation);
+                    = new IntNode<>(store, relation);
         }
         existing.add(threshold, priority);
     }

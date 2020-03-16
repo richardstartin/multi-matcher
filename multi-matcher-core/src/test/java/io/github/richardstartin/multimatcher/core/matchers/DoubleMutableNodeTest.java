@@ -3,86 +3,96 @@ package io.github.richardstartin.multimatcher.core.matchers;
 
 import io.github.richardstartin.multimatcher.core.Operation;
 import io.github.richardstartin.multimatcher.core.masks.BitsetMask;
-import io.github.richardstartin.multimatcher.core.masks.MaskFactory;
+import io.github.richardstartin.multimatcher.core.masks.MaskStore;
 import io.github.richardstartin.multimatcher.core.matchers.nodes.DoubleNode;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static io.github.richardstartin.multimatcher.core.Mask.with;
-import static io.github.richardstartin.multimatcher.core.masks.BitsetMask.factory;
+import static io.github.richardstartin.multimatcher.core.masks.BitsetMask.store;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DoubleMutableNodeTest {
 
-    private static final MaskFactory<BitsetMask> FACTORY = factory(200);
-    private static final BitsetMask ZERO = with(FACTORY.newMask(), 0);
-    private static final BitsetMask ONE = with(FACTORY.newMask(), 1);
-    private static final BitsetMask ZERO_OR_ONE = ZERO.or(ONE);
+    private MaskStore<BitsetMask> store;
+    private BitsetMask zero;
+    private BitsetMask one;
+    private BitsetMask zeroOrOne;
+
+
+    @BeforeEach
+    public void setup() {
+        store = store(200);
+        zero = with(store.newMask(), 0);
+        one = with(store.newMask(), 1);
+        zeroOrOne = zero.or(one);
+    }
 
     @Test
     public void testGreaterThan() {
         DoubleNode<BitsetMask> node = build(100, Operation.GT);
-        BitsetMask mask = FACTORY.contiguous(100);
-        assertTrue(node.match(0, mask.clone()).isEmpty());
-        assertEquals(ZERO, node.match(1, mask.clone()));
-        assertEquals(ZERO_OR_ONE, node.match(11, mask.clone()));
+        int mask = store.newContiguousMaskId(100);
+        assertTrue(store.isEmpty(node.match(0, mask)));
+        assertEquals(zero, store.getMask(node.match(1, mask)));
+        assertEquals(zeroOrOne, store.getMask(node.match(11, mask)));
     }
 
     @Test
     public void testEqual() {
         DoubleNode<BitsetMask> node = build(100, Operation.EQ);
-        BitsetMask mask = FACTORY.contiguous(100);
-        assertTrue(node.match(-1, mask.clone()).isEmpty());
-        assertEquals(ZERO, node.match(0, mask.clone()));
-        assertEquals(ONE, node.match(10, mask.clone()));
+        int mask = store.newContiguousMaskId(100);
+        assertTrue(store.isEmpty(node.match(-1L, mask)));
+        assertEquals(zero, store.getMask(node.match(0, mask)));
+        assertEquals(one, store.getMask(node.match(10, mask)));
     }
 
     @Test
     public void testLessThan() {
         DoubleNode<BitsetMask> node = build(100, Operation.LT);
-        BitsetMask mask = FACTORY.contiguous(100);
-        assertTrue(node.match(1001, mask.clone()).isEmpty());
-        assertEquals(mask.andNot(ZERO), node.match(0, mask.clone()));
-        assertEquals(mask.andNot(ZERO_OR_ONE), node.match(10, mask.clone()));
+        int mask = store.newContiguousMaskId(100);
+        assertTrue(store.isEmpty(node.match(1001, mask)));
+        assertEquals(store.getMask(mask).andNot(zero), store.getMask(node.match(0, mask)));
+        assertEquals(store.getMask(mask).andNot(zeroOrOne), store.getMask(node.match(10, mask)));
     }
 
     @Test
     public void testGreaterThanRev() {
         DoubleNode<BitsetMask> node = buildRev(100, Operation.GT);
-        BitsetMask mask = FACTORY.contiguous(100);
-        assertTrue(node.match(0, mask.clone()).isEmpty());
-        assertEquals(ZERO, node.match(1, mask.clone()));
+        int mask = store.newContiguousMaskId(100);
+        assertTrue(store.isEmpty(node.match(0, mask)));
+        assertEquals(zero, store.getMask(node.match(1, mask)));
     }
 
     @Test
     public void testEqualRev() {
         DoubleNode<BitsetMask> node = buildRev(100, Operation.EQ);
-        BitsetMask mask = FACTORY.contiguous(100);
-        assertTrue(node.match(-1, mask.clone()).isEmpty());
-        assertEquals(ZERO, node.match(0, mask.clone()));
-        assertEquals(ONE, node.match(10, mask.clone()));
+        int mask = store.newContiguousMaskId(100);
+        assertTrue(store.isEmpty(node.match(-1, mask)));
+        assertEquals(zero, store.getMask(node.match(0, mask)));
+        assertEquals(one, store.getMask(node.match(10, mask)));
     }
 
     @Test
     public void testLessThanRev() {
         DoubleNode<BitsetMask> node = buildRev(100, Operation.LT);
-        BitsetMask mask = FACTORY.contiguous(100);
-        assertTrue(node.match(1001, mask.clone()).isEmpty());
-        assertEquals(mask.andNot(ZERO), node.match(0, mask.clone()));
-        assertEquals(mask.andNot(ZERO_OR_ONE), node.match(10, mask.clone()));
+        int mask = store.newContiguousMaskId(100);
+        assertTrue(store.isEmpty(node.match(1001, mask)));
+        assertEquals(store.getMask(mask).andNot(zero), store.getMask(node.match(0, mask)));
+        assertEquals(store.getMask(mask).andNot(zeroOrOne), store.getMask(node.match(10, mask)));
     }
 
     @Test
     public void testBuildNode() {
-        DoubleNode<BitsetMask> node = new DoubleNode<>(FACTORY, Operation.EQ);
+        DoubleNode<BitsetMask> node = new DoubleNode<>(store, Operation.EQ);
         node.add(0, 0);
-        assertEquals(FACTORY.contiguous(1), node.match(0, FACTORY.contiguous(1)));
+        assertEquals(store.contiguous(1), store.getMask(node.match(0, store.newContiguousMaskId(1))));
         node.add(0, 1);
-        assertEquals(FACTORY.contiguous(2), node.match(0, FACTORY.contiguous(2)));
+        assertEquals(store.contiguous(2), store.getMask(node.match(0, store.newContiguousMaskId(2))));
     }
 
     private DoubleNode<BitsetMask> build(int count, Operation relation) {
-        DoubleNode<BitsetMask> node = new DoubleNode<>(FACTORY, relation);
+        DoubleNode<BitsetMask> node = new DoubleNode<>(store, relation);
         for (int i = 0; i < count; ++i) {
             node.add(i * 10, i);
         }
@@ -90,7 +100,7 @@ public class DoubleMutableNodeTest {
     }
 
     private DoubleNode<BitsetMask> buildRev(int count, Operation relation) {
-        DoubleNode<BitsetMask> node = new DoubleNode<>(FACTORY, relation);
+        DoubleNode<BitsetMask> node = new DoubleNode<>(store, relation);
         for (int i = count - 1; i >= 0; --i) {
             node.add(i * 10, i);
         }

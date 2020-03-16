@@ -3,6 +3,7 @@ val deps: Map<String, String> by extra
 dependencies {
     implementation("org.roaringbitmap:RoaringBitmap:${deps["roaringbitmap"]}")
     implementation("org.apache.commons:commons-collections4:${deps["commons-collections"]}")
+    implementation("it.unimi.dsi:fastutil:${deps["fastutil"]}")
     testImplementation("com.google.guava:guava:${deps["guava"]}")
     testImplementation("org.junit.jupiter:junit-jupiter-api:${deps["jupiter"]}")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:${deps["jupiter"]}")

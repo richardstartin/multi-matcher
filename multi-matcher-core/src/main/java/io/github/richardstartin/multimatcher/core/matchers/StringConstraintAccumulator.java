@@ -4,11 +4,11 @@ import io.github.richardstartin.multimatcher.core.Constraint;
 import io.github.richardstartin.multimatcher.core.Mask;
 import io.github.richardstartin.multimatcher.core.Matcher;
 import io.github.richardstartin.multimatcher.core.Operation;
-import io.github.richardstartin.multimatcher.core.masks.MaskFactory;
+import io.github.richardstartin.multimatcher.core.masks.MaskStore;
 import io.github.richardstartin.multimatcher.core.matchers.nodes.PrefixNode;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -19,16 +19,16 @@ public class StringConstraintAccumulator<Input, MaskType extends Mask<MaskType>>
         extends GenericConstraintAccumulator<Input, String, MaskType> {
 
     public StringConstraintAccumulator(Function<Input, String> accessor,
-                                       MaskFactory<MaskType> maskFactory,
+                                       MaskStore<MaskType> maskStore,
                                        int max) {
-        this(HashMap::new, accessor, maskFactory, max);
+        this(Object2IntOpenHashMap::new, accessor, maskStore, max);
     }
 
-    private StringConstraintAccumulator(Supplier<Map<String, MaskType>> mapSupplier,
+    private StringConstraintAccumulator(Supplier<Object2IntMap<String>> mapSupplier,
                                         Function<Input, String> accessor,
-                                        MaskFactory<MaskType> maskFactory,
+                                        MaskStore<MaskType> maskStore,
                                         int max) {
-        super(mapSupplier, accessor, maskFactory, max);
+        super(mapSupplier, accessor, maskStore, max);
     }
 
     @Override
@@ -38,19 +38,19 @@ public class StringConstraintAccumulator<Input, MaskType extends Mask<MaskType>>
         }
         if (constraint.getOperation() == STARTS_WITH) {
             var prefix = (PrefixNode<MaskType>) nodes.computeIfAbsent(STARTS_WITH,
-                    o -> new PrefixNode<>(factory));
+                    o -> new PrefixNode<>(store));
             prefix.add(constraint.getValue(), priority);
         } else {
             return false;
         }
-        wildcard.remove(priority);
+        store.remove(wildcard, priority);
         return true;
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public Matcher<Input, MaskType> toMatcher() {
-        wildcard.optimise();
+        store.optimise(wildcard);
         var frozen = (ClassificationNode<String, MaskType>[]) newArray(ClassificationNode.class, SIZE);
         for (var node : nodes.values()) {
             node.link(nodes);
@@ -58,48 +58,49 @@ public class StringConstraintAccumulator<Input, MaskType extends Mask<MaskType>>
         for (var pair : nodes.entrySet()) {
             frozen[pair.getKey().ordinal()] = pair.getValue().freeze();
         }
-        return new StringMatcher<>(factory, accessor, frozen, wildcard);
+        return new StringMatcher<>(store, accessor, frozen, wildcard);
     }
 
     private static class StringMatcher<T, MaskType extends Mask<MaskType>> implements Matcher<T, MaskType> {
 
         private final Function<T, String> accessor;
         private final ClassificationNode<String, MaskType>[] nodes;
-        private final MaskType wildcard;
-        private final ThreadLocal<MaskType> empty;
+        private final int wildcard;
+        private final MaskStore<MaskType> store;
 
-        StringMatcher(MaskFactory<MaskType> factory,
+        StringMatcher(MaskStore<MaskType> store,
                       Function<T, String> accessor,
                       ClassificationNode<String, MaskType>[] nodes,
-                      MaskType wildcard) {
+                      int wildcard) {
             this.accessor = accessor;
             this.nodes = nodes;
             this.wildcard = wildcard;
-            this.empty = ThreadLocal.withInitial(factory::newMask);
+            this.store = store;
         }
 
         @Override
         public void match(T input, MaskType context) {
             String value = accessor.apply(input);
-            var temp = empty.get();
+            var temp = store.getTemp();
             match(EQ, temp, value);
             match(STARTS_WITH, temp, value);
             matchNotEquals(context, value);
-            context.inPlaceAnd(temp.inPlaceOr(wildcard));
+            store.orInto(temp, wildcard);
+            context.inPlaceAnd(temp);
             temp.clear();
         }
 
         private void matchNotEquals(MaskType context, String value) {
             var node = nodes[NE.ordinal()];
             if (null != node) {
-                context.inPlaceAnd(node.match(value));
+                store.andInto(context, node.match(value));
             }
         }
 
         private void match(Operation op, MaskType context, String value) {
             var node = nodes[op.ordinal()];
             if (null != node) {
-                context.inPlaceOr(node.match(value));
+                store.orInto(context, node.match(value));
             }
         }
     }

@@ -6,6 +6,7 @@ import org.roaringbitmap.buffer.ImmutableRoaringBitmap;
 import org.roaringbitmap.buffer.MutableRoaringBitmap;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
@@ -23,8 +24,8 @@ public class RoaringMask implements Mask<RoaringMask> {
         this(storage, new MutableRoaringBitmap());
     }
 
-    public static MaskFactory<RoaringMask> factory(int maxBufferSize, boolean direct) {
-        return new Factory(maxBufferSize, direct);
+    public static MaskStore<RoaringMask> store(int maxBufferSize, boolean direct) {
+        return new Store(maxBufferSize, direct);
     }
 
     @Override
@@ -123,19 +124,84 @@ public class RoaringMask implements Mask<RoaringMask> {
         return Objects.hash(bitmap);
     }
 
-    private static final class Factory implements MaskFactory<RoaringMask> {
+    private static final class Store implements MaskStore<RoaringMask> {
         private final OptimisedStorage storage;
         private final RoaringMask empty = newMask();
 
-        private Factory(int bufferSize, boolean direct) {
+        private final ThreadLocal<RoaringMask> temp;
+
+        private RoaringMask[] bitmaps = new RoaringMask[4];
+        private int maskId = -1;
+
+        private Store(int bufferSize, boolean direct) {
             this.storage = new OptimisedStorage(direct
                     ? ByteBuffer.allocateDirect(bufferSize)
                     : ByteBuffer.allocate(bufferSize));
+            temp = ThreadLocal.withInitial(this::newMask);
         }
 
         @Override
         public RoaringMask newMask() {
             return new RoaringMask(storage);
+        }
+
+        @Override
+        public int newMaskId() {
+            ensureCapacity(++maskId);
+            bitmaps[maskId] = new RoaringMask(storage);
+            return maskId;
+        }
+
+        @Override
+        public int newMaskId(int copyAddress) {
+            ensureCapacity(++maskId);
+            bitmaps[maskId] = bitmaps[copyAddress].clone();
+            return maskId;
+        }
+
+        @Override
+        public RoaringMask getMask(int id) {
+            return id == -1 ? empty : bitmaps[id & (bitmaps.length - 1)];
+        }
+
+        @Override
+        public void add(int id, int bit) {
+            bitmaps[id & (bitmaps.length - 1)].add(bit);
+        }
+
+        @Override
+        public void remove(int id, int bit) {
+            bitmaps[id & (bitmaps.length - 1)].remove(bit);
+        }
+
+        @Override
+        public void or(int from, int into) {
+            bitmaps[into & (bitmaps.length - 1)].inPlaceOr(bitmaps[from & (bitmaps.length - 1)]);
+        }
+
+        @Override
+        public void optimise(int id) {
+            bitmaps[id & (bitmaps.length - 1)].optimise();
+        }
+
+        @Override
+        public RoaringMask getTemp() {
+            return temp.get();
+        }
+
+        @Override
+        public RoaringMask getTemp(int copyAddress) {
+            return temp.get().resetTo(-1 == copyAddress ? empty : bitmaps[copyAddress & (bitmaps.length - 1)]);
+        }
+
+        @Override
+        public void orInto(RoaringMask mask, int id) {
+            mask.inPlaceOr(-1 == id ? empty : bitmaps[id & (bitmaps.length - 1)]);
+        }
+
+        @Override
+        public void andInto(RoaringMask mask, int id) {
+            mask.inPlaceAnd(-1 == id ? empty : bitmaps[id & (bitmaps.length - 1)]);
         }
 
         @Override
@@ -146,13 +212,35 @@ public class RoaringMask implements Mask<RoaringMask> {
         }
 
         @Override
+        public int newContiguousMaskId(int max) {
+            ensureCapacity(++maskId);
+            bitmaps[maskId] = contiguous(max);
+            return maskId;
+        }
+
+        @Override
+        public boolean isEmpty(int id) {
+            return bitmaps[id & (bitmaps.length - 1)].isEmpty();
+        }
+
+        @Override
         public RoaringMask of(int... values) {
             return new RoaringMask(storage, MutableRoaringBitmap.bitmapOf(values));
         }
 
         @Override
-        public RoaringMask emptySingleton() {
-            return empty;
+        public double averageSelectivity(int[] ids, int min, int max) {
+            double cardinality = 0;
+            for (int i = min; i < max; ++i) {
+                cardinality += this.bitmaps[ids[i]].cardinality();
+            }
+            return cardinality / bitmaps.length;
+        }
+
+        private void ensureCapacity(int maskId) {
+            if (maskId >= bitmaps.length) {
+                bitmaps = Arrays.copyOf(bitmaps, bitmaps.length * 2);
+            }
         }
     }
 

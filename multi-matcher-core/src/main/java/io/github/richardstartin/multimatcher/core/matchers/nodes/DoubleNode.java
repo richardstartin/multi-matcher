@@ -2,41 +2,39 @@ package io.github.richardstartin.multimatcher.core.matchers.nodes;
 
 import io.github.richardstartin.multimatcher.core.Mask;
 import io.github.richardstartin.multimatcher.core.Operation;
-import io.github.richardstartin.multimatcher.core.masks.MaskFactory;
+import io.github.richardstartin.multimatcher.core.masks.MaskStore;
 
-import java.lang.reflect.Array;
 import java.util.Arrays;
 
 import static io.github.richardstartin.multimatcher.core.matchers.SelectivityHeuristics.avgCardinality;
 
 public class DoubleNode<MaskType extends Mask<MaskType>> {
 
-
     private final Operation relation;
-    private final MaskFactory<MaskType> factory;
+    private final MaskStore<MaskType> store;
 
     private double[] thresholds = new double[4];
-    private MaskType[] sets;
+    private int[] sets;
     private int count = 0;
 
-    @SuppressWarnings("unchecked")
-    public DoubleNode(MaskFactory<MaskType> factory, Operation relation) {
+    public DoubleNode(MaskStore<MaskType> store, Operation relation) {
         this.relation = relation;
-        this.factory = factory;
-        this.sets = (MaskType[]) Array.newInstance(factory.emptySingleton().getClass(), 4);
+        this.store = store;
+        this.sets = new int[4];
+        Arrays.fill(sets, -1);
     }
 
     public void add(double value, int priority) {
         if (count > 0 && value > thresholds[count - 1]) {
             ensureCapacity();
             int position = count;
-            MaskType mask = sets[position];
-            if (null == mask) {
-                mask = factory.newMask();
+            int maskId = sets[position];
+            if (-1 == maskId) {
+                maskId = store.newMaskId();
             }
-            mask.add(priority);
+            store.add(maskId, priority);
             thresholds[position] = value;
-            sets[position] = mask;
+            sets[position] = maskId;
             ++count;
         } else {
             int position = Arrays.binarySearch(thresholds, 0, count, value);
@@ -47,48 +45,34 @@ public class DoubleNode<MaskType extends Mask<MaskType>> {
                     sets[i] = sets[i - 1];
                     thresholds[i] = thresholds[i - 1];
                 }
-                sets[insertionPoint] = maskWith(priority);
+                int maskId = store.newMaskId();
+                store.add(maskId, priority);
+                sets[insertionPoint] = maskId;
                 thresholds[insertionPoint] = value;
                 ++count;
             } else if (position < 0) {
                 ensureCapacity();
-                sets[count] = maskWith(priority);
+                int maskId = store.newMaskId();
+                store.add(maskId, priority);
+                sets[count] = maskId;
                 thresholds[count] = value;
                 ++count;
             } else {
-                sets[position].add(priority);
+                store.add(sets[position], priority);
             }
         }
     }
 
-    public DoubleNode<MaskType> optimise() {
-        switch (relation) {
-            case LT:
-            case LE:
-                reverseRangeEncode();
-                break;
-            case GT:
-            case GE:
-                rangeEncode();
-                break;
-            default:
-        }
-        trim();
-        return this;
-    }
-
-    public float averageSelectivity() {
-        return avgCardinality(sets);
-    }
-
-    public MaskType match(double value, MaskType defaultValue) {
+    public int match(double value, int defaultValue) {
         switch (relation) {
             case GT:
-            case GE:
                 return findRangeEncoded(value);
+            case GE:
+                return findRangeEncodedInclusive(value);
             case LT:
-            case LE:
                 return findReverseRangeEncoded(value);
+            case LE:
+                return findReverseRangeEncodedInclusive(value);
             case EQ:
                 return findEqualityEncoded(value);
             default:
@@ -96,54 +80,82 @@ public class DoubleNode<MaskType extends Mask<MaskType>> {
         }
     }
 
-    private MaskType findEqualityEncoded(double value) {
-        int index = Arrays.binarySearch(thresholds, 0, count, value);
-        return index >= 0 ? sets[index] : factory.emptySingleton();
+
+    public double averageSelectivity() {
+        return store.averageSelectivity(sets);
     }
 
-    private MaskType findRangeEncoded(double value) {
+    public DoubleNode<MaskType> optimise() {
+        switch (relation) {
+            case GE:
+            case GT:
+                rangeEncode();
+                break;
+            case LE:
+            case LT:
+                reverseRangeEncode();
+                break;
+            default:
+        }
+        trim();
+        return this;
+    }
+
+    private int findEqualityEncoded(double value) {
+        int index = Arrays.binarySearch(thresholds, 0, count, value);
+        return index >= 0 ? sets[index] : -1;
+    }
+
+    private int findRangeEncoded(double value) {
         int pos = Arrays.binarySearch(thresholds, 0, count, value);
         int index = (pos >= 0 ? pos : -(pos + 1)) - 1;
-        return index >= 0 && index < count ? sets[index] : factory.emptySingleton();
+        return index >= 0 && index < count ? sets[index] : -1;
     }
 
-    private MaskType findReverseRangeEncoded(double value) {
+    private int findRangeEncodedInclusive(double value) {
+        int pos = Arrays.binarySearch(thresholds, 0, count, value);
+        int index = (pos >= 0 ? pos : -(pos + 1) - 1);
+        return index >= 0 && index < count ? sets[index] : -1;
+    }
+
+    private int findReverseRangeEncoded(double value) {
         int pos = Arrays.binarySearch(thresholds, 0, count, value);
         int index = (pos >= 0 ? pos + 1 : -(pos + 1));
-        return index >= 0 && index < count ? sets[index] : factory.emptySingleton();
+        return index >= 0 && index < count ? sets[index] : -1;
+    }
+
+    private int findReverseRangeEncodedInclusive(double value) {
+        int pos = Arrays.binarySearch(thresholds, 0, count, value);
+        int index = (pos >= 0 ? pos : -(pos + 1));
+        return index < count ? sets[index] : -1;
     }
 
     private void reverseRangeEncode() {
         for (int i = count - 2; i >= 0; --i) {
-            sets[i] = sets[i].inPlaceOr(sets[i + 1]);
-            sets[i].optimise();
+            store.or(sets[i + 1], sets[i]);
+            store.optimise(sets[i]);
         }
     }
 
     private void rangeEncode() {
         for (int i = 1; i < count; ++i) {
-            sets[i] = sets[i].inPlaceOr(sets[i - 1]);
-            sets[i].optimise();
+            store.or(sets[i - 1], sets[i]);
+            store.optimise(sets[i]);
         }
     }
 
     private void trim() {
-        thresholds = Arrays.copyOf(thresholds, count);
         sets = Arrays.copyOf(sets, count);
+        thresholds = Arrays.copyOf(thresholds, count);
     }
 
     private void ensureCapacity() {
         int newCount = count + 1;
         if (newCount == thresholds.length) {
             sets = Arrays.copyOf(sets, newCount * 2);
+            Arrays.fill(sets, newCount, sets.length, -1);
             thresholds = Arrays.copyOf(thresholds, newCount * 2);
         }
-    }
-
-    private MaskType maskWith(int value) {
-        MaskType mask = factory.newMask();
-        mask.add(value);
-        return mask;
     }
 
     @Override
@@ -152,5 +164,4 @@ public class DoubleNode<MaskType extends Mask<MaskType>> {
                 Arrays.stream(thresholds).boxed().iterator(),
                 Arrays.stream(sets).iterator());
     }
-
 }

@@ -2,7 +2,7 @@ package io.github.richardstartin.multimatcher.core;
 
 
 import io.github.richardstartin.multimatcher.core.masks.BitsetMask;
-import io.github.richardstartin.multimatcher.core.masks.MaskFactory;
+import io.github.richardstartin.multimatcher.core.masks.MaskStore;
 import io.github.richardstartin.multimatcher.core.masks.RoaringMask;
 import io.github.richardstartin.multimatcher.core.masks.WordMask;
 import io.github.richardstartin.multimatcher.core.schema.Schema;
@@ -103,46 +103,46 @@ public interface Classifier<T, C> {
         public Classifier<Input, Classification> build(List<MatchingConstraint<Key, Classification>> constraints) {
             int maxPriority = constraints.size();
             if (maxPriority < WordMask.MAX_CAPACITY) {
-                return build(constraints, WordMask.FACTORY, maxPriority);
+                return build(constraints, WordMask.store(), maxPriority);
             }
             if (maxPriority < BitsetMask.MAX_CAPACITY) {
-                return build(constraints, BitsetMask.factory(maxPriority), maxPriority);
+                return build(constraints, BitsetMask.store(maxPriority), maxPriority);
             }
-            return build(constraints, RoaringMask.factory(optimisedStorageSpace, useDirectBuffers), maxPriority);
+            return build(constraints, RoaringMask.store(optimisedStorageSpace, useDirectBuffers), maxPriority);
         }
 
         private <MaskType extends Mask<MaskType>>
         MaskedClassifier<MaskType, Input, Classification> build(List<MatchingConstraint<Key, Classification>> specs,
-                                                                MaskFactory<MaskType> maskFactory,
+                                                                MaskStore<MaskType> maskStore,
                                                                 int max) {
             classifications = (Classification[]) new Object[max];
             int sequence = 0;
             specs.sort(Comparator.comparingInt(rd -> order(rd.getPriority())));
             for (var spec : specs) {
-                addMatchingConstraint(spec, sequence++, maskFactory, max);
+                addMatchingConstraint(spec, sequence++, maskStore, max);
             }
-            return new MaskedClassifier<>(classifications, freezeMatchers(), maskFactory.contiguous(max));
+            return new MaskedClassifier<>(classifications, freezeMatchers(), maskStore.contiguous(max));
         }
 
         private <MaskType extends Mask<MaskType>>
         void addMatchingConstraint(MatchingConstraint<Key, Classification> matchInfo,
                                    int priority,
-                                   MaskFactory<MaskType> maskFactory,
+                                   MaskStore<MaskType> maskStore,
                                    int max) {
             classifications[priority] = matchInfo.getClassification();
             for (var pair : matchInfo.getConstraints().entrySet()) {
-                getOrCreateAccumulator(pair.getKey(), maskFactory, max)
+                getOrCreateAccumulator(pair.getKey(), maskStore, max)
                         .addConstraint(pair.getValue(), priority);
             }
         }
 
         private <MaskType extends Mask<MaskType>>
         ConstraintAccumulator<Input, MaskType> getOrCreateAccumulator(Key key,
-                                                                      MaskFactory<MaskType> maskFactory,
+                                                                      MaskStore<MaskType> maskStore,
                                                                       int max) {
             var accumulator = (ConstraintAccumulator<Input, MaskType>) accumulators.get(key);
             if (null == accumulator) {
-                accumulator = schema.getAttribute(key).newAccumulator(maskFactory, max);
+                accumulator = schema.getAttribute(key).newAccumulator(maskStore, max);
                 accumulators.put(key, accumulator);
             }
             return accumulator;

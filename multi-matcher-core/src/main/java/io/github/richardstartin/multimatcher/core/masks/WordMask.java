@@ -2,6 +2,7 @@ package io.github.richardstartin.multimatcher.core.masks;
 
 import io.github.richardstartin.multimatcher.core.Mask;
 
+import java.util.Arrays;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.function.IntConsumer;
@@ -10,7 +11,9 @@ import java.util.stream.LongStream;
 
 public class WordMask implements Mask<WordMask> {
 
-    public static final MaskFactory<WordMask> FACTORY = new Factory();
+    public static MaskStore<WordMask> store() {
+        return new Store();
+    }
 
     public static final int MAX_CAPACITY = 64;
 
@@ -130,8 +133,12 @@ public class WordMask implements Mask<WordMask> {
         return Objects.hash(mask);
     }
 
-    private static final class Factory implements MaskFactory<WordMask> {
-        private final WordMask EMPTY = newMask();
+    private static final class Store implements MaskStore<WordMask> {
+        private static final WordMask EMPTY = new WordMask(0L);
+
+        private long[] masks = new long[4];
+
+        private int maskId = -1;
 
         @Override
         public WordMask newMask() {
@@ -139,8 +146,79 @@ public class WordMask implements Mask<WordMask> {
         }
 
         @Override
+        public int newMaskId() {
+            ensureCapacity(++maskId);
+            return maskId;
+        }
+
+        @Override
+        public int newMaskId(int copyAddress) {
+            ensureCapacity(++maskId);
+            masks[maskId] = masks[copyAddress];
+            return maskId;
+        }
+
+        @Override
+        public WordMask getMask(int id) {
+            return id == -1 ? EMPTY : new WordMask(masks[id & (masks.length - 1)]);
+        }
+
+        @Override
+        public void add(int id, int bit) {
+            masks[id & (masks.length - 1)] |= (1L << bit);
+        }
+
+        @Override
+        public void remove(int id, int bit) {
+            masks[id & (masks.length - 1)] ^= (1L << bit);
+        }
+
+        @Override
+        public void or(int from, int into) {
+            masks[into & (masks.length - 1)] |= masks[from & (masks.length - 1)];
+        }
+
+        @Override
+        public void optimise(int id) {
+
+        }
+
+        @Override
+        public WordMask getTemp() {
+            return new WordMask();
+        }
+
+        @Override
+        public WordMask getTemp(int copyAddress) {
+            long word = copyAddress == -1 ? 0L : masks[copyAddress & (masks.length - 1)];
+            return new WordMask(word);
+        }
+
+        @Override
+        public void orInto(WordMask mask, int id) {
+            mask.mask |= (id == -1 ? 0L : masks[id & (masks.length - 1)]);
+        }
+
+        @Override
+        public void andInto(WordMask mask, int id) {
+            mask.mask &= (id == -1 ? 0L : masks[id & (masks.length - 1)]);
+        }
+
+        @Override
         public WordMask contiguous(int max) {
             return new WordMask(((1L << max) - 1));
+        }
+
+        @Override
+        public int newContiguousMaskId(int max) {
+            ensureCapacity(++maskId);
+            masks[maskId] = (1L << max) - 1;
+            return maskId;
+        }
+
+        @Override
+        public boolean isEmpty(int id) {
+            return masks[id & (masks.length - 1)] == 0L;
         }
 
         @Override
@@ -153,8 +231,27 @@ public class WordMask implements Mask<WordMask> {
         }
 
         @Override
-        public WordMask emptySingleton() {
-            return EMPTY;
+        public double averageSelectivity(int[] ids, int min, int max) {
+            int cardinality = 0;
+            for (int i = min; i < max; ++i) {
+                cardinality += Long.bitCount(this.masks[ids[i]]);
+            }
+            return ((double)cardinality)/masks.length;
+        }
+
+        @Override
+        public double averageSelectivity(int[] masks) {
+            int cardinality = 0;
+            for (int i : masks) {
+                cardinality += Long.bitCount(this.masks[i]);
+            }
+            return ((double)cardinality)/masks.length;
+        }
+
+        private void ensureCapacity(int maskId) {
+            if (maskId >= masks.length) {
+                masks = Arrays.copyOf(masks, masks.length * 2);
+            }
         }
     }
 }

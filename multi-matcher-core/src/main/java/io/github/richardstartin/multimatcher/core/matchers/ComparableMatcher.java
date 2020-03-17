@@ -1,7 +1,7 @@
 package io.github.richardstartin.multimatcher.core.matchers;
 
 import io.github.richardstartin.multimatcher.core.*;
-import io.github.richardstartin.multimatcher.core.masks.MaskFactory;
+import io.github.richardstartin.multimatcher.core.masks.MaskStore;
 import io.github.richardstartin.multimatcher.core.matchers.nodes.ComparableNode;
 
 import java.util.Arrays;
@@ -15,30 +15,28 @@ public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements
         Matcher<T, MaskType> {
 
     private final Function<T, U> accessor;
-    private final MaskType wildcards;
+    private final int wildcards;
     private final Comparator<U> comparator;
-    private final MaskFactory<MaskType> factory;
-    private final ThreadLocal<MaskType> empty;
+    private final MaskStore<MaskType> store;
     private ComparableNode<U, MaskType>[] children;
 
     @SuppressWarnings("unchecked")
     public ComparableMatcher(Function<T, U> accessor,
-                             Comparator<U> comparator, MaskFactory<MaskType> maskFactory,
+                             Comparator<U> comparator, MaskStore<MaskType> maskStore,
                              int max) {
         this.accessor = accessor;
         this.comparator = comparator;
-        this.factory = maskFactory;
-        this.wildcards = maskFactory.contiguous(max);
-        this.empty = ThreadLocal.withInitial(factory::newMask);
+        this.store = maskStore;
+        this.wildcards = maskStore.newContiguousMaskId(max);
         this.children = (ComparableNode<U, MaskType>[]) newArray(ComparableNode.class, Operation.SIZE);
     }
 
     @Override
     public void match(T value, MaskType context) {
-        MaskType temp = empty.get().inPlaceOr(wildcards);
+        MaskType temp = store.getTemp(wildcards);
         U comparable = accessor.apply(value);
         for (var component : children) {
-            temp = temp.inPlaceOr(component.match(comparable));
+            store.orInto(temp, component.match(comparable));
         }
         context.inPlaceAnd(temp);
         temp.clear();
@@ -47,14 +45,14 @@ public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements
     @Override
     public boolean addConstraint(Constraint constraint, int priority) {
         add(constraint.getOperation(), constraint.getValue(), priority);
-        wildcards.remove(priority);
+        store.remove(wildcards, priority);
         return true;
     }
 
     @Override
     public Matcher<T, MaskType> toMatcher() {
         optimise();
-        wildcards.optimise();
+        store.optimise(wildcards);
         return this;
     }
 
@@ -72,7 +70,7 @@ public class ComparableMatcher<T, U, MaskType extends Mask<MaskType>> implements
         var existing = children[relation.ordinal()];
         if (null == existing) {
             existing = children[relation.ordinal()]
-                    = new ComparableNode<>(factory, comparator, relation);
+                    = new ComparableNode<>(store, comparator, relation);
         }
         existing.add(threshold, priority);
     }

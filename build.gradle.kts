@@ -17,6 +17,7 @@ subprojects {
                 "jackson" to "2.10.0",
                 "guava"  to "28.1-jre",
                 "roaringbitmap" to "0.8.13",
+                "fastutil" to "8.3.1",
                 "commons-collections" to "4.2"
         )
     }

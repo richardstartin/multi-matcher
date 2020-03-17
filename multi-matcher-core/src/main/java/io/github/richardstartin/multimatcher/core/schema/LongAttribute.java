@@ -2,7 +2,7 @@ package io.github.richardstartin.multimatcher.core.schema;
 
 import io.github.richardstartin.multimatcher.core.ConstraintAccumulator;
 import io.github.richardstartin.multimatcher.core.Mask;
-import io.github.richardstartin.multimatcher.core.masks.MaskFactory;
+import io.github.richardstartin.multimatcher.core.masks.MaskStore;
 import io.github.richardstartin.multimatcher.core.matchers.LongMatcher;
 
 import java.util.function.ToLongFunction;
@@ -22,7 +22,7 @@ public class LongAttribute<T> implements Attribute<T> {
 
     @Override
     public <MaskType extends Mask<MaskType>>
-    ConstraintAccumulator<T, MaskType> newAccumulator(MaskFactory<MaskType> maskFactory, int max) {
-        return new LongMatcher<>(accessor, maskFactory, max);
+    ConstraintAccumulator<T, MaskType> newAccumulator(MaskStore<MaskType> maskStore, int max) {
+        return new LongMatcher<>(accessor, maskStore, max);
     }
 }

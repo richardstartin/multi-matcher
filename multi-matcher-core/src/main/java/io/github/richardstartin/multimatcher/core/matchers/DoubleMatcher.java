@@ -1,7 +1,7 @@
 package io.github.richardstartin.multimatcher.core.matchers;
 
 import io.github.richardstartin.multimatcher.core.*;
-import io.github.richardstartin.multimatcher.core.masks.MaskFactory;
+import io.github.richardstartin.multimatcher.core.masks.MaskStore;
 import io.github.richardstartin.multimatcher.core.matchers.nodes.DoubleNode;
 
 import java.util.function.ToDoubleFunction;
@@ -14,29 +14,26 @@ public class DoubleMatcher<T, MaskType extends Mask<MaskType>> implements Constr
         Matcher<T, MaskType> {
 
     private final ToDoubleFunction<T> accessor;
-    private final MaskFactory<MaskType> factory;
-    private final ThreadLocal<MaskType> empty;
-    private final MaskType wildcards;
+    private final MaskStore<MaskType> store;
+    private final int wildcards;
     private DoubleNode<MaskType>[] children;
 
     @SuppressWarnings("unchecked")
-    public DoubleMatcher(ToDoubleFunction<T> accessor, MaskFactory<MaskType> maskFactory, int max) {
+    public DoubleMatcher(ToDoubleFunction<T> accessor, MaskStore<MaskType> maskStore, int max) {
         this.accessor = accessor;
-        this.wildcards = maskFactory.contiguous(max);
-        this.factory = maskFactory;
-        this.empty = ThreadLocal.withInitial(factory::newMask);
+        this.wildcards = maskStore.newContiguousMaskId(max);
+        this.store = maskStore;
         this.children = (DoubleNode<MaskType>[]) newArray(DoubleNode.class, Operation.SIZE);
     }
 
     @Override
     public void match(T value, MaskType context) {
-        MaskType temp = empty.get().inPlaceOr(wildcards);
-        double d = accessor.applyAsDouble(value);
+        MaskType temp = store.getTemp(wildcards);
+        double attributeValue = accessor.applyAsDouble(value);
         for (var component : children) {
-            temp.inPlaceOr(component.match(d, factory.emptySingleton()));
+            store.orInto(temp, component.match(attributeValue, -1));
         }
         context.inPlaceAnd(temp);
-        temp.clear();
     }
 
     @Override
@@ -44,14 +41,14 @@ public class DoubleMatcher<T, MaskType extends Mask<MaskType>> implements Constr
         Number number = constraint.getValue();
         double value = number.doubleValue();
         add(constraint.getOperation(), value, priority);
-        wildcards.remove(priority);
+        store.remove(wildcards, priority);
         return true;
     }
 
     @Override
     public Matcher<T, MaskType> toMatcher() {
         optimise();
-        wildcards.optimise();
+        store.optimise(wildcards);
         return this;
     }
 
@@ -59,7 +56,7 @@ public class DoubleMatcher<T, MaskType extends Mask<MaskType>> implements Constr
         var existing = children[relation.ordinal()];
         if (null == existing) {
             existing = children[relation.ordinal()]
-                    = new DoubleNode<>(factory, relation);
+                    = new DoubleNode<>(store, relation);
         }
         existing.add(threshold, priority);
     }

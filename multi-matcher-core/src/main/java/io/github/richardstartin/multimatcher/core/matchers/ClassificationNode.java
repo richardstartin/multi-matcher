@@ -4,9 +4,9 @@ import io.github.richardstartin.multimatcher.core.Mask;
 
 public interface ClassificationNode<Input, MaskType extends Mask<MaskType>> {
 
-    MaskType match(Input input);
+    int match(Input input);
 
-    default float averageSelectivity() {
+    default double averageSelectivity() {
         return 1;
     }
 }

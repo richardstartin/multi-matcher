@@ -13,6 +13,7 @@ public class BitsetMask implements Mask<BitsetMask> {
     private static final int UNKNOWN_EMPTY = -2;
     private static final int KNOWN_EMPTY = -1;
     private static final long[] EMPTY = new long[256];
+
     private final long[] bitset;
     private int firstNonEmptyWord = UNKNOWN_EMPTY;
     BitsetMask(int max) {
@@ -31,8 +32,8 @@ public class BitsetMask implements Mask<BitsetMask> {
         this.firstNonEmptyWord = firstNonEmptyWord;
     }
 
-    public static MaskFactory<BitsetMask> factory(int max) {
-        return new Factory(max);
+    public static MaskStore<BitsetMask> store(int max) {
+        return new Store(max);
     }
 
     private static int indexOfFirstNonEmptyWord(long[] bitset) {
@@ -95,7 +96,10 @@ public class BitsetMask implements Mask<BitsetMask> {
     @Override
     public BitsetMask resetTo(Mask<BitsetMask> other) {
         if (other.isEmpty()) {
-            this.firstNonEmptyWord = KNOWN_EMPTY;
+            if (firstNonEmptyWord != KNOWN_EMPTY) {
+                Arrays.fill(bitset, Math.max(firstNonEmptyWord, 0), bitset.length, 0L);
+                this.firstNonEmptyWord = KNOWN_EMPTY;
+            }
         } else {
             System.arraycopy(other.unwrap().bitset, 0, bitset, 0, bitset.length);
             this.firstNonEmptyWord = other.unwrap().firstNonEmptyWord;
@@ -212,14 +216,19 @@ public class BitsetMask implements Mask<BitsetMask> {
         return cardinality;
     }
 
-    public static final class Factory implements MaskFactory<BitsetMask> {
+    public static final class Store implements MaskStore<BitsetMask> {
+
+        private static final BitsetMask EMPTY = new BitsetMask(null, KNOWN_EMPTY);
 
         private final int max;
-        private final BitsetMask empty;
+        private final ThreadLocal<BitsetMask> temp;
 
-        private Factory(int max) {
+        private BitsetMask[] bitsets = new BitsetMask[4];
+        private int maskId = -1;
+
+        private Store(int max) {
             this.max = max;
-            this.empty = new BitsetMask(null, KNOWN_EMPTY);
+            this.temp = ThreadLocal.withInitial(this::newMask);
         }
 
         @Override
@@ -228,11 +237,84 @@ public class BitsetMask implements Mask<BitsetMask> {
         }
 
         @Override
+        public int newMaskId() {
+            ensureCapacity(++maskId);
+            bitsets[maskId] = newMask();
+            return maskId;
+        }
+
+        @Override
+        public int newMaskId(int copyAddress) {
+            ensureCapacity(++maskId);
+            bitsets[maskId] = bitsets[copyAddress].clone();
+            return maskId;
+        }
+
+        @Override
+        public BitsetMask getMask(int id) {
+            return id == -1 ? EMPTY :  bitsets[id & (bitsets.length - 1)];
+        }
+
+        @Override
+        public void add(int id, int bit) {
+            bitsets[id & (bitsets.length - 1)].add(bit);
+        }
+
+        @Override
+        public void remove(int id, int bit) {
+            if (id != -1) {
+                bitsets[id & (bitsets.length - 1)].remove(bit);
+            }
+        }
+
+        @Override
+        public void or(int from, int into) {
+            bitsets[into & (bitsets.length - 1)].inPlaceOr(bitsets[from & (bitsets.length - 1)]);
+        }
+
+        @Override
+        public void optimise(int id) {
+            bitsets[id & (bitsets.length - 1)].optimise();
+        }
+
+        @Override
+        public BitsetMask getTemp() {
+            return temp.get();
+        }
+
+        @Override
+        public BitsetMask getTemp(int copyAddress) {
+            return temp.get().resetTo(copyAddress == -1 ? EMPTY : bitsets[copyAddress & (bitsets.length - 1)]);
+        }
+
+        @Override
+        public void orInto(BitsetMask mask, int id) {
+            mask.inPlaceOr(id == -1 ? EMPTY : bitsets[id & (bitsets.length - 1)]);
+        }
+
+        @Override
+        public void andInto(BitsetMask mask, int id) {
+            mask.inPlaceAnd(id == -1 ? EMPTY : bitsets[id & (bitsets.length - 1)]);
+        }
+
+        @Override
         public BitsetMask contiguous(int max) {
             if (max > this.max) {
                 throw new IllegalArgumentException();
             }
             return new BitsetMask(this.max, 0, max);
+        }
+
+        @Override
+        public int newContiguousMaskId(int max) {
+            ensureCapacity(++maskId);
+            bitsets[maskId] = contiguous(max);
+            return maskId;
+        }
+
+        @Override
+        public boolean isEmpty(int id) {
+            return -1 == id || bitsets[id & (bitsets.length - 1)].isEmpty();
         }
 
         @Override
@@ -245,8 +327,18 @@ public class BitsetMask implements Mask<BitsetMask> {
         }
 
         @Override
-        public BitsetMask emptySingleton() {
-            return empty;
+        public double averageSelectivity(int[] ids, int min, int max) {
+            double selectivity = 0f;
+            for (int i = min; i < max; ++i) {
+                selectivity += bitsets[ids[i]].cardinality();
+            }
+            return selectivity / ids.length;
+        }
+
+        private void ensureCapacity(int maskId) {
+            if (maskId >= bitsets.length) {
+                bitsets = Arrays.copyOf(bitsets, bitsets.length * 2);
+            }
         }
     }
 }

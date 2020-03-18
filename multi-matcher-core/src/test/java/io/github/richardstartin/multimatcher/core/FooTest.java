@@ -1,6 +1,5 @@
 package io.github.richardstartin.multimatcher.core;
 
-import io.github.richardstartin.multimatcher.core.schema.Schema;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;

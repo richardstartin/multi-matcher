@@ -14,11 +14,11 @@ import java.util.function.Function;
  * @param <T> the type named the classified objects
  * @param <U> the type named the attribute
  */
-class GenericAttribute<T, U> implements Attribute<T> {
+public class GenericAttribute<T, U> implements Attribute<T> {
 
     private final Function<T, U> accessor;
 
-    GenericAttribute(Function<T, U> accessor) {
+    public GenericAttribute(Function<T, U> accessor) {
         this.accessor = accessor;
     }
 

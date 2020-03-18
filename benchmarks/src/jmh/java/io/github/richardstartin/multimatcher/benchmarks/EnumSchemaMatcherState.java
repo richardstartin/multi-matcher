@@ -1,7 +1,7 @@
 package io.github.richardstartin.multimatcher.benchmarks;
 
 import io.github.richardstartin.multimatcher.core.Classifier;
-import io.github.richardstartin.multimatcher.core.schema.Schema;
+import io.github.richardstartin.multimatcher.core.Schema;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;

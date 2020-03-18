@@ -12,11 +12,11 @@ import java.util.function.ToDoubleFunction;
  *
  * @param <T>
  */
-class DoubleAttribute<T> implements Attribute<T> {
+public class DoubleAttribute<T> implements Attribute<T> {
 
     private final ToDoubleFunction<T> accessor;
 
-    DoubleAttribute(ToDoubleFunction<T> accessor) {
+    public DoubleAttribute(ToDoubleFunction<T> accessor) {
         this.accessor = accessor;
     }
 

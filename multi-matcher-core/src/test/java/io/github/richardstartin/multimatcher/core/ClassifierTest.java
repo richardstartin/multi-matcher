@@ -3,7 +3,6 @@ package io.github.richardstartin.multimatcher.core;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.google.common.collect.ImmutableMap;
 import io.github.richardstartin.multimatcher.core.schema.AttributeNotRegistered;
-import io.github.richardstartin.multimatcher.core.schema.Schema;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;

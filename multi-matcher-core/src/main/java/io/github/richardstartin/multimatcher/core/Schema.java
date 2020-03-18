@@ -1,4 +1,6 @@
-package io.github.richardstartin.multimatcher.core.schema;
+package io.github.richardstartin.multimatcher.core;
+
+import io.github.richardstartin.multimatcher.core.schema.*;
 
 import java.util.Comparator;
 import java.util.EnumMap;
@@ -147,7 +149,7 @@ public class Schema<Key, Input> {
      * @param key the key named the attribute
      * @return the attribute if registered, otherwise null
      */
-    public Attribute<Input> getAttribute(Key key) {
+    Attribute<Input> getAttribute(Key key) {
         Attribute<Input> attribute = attributes.get(key);
         if (null == attribute) {
             throw new AttributeNotRegistered("No attribute " + key + " registered.");
@@ -156,7 +158,7 @@ public class Schema<Key, Input> {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> Map<Key, T> newMap() {
+    <T> Map<Key, T> newMap() {
         if (null == prototype) {
             return newSizedHashMap();
         }

@@ -224,11 +224,12 @@ public class BitsetMask implements Mask<BitsetMask> {
         private final ThreadLocal<BitsetMask> temp;
 
         private BitsetMask[] bitsets = new BitsetMask[4];
-        private int maskId = -1;
+        private int maskId = 0;
 
         private Store(int max) {
             this.max = max;
             this.temp = ThreadLocal.withInitial(this::newMask);
+            bitsets[0] = EMPTY;
         }
 
         @Override
@@ -252,7 +253,7 @@ public class BitsetMask implements Mask<BitsetMask> {
 
         @Override
         public BitsetMask getMask(int id) {
-            return id == -1 ? EMPTY :  bitsets[id & (bitsets.length - 1)];
+            return bitsets[id & (bitsets.length - 1)];
         }
 
         @Override
@@ -262,7 +263,7 @@ public class BitsetMask implements Mask<BitsetMask> {
 
         @Override
         public void remove(int id, int bit) {
-            if (id != -1) {
+            if (id != 0) {
                 bitsets[id & (bitsets.length - 1)].remove(bit);
             }
         }
@@ -270,6 +271,11 @@ public class BitsetMask implements Mask<BitsetMask> {
         @Override
         public void or(int from, int into) {
             bitsets[into & (bitsets.length - 1)].inPlaceOr(bitsets[from & (bitsets.length - 1)]);
+        }
+
+        @Override
+        public void andNot(int from, int into) {
+            bitsets[into & (bitsets.length - 1)].inPlaceAndNot(bitsets[from & (bitsets.length - 1)]);
         }
 
         @Override
@@ -284,17 +290,17 @@ public class BitsetMask implements Mask<BitsetMask> {
 
         @Override
         public BitsetMask getTemp(int copyAddress) {
-            return temp.get().resetTo(copyAddress == -1 ? EMPTY : bitsets[copyAddress & (bitsets.length - 1)]);
+            return temp.get().resetTo(bitsets[copyAddress & (bitsets.length - 1)]);
         }
 
         @Override
         public void orInto(BitsetMask mask, int id) {
-            mask.inPlaceOr(id == -1 ? EMPTY : bitsets[id & (bitsets.length - 1)]);
+            mask.inPlaceOr(bitsets[id & (bitsets.length - 1)]);
         }
 
         @Override
         public void andInto(BitsetMask mask, int id) {
-            mask.inPlaceAnd(id == -1 ? EMPTY : bitsets[id & (bitsets.length - 1)]);
+            mask.inPlaceAnd(bitsets[id & (bitsets.length - 1)]);
         }
 
         @Override
@@ -314,7 +320,7 @@ public class BitsetMask implements Mask<BitsetMask> {
 
         @Override
         public boolean isEmpty(int id) {
-            return -1 == id || bitsets[id & (bitsets.length - 1)].isEmpty();
+            return bitsets[id & (bitsets.length - 1)].isEmpty();
         }
 
         @Override

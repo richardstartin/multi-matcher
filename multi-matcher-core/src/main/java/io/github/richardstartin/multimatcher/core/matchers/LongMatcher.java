@@ -31,7 +31,7 @@ public class LongMatcher<T, MaskType extends Mask<MaskType>> implements Constrai
         MaskType temp = store.getTemp(wildcards);
         long attributeValue = accessor.applyAsLong(value);
         for (var component : children) {
-            store.orInto(temp, component.match(attributeValue, -1));
+            store.orInto(temp, component.match(attributeValue, 0));
         }
         context.inPlaceAnd(temp);
     }

@@ -28,8 +28,8 @@ public class ComparableNode<T, MaskType extends Mask<MaskType>>
     }
 
     public void add(T value, int priority) {
-        int set = sets.getOrDefault(value, -1);
-        if (-1 == set) {
+        int set = sets.getOrDefault(value, 0);
+        if (0 == set) {
             set = store.newMaskId();
             sets.put(value, set);
         }
@@ -42,15 +42,15 @@ public class ComparableNode<T, MaskType extends Mask<MaskType>>
             case GE:
             case EQ:
             case LE:
-                return sets.getOrDefault(value, -1);
+                return sets.getOrDefault(value, 0);
             case LT:
                 var higher = sets.higherEntry(value);
-                return null == higher ? -1 : higher.getValue();
+                return null == higher ? 0 : higher.getValue();
             case GT:
                 var lower = sets.lowerEntry(value);
-                return null == lower ? -1 : lower.getValue();
+                return null == lower ? 0 : lower.getValue();
             default:
-                return -1;
+                return 0;
         }
     }
 
@@ -74,25 +74,21 @@ public class ComparableNode<T, MaskType extends Mask<MaskType>>
     }
 
     private void rangeEncode() {
-        int prev = -1;
+        int prev = 0;
         for (var set : sets.entrySet()) {
-            if (prev != -1) {
-                int next = set.getValue();
-                store.or(prev, next);
-                store.optimise(next);
-            }
+            int next = set.getValue();
+            store.or(prev, next);
+            store.optimise(next);
             prev = set.getValue();
         }
     }
 
     private void reverseRangeEncode() {
-        int prev = -1;
+        int prev = 0;
         for (var set : sets.descendingMap().entrySet()) {
-            if (prev != -1) {
-                int next = set.getValue();
-                store.or(prev, next);
-                store.optimise(next);
-            }
+            int next = set.getValue();
+            store.or(prev, next);
+            store.optimise(next);
             prev = set.getValue();
         }
     }

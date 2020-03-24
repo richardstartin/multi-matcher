@@ -126,18 +126,18 @@ public class RoaringMask implements Mask<RoaringMask> {
 
     private static final class Store implements MaskStore<RoaringMask> {
         private final OptimisedStorage storage;
-        private final RoaringMask empty = newMask();
 
         private final ThreadLocal<RoaringMask> temp;
 
         private RoaringMask[] bitmaps = new RoaringMask[4];
-        private int maskId = -1;
+        private int maskId = 0;
 
         private Store(int bufferSize, boolean direct) {
             this.storage = new OptimisedStorage(direct
                     ? ByteBuffer.allocateDirect(bufferSize)
                     : ByteBuffer.allocate(bufferSize));
             temp = ThreadLocal.withInitial(this::newMask);
+            bitmaps[0] = newMask();
         }
 
         @Override
@@ -161,7 +161,7 @@ public class RoaringMask implements Mask<RoaringMask> {
 
         @Override
         public RoaringMask getMask(int id) {
-            return id == -1 ? empty : bitmaps[id & (bitmaps.length - 1)];
+            return bitmaps[id & (bitmaps.length - 1)];
         }
 
         @Override
@@ -180,6 +180,11 @@ public class RoaringMask implements Mask<RoaringMask> {
         }
 
         @Override
+        public void andNot(int from, int into) {
+            bitmaps[into & (bitmaps.length - 1)].inPlaceAndNot(bitmaps[from & (bitmaps.length - 1)]);
+        }
+
+        @Override
         public void optimise(int id) {
             bitmaps[id & (bitmaps.length - 1)].optimise();
         }
@@ -191,17 +196,17 @@ public class RoaringMask implements Mask<RoaringMask> {
 
         @Override
         public RoaringMask getTemp(int copyAddress) {
-            return temp.get().resetTo(-1 == copyAddress ? empty : bitmaps[copyAddress & (bitmaps.length - 1)]);
+            return temp.get().resetTo(bitmaps[copyAddress & (bitmaps.length - 1)]);
         }
 
         @Override
         public void orInto(RoaringMask mask, int id) {
-            mask.inPlaceOr(-1 == id ? empty : bitmaps[id & (bitmaps.length - 1)]);
+            mask.inPlaceOr(bitmaps[id & (bitmaps.length - 1)]);
         }
 
         @Override
         public void andInto(RoaringMask mask, int id) {
-            mask.inPlaceAnd(-1 == id ? empty : bitmaps[id & (bitmaps.length - 1)]);
+            mask.inPlaceAnd(bitmaps[id & (bitmaps.length - 1)]);
         }
 
         @Override

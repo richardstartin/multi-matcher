@@ -32,13 +32,13 @@ public class PrefixNode<MaskType extends Mask<MaskType>> implements MutableNode<
     public int match(String value) {
         int position = longest;
         while (position > 0) {
-            int match = map.getOrDefault(value.substring(0, position), -1);
-            if (-1 != match) {
+            int match = map.getOrDefault(value.substring(0, position), 0);
+            if (0 != match) {
                 return match;
             }
             --position;
         }
-        return -1;
+        return 0;
     }
 
     @Override

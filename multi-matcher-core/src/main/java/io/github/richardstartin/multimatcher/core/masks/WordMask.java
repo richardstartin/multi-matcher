@@ -285,12 +285,12 @@ public class WordMask implements Mask<WordMask> {
 
         @Override
         public void add(int id, int bit) {
-            masks[id & (masks.length - 1)] |= (1L << bit);
+            masks[id & (masks.length - 1)] |= (1 << bit);
         }
 
         @Override
         public void remove(int id, int bit) {
-            masks[id & (masks.length - 1)] ^= (1L << bit);
+            masks[id & (masks.length - 1)] ^= (1 << bit);
         }
 
         @Override
@@ -315,7 +315,7 @@ public class WordMask implements Mask<WordMask> {
 
         @Override
         public WordMask contiguous(int max) {
-            return new WordMask(((1L << max) - 1));
+            return new WordMask(((1 << max) - 1));
         }
 
         @Override
@@ -327,7 +327,7 @@ public class WordMask implements Mask<WordMask> {
 
         @Override
         public boolean isEmpty(int id) {
-            return masks[id & (masks.length - 1)] == 0L;
+            return masks[id & (masks.length - 1)] == 0;
         }
 
         @Override
@@ -343,7 +343,7 @@ public class WordMask implements Mask<WordMask> {
         public double averageSelectivity(int[] ids, int min, int max) {
             int cardinality = 0;
             for (int i = min; i < max; ++i) {
-                cardinality += Long.bitCount(this.masks[ids[i]]);
+                cardinality += Integer.bitCount(this.masks[ids[i]]);
             }
             return ((double)cardinality)/masks.length;
         }
@@ -352,7 +352,7 @@ public class WordMask implements Mask<WordMask> {
         public double averageSelectivity(int[] masks) {
             int cardinality = 0;
             for (int i : masks) {
-                cardinality += Long.bitCount(this.masks[i]);
+                cardinality += Integer.bitCount(this.masks[i]);
             }
             return ((double)cardinality)/masks.length;
         }

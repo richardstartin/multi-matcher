@@ -11,8 +11,10 @@ import java.util.stream.LongStream;
 
 public class WordMask implements Mask<WordMask> {
 
-    public static MaskStore<WordMask> store() {
-        return new Store();
+    public static MaskStore<WordMask> store(int max) {
+        return max <= 32
+                ? new IntStore()
+                : new LongStore();
     }
 
     public static final int MAX_CAPACITY = 64;
@@ -21,6 +23,10 @@ public class WordMask implements Mask<WordMask> {
 
     public WordMask(long mask) {
         this.mask = mask;
+    }
+
+    public WordMask(int mask) {
+        this(mask & 0xFFFFFFFFL);
     }
 
     public WordMask() {
@@ -139,7 +145,7 @@ public class WordMask implements Mask<WordMask> {
         return Objects.hash(mask);
     }
 
-    private static final class Store implements MaskStore<WordMask> {
+    private static final class LongStore implements MaskStore<WordMask> {
 
         private long[] masks = new long[4];
 
@@ -220,6 +226,115 @@ public class WordMask implements Mask<WordMask> {
             long word = 0L;
             for (int v : values) {
                 word |= (1L << v);
+            }
+            return new WordMask(word);
+        }
+
+        @Override
+        public double averageSelectivity(int[] ids, int min, int max) {
+            int cardinality = 0;
+            for (int i = min; i < max; ++i) {
+                cardinality += Long.bitCount(this.masks[ids[i]]);
+            }
+            return ((double)cardinality)/masks.length;
+        }
+
+        @Override
+        public double averageSelectivity(int[] masks) {
+            int cardinality = 0;
+            for (int i : masks) {
+                cardinality += Long.bitCount(this.masks[i]);
+            }
+            return ((double)cardinality)/masks.length;
+        }
+
+        private void ensureCapacity(int maskId) {
+            if (maskId >= masks.length) {
+                masks = Arrays.copyOf(masks, masks.length * 2);
+            }
+        }
+    }
+
+    private static final class IntStore implements MaskStore<WordMask> {
+        private int[] masks = new int[4];
+
+        private int maskId = 0;
+
+        @Override
+        public WordMask newMask() {
+            return new WordMask(0L);
+        }
+
+        @Override
+        public int newMaskId() {
+            ensureCapacity(++maskId);
+            return maskId;
+        }
+
+        @Override
+        public int storeMask(WordMask mask) {
+            ensureCapacity(++maskId);
+            masks[maskId] = (int)mask.mask;
+            return maskId;
+        }
+
+        @Override
+        public WordMask getMask(int id) {
+            return new WordMask(masks[id & (masks.length - 1)]);
+        }
+
+        @Override
+        public void add(int id, int bit) {
+            masks[id & (masks.length - 1)] |= (1L << bit);
+        }
+
+        @Override
+        public void remove(int id, int bit) {
+            masks[id & (masks.length - 1)] ^= (1L << bit);
+        }
+
+        @Override
+        public void or(int from, int into) {
+            masks[into & (masks.length - 1)] |= masks[from & (masks.length - 1)];
+        }
+
+        @Override
+        public WordMask getTemp(int copyAddress) {
+            return new WordMask(masks[copyAddress & (masks.length - 1)]);
+        }
+
+        @Override
+        public void orInto(WordMask mask, int id) {
+            mask.mask |= masks[id & (masks.length - 1)];
+        }
+
+        @Override
+        public void andInto(WordMask mask, int id) {
+            mask.mask &= masks[id & (masks.length - 1)];
+        }
+
+        @Override
+        public WordMask contiguous(int max) {
+            return new WordMask(((1L << max) - 1));
+        }
+
+        @Override
+        public int newContiguousMaskId(int max) {
+            ensureCapacity(++maskId);
+            masks[maskId] = (1 << max) - 1;
+            return maskId;
+        }
+
+        @Override
+        public boolean isEmpty(int id) {
+            return masks[id & (masks.length - 1)] == 0L;
+        }
+
+        @Override
+        public WordMask of(int... values) {
+            int word = 0;
+            for (int v : values) {
+                word |= (1 << v);
             }
             return new WordMask(word);
         }

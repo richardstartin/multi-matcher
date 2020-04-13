@@ -18,7 +18,7 @@ class MaskTest {
     public void init() {
         bitmapMaskStore = BitsetMask.store(1 << 12);
         roaringMaskStore = RoaringMask.store(1024 * 1024, false);
-        wordMaskStore = WordMask.store();
+        wordMaskStore = WordMask.store(64);
     }
 
     @Test

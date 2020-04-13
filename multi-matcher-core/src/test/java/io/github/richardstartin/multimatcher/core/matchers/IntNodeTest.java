@@ -1,12 +1,22 @@
 package io.github.richardstartin.multimatcher.core.matchers;
 
+import io.github.richardstartin.multimatcher.core.Mask;
 import io.github.richardstartin.multimatcher.core.Operation;
 import io.github.richardstartin.multimatcher.core.masks.BitsetMask;
 import io.github.richardstartin.multimatcher.core.masks.MaskStore;
+import io.github.richardstartin.multimatcher.core.masks.RoaringMask;
+import io.github.richardstartin.multimatcher.core.masks.WordMask;
 import io.github.richardstartin.multimatcher.core.matchers.nodes.IntNode;
+import io.github.richardstartin.multimatcher.core.matchers.nodes.LongNode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static io.github.richardstartin.multimatcher.core.Mask.with;
 import static io.github.richardstartin.multimatcher.core.Mask.without;
@@ -19,128 +29,151 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class IntNodeTest {
 
 
-    @Test
-    public void testGreaterThan() {
-        MaskStore<BitsetMask> store = store(200);
-        IntNode<BitsetMask> node = build(store, 100, GT);
-        int mask = store.newContiguousMaskId(100);
-        assertTrue(store.getMask(node.match(0, mask)).isEmpty());
+    public static Stream<Arguments> stores() {
+        return IntStream.of(32, 64, 100, 200).boxed()
+                .flatMap(i -> {
+                    if (i <= 64) {
+                        return Stream.of(
+                                Arguments.of(i/2, WordMask.store(i)),
+                                Arguments.of(i/2, BitsetMask.store(i)),
+                                Arguments.of(i/2, RoaringMask.store(0, false))
+                        );
+                    } else {
+                        return Stream.of(
+                                Arguments.of(i/2, BitsetMask.store(i)),
+                                Arguments.of(i/2, RoaringMask.store(0, false))
+                        );
+                    }
+                });
+    }
+
+    @ParameterizedTest
+    @MethodSource("stores")
+    public <MaskType extends Mask<MaskType>> void testGreaterThan(int maxElement, MaskStore<MaskType> store) {
+        var node = build(store, maxElement, Operation.GT);
+        int mask = store.newContiguousMaskId(maxElement);
+        assertTrue(store.isEmpty(node.match(0, mask)));
         assertEquals(with(store.newMask(), 0), store.getMask(node.match(1, mask)));
     }
 
 
-    @Test
-    public void testGreaterThanOrEqual() {
-        MaskStore<BitsetMask> store = store(200);
-        IntNode<BitsetMask> node = build(store, 100, GE);
-        int mask = store.newContiguousMaskId(100);
+    @ParameterizedTest
+    @MethodSource("stores")
+    public <MaskType extends Mask<MaskType>> void testGreaterThanOrEqual(int maxElement, MaskStore<MaskType> store) {
+        var node = build(store, maxElement, Operation.GE);
+        int mask = store.newContiguousMaskId(maxElement);
         assertTrue(store.isEmpty(node.match(-1, mask)));
         assertEquals(with(store.newMask(), 0), store.getMask(node.match(0, mask)));
-        assertEquals(with(with(store.newMask(), 1), 0), store.getMask(node.match(10, mask)));
+        assertEquals(with(with(store.newMask(), 0), 1), store.getMask(node.match(10, mask)));
     }
 
-    @Test
-    public void testEqual() {
-        MaskStore<BitsetMask> store = store(200);
-        IntNode<BitsetMask> node = build(store, 100, EQ);
-        int mask = store.newContiguousMaskId(100);
+    @ParameterizedTest
+    @MethodSource("stores")
+    public <MaskType extends Mask<MaskType>> void testEqual(int maxElement, MaskStore<MaskType> store) {
+        var node = build(store, maxElement, Operation.EQ);
+        int mask = store.newContiguousMaskId(maxElement);
         assertTrue(store.isEmpty(node.match(-1, mask)));
         assertEquals(with(store.newMask(), 0), store.getMask(node.match(0, mask)));
         assertEquals(with(store.newMask(), 1), store.getMask(node.match(10, mask)));
     }
 
 
-    @Test
-    public void testLessThanOrEqual() {
-        MaskStore<BitsetMask> store = store(200);
-        IntNode<BitsetMask> node = build(store, 100, LE);
-        int mask = store.newContiguousMaskId(100);
+    @ParameterizedTest
+    @MethodSource("stores")
+    public <MaskType extends Mask<MaskType>> void testLessThanOrEqual(int maxElement, MaskStore<MaskType> store) {
+        var node = build(store, maxElement, Operation.LE);
+        int mask = store.newContiguousMaskId(maxElement);
         assertTrue(store.isEmpty(node.match(1001, mask)));
         assertEquals(store.getMask(mask), store.getMask(node.match(0, mask)));
-        assertEquals(without(store.getMask(mask).clone(), 0), store.getMask(node.match(10, mask)));
+        assertEquals(without(store.getMask(mask), 0), store.getMask(node.match(10, mask)));
     }
 
-    @Test
-    public void testLessThan() {
-        MaskStore<BitsetMask> store = store(200);
-        IntNode<BitsetMask> node = build(store, 100, LT);
-        int mask = store.newContiguousMaskId(100);
+    @ParameterizedTest
+    @MethodSource("stores")
+    public <MaskType extends Mask<MaskType>> void testLessThan(int maxElement, MaskStore<MaskType> store) {
+        var node = build(store, maxElement, Operation.LT);
+        int mask = store.newContiguousMaskId(maxElement);
         assertTrue(store.isEmpty(node.match(1001, mask)));
-        assertEquals(without(store.getMask(mask).clone(), 0), store.getMask(node.match(0, mask)));
-        assertEquals(without(without(store.getMask(mask).clone(), 0), 1), store.getMask(node.match(10, mask)));
+        assertEquals(without(store.getMask(mask).clone(), 0),
+                store.getMask(node.match(0, mask)));
+        assertEquals(without(without(store.getMask(mask).clone(), 0), 1),
+                store.getMask(node.match(10, mask)));
     }
 
-    @Test
-    public void testGreaterThanRev() {
-        MaskStore<BitsetMask> store = store(200);
-        IntNode<BitsetMask> node = buildRev(store, 100, GT);
-        int mask = store.newContiguousMaskId(100);
+    @ParameterizedTest
+    @MethodSource("stores")
+    public <MaskType extends Mask<MaskType>> void testGreaterThanRev(int maxElement, MaskStore<MaskType> store) {
+        var node = buildRev(store, maxElement, Operation.GT);
+        int mask = store.newContiguousMaskId(maxElement);
         assertTrue(store.isEmpty(node.match(0, mask)));
         assertEquals(with(store.newMask(), 0), store.getMask(node.match(1, mask)));
     }
 
+    @ParameterizedTest
+    @MethodSource("stores")
+    public <MaskType extends Mask<MaskType>> void testBuildNode(int maxElement, MaskStore<MaskType> store) {
+        var node = new LongNode<>(store, Operation.EQ);
+        node.add(0, 0);
+        assertEquals(store.contiguous(1), store.getMask(node.match(0, store.newContiguousMaskId(1))));
+        node.add(0, 1);
+        assertEquals(store.contiguous(2), store.getMask(node.match(0, store.newContiguousMaskId(2))));
+    }
 
-    @Test
-    public void testGreaterThanOrEqualRev() {
-        MaskStore<BitsetMask> store = store(200);
-        IntNode<BitsetMask> node = buildRev(store, 100, GE);
-        int mask = store.newContiguousMaskId(100);
+    @ParameterizedTest
+    @MethodSource("stores")
+    public <MaskType extends Mask<MaskType>> void testGreaterThanOrEqualRev(int maxElement, MaskStore<MaskType> store) {
+        var node = buildRev(store, maxElement, Operation.GE);
+        int mask = store.newContiguousMaskId(maxElement);
         assertTrue(store.isEmpty(node.match(-1, mask)));
         assertEquals(with(store.newMask(), 0), store.getMask(node.match(0, mask)));
         assertEquals(with(with(store.newMask(), 0), 1), store.getMask(node.match(10, mask)));
     }
 
-    @Test
-    public void testEqualRev() {
-        MaskStore<BitsetMask> factory = store(200);
-        IntNode<BitsetMask> node = buildRev(factory, 100, EQ);
-        int mask = factory.newContiguousMaskId(100);
-        assertTrue(factory.isEmpty(node.match(-1, mask)));
-        assertEquals(with(factory.newMask(), 0), factory.getMask(node.match(0, mask)));
-        assertEquals(with(factory.newMask(), 1), factory.getMask(node.match(10, mask)));
+    @ParameterizedTest
+    @MethodSource("stores")
+    public <MaskType extends Mask<MaskType>> void testEqualRev(int maxElement, MaskStore<MaskType> store) {
+        var node = buildRev(store, maxElement, Operation.EQ);
+        int mask = store.newContiguousMaskId(maxElement);
+        assertTrue(store.isEmpty(node.match(-1, mask)));
+        assertEquals(with(store.newMask(), 0), store.getMask(node.match(0, mask)));
+        assertEquals(with(store.newMask(), 1), store.getMask(node.match(10, mask)));
     }
 
 
-    @Test
-    public void testLessThanOrEqualRev() {
-        MaskStore<BitsetMask> factory = store(200);
-        IntNode<BitsetMask> node = buildRev(factory, 100, LE);
-        int mask = factory.newContiguousMaskId(100);
-        assertTrue(factory.isEmpty(node.match(1001, mask)));
-        assertEquals(factory.getMask(mask), factory.getMask(node.match(0, mask)));
-        assertEquals(without(factory.getMask(mask).clone(), 0), factory.getMask(node.match(10, mask)));
+    @ParameterizedTest
+    @MethodSource("stores")
+    public <MaskType extends Mask<MaskType>> void testLessThanOrEqualRev(int maxElement, MaskStore<MaskType> store) {
+        var node = buildRev(store, maxElement, Operation.LE);
+        int mask = store.newContiguousMaskId(maxElement);
+        assertTrue(store.isEmpty(node.match(1001, mask)));
+        assertEquals(store.getMask(mask), store.getMask(node.match(0, mask)));
+        assertEquals(without(store.getMask(mask).clone(), 0), store.getMask(node.match(10, mask)));
     }
 
-    @Test
-    public void testLessThanRev() {
-        MaskStore<BitsetMask> factory = store(200);
-        IntNode<BitsetMask> node = buildRev(factory, 100, LT);
-        int mask = factory.newContiguousMaskId(100);
-        assertTrue(factory.isEmpty(node.match(1001, mask)));
-        assertEquals(without(factory.getMask(mask).clone(), 0), factory.getMask(node.match(0, mask)));
-        assertEquals(without(without(factory.getMask(mask).clone(), 0), 1), factory.getMask(node.match(10, mask)));
+    @ParameterizedTest
+    @MethodSource("stores")
+    public <MaskType extends Mask<MaskType>> void testLessThanRev(int maxElement, MaskStore<MaskType> store) {
+        var node = buildRev(store, maxElement, Operation.LT);
+        int mask = store.newContiguousMaskId(maxElement);
+        assertTrue(store.isEmpty(node.match(1001, mask)));
+        assertEquals(without(store.getMask(mask).clone(), 0), store.getMask(node.match(0, mask)));
+        assertEquals(without(without(store.getMask(mask).clone(), 0), 1),
+                store.getMask(node.match(10, mask)));
     }
 
-    @Test
-    public void testBuildNode() {
-        MaskStore<BitsetMask> factory = store(200);
-        IntNode<BitsetMask> node = new IntNode<>(factory, EQ);
-        node.add(0, 0);
-        assertEquals(factory.contiguous(1), factory.getMask(node.match(0, factory.newContiguousMaskId(1))));
-        node.add(0, 1);
-        assertEquals(factory.contiguous(2), factory.getMask(node.match(0, factory.newContiguousMaskId(2))));
-    }
 
-    private IntNode<BitsetMask> build(MaskStore<BitsetMask> factory, int count, Operation relation) {
-        IntNode<BitsetMask> node = new IntNode<>(factory, relation);
+    private <MaskType extends Mask<MaskType>>
+    IntNode<MaskType> build(MaskStore<MaskType> store, int count, Operation relation) {
+        var node = new IntNode<>(store, relation);
         for (int i = 0; i < count; ++i) {
             node.add(i * 10, i);
         }
         return node.optimise();
     }
 
-    private IntNode<BitsetMask> buildRev(MaskStore<BitsetMask> factory, int count, Operation relation) {
-        IntNode<BitsetMask> node = new IntNode<>(factory, relation);
+    private <MaskType extends Mask<MaskType>>
+    IntNode<MaskType> buildRev(MaskStore<MaskType> store, int count, Operation relation) {
+        var node = new IntNode<>(store, relation);
         for (int i = count - 1; i >= 0; --i) {
             node.add(i * 10, i);
         }

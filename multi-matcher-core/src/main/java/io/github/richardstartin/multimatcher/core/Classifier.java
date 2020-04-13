@@ -104,7 +104,7 @@ public interface Classifier<T, C> {
         public Classifier<Input, Classification> build(List<MatchingConstraint<Key, Classification>> constraints) {
             int maxPriority = constraints.size();
             if (maxPriority < WordMask.MAX_CAPACITY) {
-                return build(constraints, WordMask.store(), maxPriority);
+                return build(constraints, WordMask.store(maxPriority), maxPriority);
             }
             if (maxPriority < BitsetMask.MAX_CAPACITY) {
                 return build(constraints, BitsetMask.store(maxPriority), maxPriority);

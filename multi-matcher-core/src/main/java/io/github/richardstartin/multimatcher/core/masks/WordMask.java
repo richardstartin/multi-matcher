@@ -56,6 +56,12 @@ public class WordMask implements Mask<WordMask> {
     }
 
     @Override
+    public WordMask inPlaceNot(int max) {
+        this.mask = (~mask) & ((1L << max) -1);
+        return this;
+    }
+
+    @Override
     public WordMask resetTo(Mask<WordMask> other) {
         this.mask = other.unwrap().mask;
         return this;
@@ -154,6 +160,13 @@ public class WordMask implements Mask<WordMask> {
         public int newMaskId(int copyAddress) {
             ensureCapacity(++maskId);
             masks[maskId] = masks[copyAddress];
+            return maskId;
+        }
+
+        @Override
+        public int storeMask(WordMask mask) {
+            ensureCapacity(++maskId);
+            masks[maskId] = mask.mask;
             return maskId;
         }
 

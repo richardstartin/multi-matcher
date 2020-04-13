@@ -14,6 +14,8 @@ public interface MaskStore<MaskType extends Mask<MaskType>> {
 
     int newMaskId(int copyAddress);
 
+    int storeMask(MaskType mask);
+
     MaskType getMask(int id);
 
     void add(int id, int bit);

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.google.common.collect.ImmutableMap;
 import io.github.richardstartin.multimatcher.core.schema.AttributeNotRegistered;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -11,6 +13,7 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Execution(ExecutionMode.CONCURRENT)
 public class ClassifierTest {
 
     @Test
@@ -322,13 +325,13 @@ public class ClassifierTest {
     public void testStringMatcher() throws IOException {
         Classifier<TestDomainObject, String> classifier = buildStringMatcher(() ->
                 Arrays.asList(MatchingConstraint.<String, String>anonymous()
-                                .startsWith("field1", "foo")
+                                .eq("field1", "foo")
                                 .eq("field3", "bar")
                                 .priority(0)
                                 .classification("RED")
                                 .build(),
                         MatchingConstraint.<String, String>anonymous()
-                                .startsWith("field1", "fo")
+                                .eq("field1", "foo")
                                 .priority(1)
                                 .classification("BLUE")
                                 .build()));

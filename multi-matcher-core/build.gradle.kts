@@ -20,5 +20,4 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
     failFast = true
-    maxParallelForks = 8
 }

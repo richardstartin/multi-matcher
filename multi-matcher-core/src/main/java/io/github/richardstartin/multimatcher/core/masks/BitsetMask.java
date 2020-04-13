@@ -94,6 +94,18 @@ public class BitsetMask implements Mask<BitsetMask> {
     }
 
     @Override
+    public BitsetMask inPlaceNot(int max) {
+        int wordIndex = max >>> 6;
+        for (int i = 0; i < wordIndex; ++i) {
+            bitset[i] = ~bitset[i];
+        }
+        if (wordIndex < bitset.length) {
+            bitset[wordIndex] = (~bitset[wordIndex]) & ((1L << max) - 1);
+        }
+        return this;
+    }
+
+    @Override
     public BitsetMask resetTo(Mask<BitsetMask> other) {
         if (other.isEmpty()) {
             if (firstNonEmptyWord != KNOWN_EMPTY) {
@@ -248,6 +260,13 @@ public class BitsetMask implements Mask<BitsetMask> {
         public int newMaskId(int copyAddress) {
             ensureCapacity(++maskId);
             bitsets[maskId] = bitsets[copyAddress].clone();
+            return maskId;
+        }
+
+        @Override
+        public int storeMask(BitsetMask mask) {
+            ensureCapacity(++maskId);
+            bitsets[maskId] = mask;
             return maskId;
         }
 

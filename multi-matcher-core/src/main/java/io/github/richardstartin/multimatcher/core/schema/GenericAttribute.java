@@ -6,6 +6,7 @@ import io.github.richardstartin.multimatcher.core.masks.MaskStore;
 import io.github.richardstartin.multimatcher.core.matchers.GenericConstraintAccumulator;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 
+import java.util.HashMap;
 import java.util.function.Function;
 
 /**
@@ -25,6 +26,6 @@ public class GenericAttribute<T, U> implements Attribute<T> {
     @Override
     public <MaskType extends Mask<MaskType>>
     ConstraintAccumulator<T, MaskType> newAccumulator(MaskStore<MaskType> maskStore, int max) {
-        return new GenericConstraintAccumulator<>(Object2IntOpenHashMap::new, accessor, maskStore, max);
+        return new GenericConstraintAccumulator<>(Object2IntOpenHashMap::new, HashMap::new, accessor, maskStore, max);
     }
 }

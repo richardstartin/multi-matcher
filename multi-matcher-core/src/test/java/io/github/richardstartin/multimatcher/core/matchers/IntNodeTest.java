@@ -5,6 +5,8 @@ import io.github.richardstartin.multimatcher.core.masks.BitsetMask;
 import io.github.richardstartin.multimatcher.core.masks.MaskStore;
 import io.github.richardstartin.multimatcher.core.matchers.nodes.IntNode;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 import static io.github.richardstartin.multimatcher.core.Mask.with;
 import static io.github.richardstartin.multimatcher.core.Mask.without;
@@ -13,6 +15,7 @@ import static io.github.richardstartin.multimatcher.core.masks.BitsetMask.store;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Execution(ExecutionMode.CONCURRENT)
 public class IntNodeTest {
 
 

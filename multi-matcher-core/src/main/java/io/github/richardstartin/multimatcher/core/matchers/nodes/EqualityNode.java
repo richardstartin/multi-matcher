@@ -23,7 +23,7 @@ public class EqualityNode<T, MaskType extends Mask<MaskType>> implements Mutable
         this.segments = segments;
     }
 
-    public void add(T segment, int priority) {
+    public void add(T segment, int priority, Operation op) {
         int maskId = segments.getOrDefault(segment, 0);
         if (0 == maskId) {
             maskId = store.newMaskId();

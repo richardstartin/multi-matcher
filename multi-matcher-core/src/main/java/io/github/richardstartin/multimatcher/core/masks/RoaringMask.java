@@ -57,6 +57,12 @@ public class RoaringMask implements Mask<RoaringMask> {
     }
 
     @Override
+    public RoaringMask inPlaceNot(int max) {
+        ((MutableRoaringBitmap) bitmap).flip(0L, max);
+        return this;
+    }
+
+    @Override
     public RoaringMask resetTo(Mask<RoaringMask> other) {
         this.bitmap = other.unwrap().bitmap.toMutableRoaringBitmap();
         return this;
@@ -156,6 +162,13 @@ public class RoaringMask implements Mask<RoaringMask> {
         public int newMaskId(int copyAddress) {
             ensureCapacity(++maskId);
             bitmaps[maskId] = bitmaps[copyAddress].clone();
+            return maskId;
+        }
+
+        @Override
+        public int storeMask(RoaringMask mask) {
+            ensureCapacity(++maskId);
+            bitmaps[maskId] = mask;
             return maskId;
         }
 

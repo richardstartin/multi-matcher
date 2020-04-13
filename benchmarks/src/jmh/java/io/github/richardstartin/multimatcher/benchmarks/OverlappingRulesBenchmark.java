@@ -36,7 +36,7 @@ public class OverlappingRulesBenchmark {
     }
 
 
-    @Param({"63", "1500", "15000", "20000"})
+    @Param({"32", "63", "1500", "15000", "20000"})
     int count;
 
     private List<TestDomainObject> inputs;

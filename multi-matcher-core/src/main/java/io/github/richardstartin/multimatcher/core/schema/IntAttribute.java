@@ -16,7 +16,7 @@ public class IntAttribute<T> implements Attribute<T> {
 
     private final ToIntFunction<T> accessor;
 
-    IntAttribute(ToIntFunction<T> accessor) {
+    public IntAttribute(ToIntFunction<T> accessor) {
         this.accessor = accessor;
     }
 

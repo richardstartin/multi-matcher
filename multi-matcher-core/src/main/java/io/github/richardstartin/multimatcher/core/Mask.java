@@ -25,6 +25,8 @@ public interface Mask<T extends Mask<T>> {
 
     T inPlaceOr(T other);
 
+    T inPlaceNot(int max);
+
     T resetTo(Mask<T> other);
 
     void clear();

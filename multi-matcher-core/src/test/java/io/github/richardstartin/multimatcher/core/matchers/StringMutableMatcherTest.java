@@ -2,6 +2,8 @@ package io.github.richardstartin.multimatcher.core.matchers;
 
 import io.github.richardstartin.multimatcher.core.masks.WordMask;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 import java.util.function.Function;
 
@@ -9,6 +11,7 @@ import static io.github.richardstartin.multimatcher.core.Constraint.equalTo;
 import static io.github.richardstartin.multimatcher.core.Constraint.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Execution(ExecutionMode.CONCURRENT)
 public class StringMutableMatcherTest {
 
     @Test

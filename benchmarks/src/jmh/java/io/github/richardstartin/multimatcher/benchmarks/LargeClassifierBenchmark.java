@@ -2,7 +2,7 @@ package io.github.richardstartin.multimatcher.benchmarks;
 
 import io.github.richardstartin.multimatcher.core.Classifier;
 import io.github.richardstartin.multimatcher.core.MatchingConstraint;
-import io.github.richardstartin.multimatcher.core.schema.Schema;
+import io.github.richardstartin.multimatcher.core.Schema;
 import org.openjdk.jmh.annotations.*;
 
 import java.util.HashMap;

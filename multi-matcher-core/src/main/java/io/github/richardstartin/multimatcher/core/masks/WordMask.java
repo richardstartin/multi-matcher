@@ -56,6 +56,12 @@ public class WordMask implements Mask<WordMask> {
     }
 
     @Override
+    public WordMask inPlaceNot(int max) {
+        this.mask = (~mask) & ((1L << max) -1);
+        return this;
+    }
+
+    @Override
     public WordMask resetTo(Mask<WordMask> other) {
         this.mask = other.unwrap().mask;
         return this;
@@ -134,11 +140,10 @@ public class WordMask implements Mask<WordMask> {
     }
 
     private static final class Store implements MaskStore<WordMask> {
-        private static final WordMask EMPTY = new WordMask(0L);
 
         private long[] masks = new long[4];
 
-        private int maskId = -1;
+        private int maskId = 0;
 
         @Override
         public WordMask newMask() {
@@ -159,8 +164,15 @@ public class WordMask implements Mask<WordMask> {
         }
 
         @Override
+        public int storeMask(WordMask mask) {
+            ensureCapacity(++maskId);
+            masks[maskId] = mask.mask;
+            return maskId;
+        }
+
+        @Override
         public WordMask getMask(int id) {
-            return id == -1 ? EMPTY : new WordMask(masks[id & (masks.length - 1)]);
+            return new WordMask(masks[id & (masks.length - 1)]);
         }
 
         @Override
@@ -179,6 +191,11 @@ public class WordMask implements Mask<WordMask> {
         }
 
         @Override
+        public void andNot(int from, int into) {
+            masks[into & (masks.length - 1)] &= ~masks[from & (masks.length - 1)];
+        }
+
+        @Override
         public void optimise(int id) {
 
         }
@@ -190,18 +207,17 @@ public class WordMask implements Mask<WordMask> {
 
         @Override
         public WordMask getTemp(int copyAddress) {
-            long word = copyAddress == -1 ? 0L : masks[copyAddress & (masks.length - 1)];
-            return new WordMask(word);
+            return new WordMask(masks[copyAddress & (masks.length - 1)]);
         }
 
         @Override
         public void orInto(WordMask mask, int id) {
-            mask.mask |= (id == -1 ? 0L : masks[id & (masks.length - 1)]);
+            mask.mask |= masks[id & (masks.length - 1)];
         }
 
         @Override
         public void andInto(WordMask mask, int id) {
-            mask.mask &= (id == -1 ? 0L : masks[id & (masks.length - 1)]);
+            mask.mask &= masks[id & (masks.length - 1)];
         }
 
         @Override

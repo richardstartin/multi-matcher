@@ -31,7 +31,7 @@ public class DoubleMatcher<T, MaskType extends Mask<MaskType>> implements Constr
         MaskType temp = store.getTemp(wildcards);
         double attributeValue = accessor.applyAsDouble(value);
         for (var component : children) {
-            store.orInto(temp, component.match(attributeValue, -1));
+            store.orInto(temp, component.match(attributeValue, 0));
         }
         context.inPlaceAnd(temp);
     }

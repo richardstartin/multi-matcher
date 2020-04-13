@@ -34,8 +34,8 @@ public class InequalityNode<T, MaskType extends Mask<MaskType>> implements Mutab
     }
 
     public void add(T segment, int priority) {
-        int maskId = segments.getOrDefault(segment, -1);
-        if (-1 == maskId) {
+        int maskId = segments.getOrDefault(segment, 0);
+        if (0 == maskId) {
             int newMaskId = store.newMaskId(wildcard);
             segments.put(segment, newMaskId);
             store.remove(newMaskId, priority);

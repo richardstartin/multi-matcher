@@ -8,6 +8,7 @@ import it.unimi.dsi.fastutil.Hash;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenCustomHashMap;
 
+import java.util.EnumMap;
 import java.util.function.Function;
 
 public class EnumAttribute<E extends Enum<E>, Input> implements Attribute<Input> {
@@ -23,7 +24,7 @@ public class EnumAttribute<E extends Enum<E>, Input> implements Attribute<Input>
     @Override
     public <MaskType extends Mask<MaskType>>
     ConstraintAccumulator<Input, MaskType> newAccumulator(MaskStore<MaskType> maskStore, int max) {
-        return new GenericConstraintAccumulator<>(this::newMap, accessor, maskStore, max);
+        return new GenericConstraintAccumulator<>(this::newMap, () -> new EnumMap<>(type), accessor, maskStore, max);
     }
 
 

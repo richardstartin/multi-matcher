@@ -5,10 +5,11 @@ import io.github.richardstartin.multimatcher.core.masks.BitsetMask;
 import io.github.richardstartin.multimatcher.core.masks.MaskStore;
 import io.github.richardstartin.multimatcher.core.masks.RoaringMask;
 import io.github.richardstartin.multimatcher.core.masks.WordMask;
-import io.github.richardstartin.multimatcher.core.schema.Schema;
 
 import java.util.*;
 import java.util.function.Consumer;
+
+import static java.util.Comparator.comparingInt;
 
 /**
  * Classifies objects according to constraints applied to
@@ -81,7 +82,7 @@ public interface Classifier<T, C> {
         }
 
         private static int order(int priority) {
-            return (1 << 31) - priority - 1;
+            return Integer.MAX_VALUE - priority;
         }
 
         public ClassifierBuilder<Key, Input, Classification> useDirectBuffers(boolean useDirectBuffers) {
@@ -117,7 +118,7 @@ public interface Classifier<T, C> {
                                                                 int max) {
             classifications = (Classification[]) new Object[max];
             int sequence = 0;
-            specs.sort(Comparator.comparingInt(rd -> order(rd.getPriority())));
+            specs.sort(comparingInt(rd -> order(rd.getPriority())));
             for (var spec : specs) {
                 addMatchingConstraint(spec, sequence++, maskStore, max);
             }
@@ -155,7 +156,7 @@ public interface Classifier<T, C> {
             for (var accumulator : accumulators.values()) {
                 matchers[i++] = accumulator.toMatcher();
             }
-            Arrays.sort(matchers, Comparator.comparingInt(x -> (int) (x.averageSelectivity() * 1000)));
+            Arrays.sort(matchers, comparingInt(x -> (int) (x.averageSelectivity() * 1000)));
             return (Matcher<Input, MaskType>[]) matchers;
         }
     }

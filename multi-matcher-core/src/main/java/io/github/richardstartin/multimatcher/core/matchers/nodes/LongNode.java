@@ -21,7 +21,6 @@ public class LongNode<MaskType extends Mask<MaskType>> {
         this.relation = relation;
         this.factory = factory;
         this.sets = new int[4];
-        Arrays.fill(sets, -1);
     }
 
     public void add(long value, int priority) {
@@ -29,7 +28,7 @@ public class LongNode<MaskType extends Mask<MaskType>> {
             ensureCapacity();
             int position = count;
             int maskId = sets[position];
-            if (-1 == maskId) {
+            if (0 == maskId) {
                 maskId = factory.newMaskId();
             }
             factory.add(maskId, priority);
@@ -103,31 +102,31 @@ public class LongNode<MaskType extends Mask<MaskType>> {
 
     private int findEqualityEncoded(long value) {
         int index = Arrays.binarySearch(thresholds, 0, count, value);
-        return index >= 0 ? sets[index] : -1;
+        return index >= 0 ? sets[index] : 0;
     }
 
     private int findRangeEncoded(long value) {
         int pos = Arrays.binarySearch(thresholds, 0, count, value);
         int index = (pos >= 0 ? pos : -(pos + 1)) - 1;
-        return index >= 0 && index < count ? sets[index] : -1;
+        return index >= 0 && index < count ? sets[index] : 0;
     }
 
     private int findRangeEncodedInclusive(long value) {
         int pos = Arrays.binarySearch(thresholds, 0, count, value);
         int index = (pos >= 0 ? pos : -(pos + 1) - 1);
-        return index >= 0 && index < count ? sets[index] : -1;
+        return index >= 0 && index < count ? sets[index] : 0;
     }
 
     private int findReverseRangeEncoded(long value) {
         int pos = Arrays.binarySearch(thresholds, 0, count, value);
         int index = (pos >= 0 ? pos + 1 : -(pos + 1));
-        return index >= 0 && index < count ? sets[index] : -1;
+        return index >= 0 && index < count ? sets[index] : 0;
     }
 
     private int findReverseRangeEncodedInclusive(long value) {
         int pos = Arrays.binarySearch(thresholds, 0, count, value);
         int index = (pos >= 0 ? pos : -(pos + 1));
-        return index < count ? sets[index] : -1;
+        return index < count ? sets[index] : 0;
     }
 
     private void reverseRangeEncode() {
@@ -153,7 +152,6 @@ public class LongNode<MaskType extends Mask<MaskType>> {
         int newCount = count + 1;
         if (newCount == thresholds.length) {
             sets = Arrays.copyOf(sets, newCount * 2);
-            Arrays.fill(sets, newCount, sets.length, -1);
             thresholds = Arrays.copyOf(thresholds, newCount * 2);
         }
     }

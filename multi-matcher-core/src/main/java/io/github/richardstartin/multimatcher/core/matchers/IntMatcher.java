@@ -31,7 +31,7 @@ public class IntMatcher<T, MaskType extends Mask<MaskType>> implements Constrain
         MaskType temp = store.getTemp(wildcards);
         int i = accessor.applyAsInt(value);
         for (var component : children) {
-            store.orInto(temp, component.match(i, -1));
+            store.orInto(temp, component.match(i, 0));
         }
         context.inPlaceAnd(temp);
     }

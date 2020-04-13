@@ -16,7 +16,7 @@ public class LongAttribute<T> implements Attribute<T> {
 
     private final ToLongFunction<T> accessor;
 
-    LongAttribute(ToLongFunction<T> accessor) {
+    public LongAttribute(ToLongFunction<T> accessor) {
         this.accessor = accessor;
     }
 

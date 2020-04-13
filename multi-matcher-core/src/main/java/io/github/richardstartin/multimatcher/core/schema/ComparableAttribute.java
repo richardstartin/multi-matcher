@@ -19,7 +19,7 @@ public class ComparableAttribute<T, U> implements Attribute<T> {
     private final Comparator<U> comparator;
     private final Function<T, U> accessor;
 
-    ComparableAttribute(Comparator<U> comparator, Function<T, U> accessor) {
+    public ComparableAttribute(Comparator<U> comparator, Function<T, U> accessor) {
         this.comparator = comparator;
         this.accessor = accessor;
     }

@@ -23,9 +23,9 @@ public class EqualityNode<T, MaskType extends Mask<MaskType>> implements Mutable
         this.segments = segments;
     }
 
-    public void add(T segment, int priority) {
-        int maskId = segments.getOrDefault(segment, -1);
-        if (-1 == maskId) {
+    public void add(T segment, int priority, Operation op) {
+        int maskId = segments.getOrDefault(segment, 0);
+        if (0 == maskId) {
             maskId = store.newMaskId();
             segments.put(segment, maskId);
         }
@@ -61,7 +61,7 @@ public class EqualityNode<T, MaskType extends Mask<MaskType>> implements Mutable
 
         @Override
         public int match(Input input) {
-            return segments.getOrDefault(input, -1);
+            return segments.getOrDefault(input, 0);
         }
 
         @Override

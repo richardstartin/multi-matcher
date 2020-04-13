@@ -159,13 +159,6 @@ public class RoaringMask implements Mask<RoaringMask> {
         }
 
         @Override
-        public int newMaskId(int copyAddress) {
-            ensureCapacity(++maskId);
-            bitmaps[maskId] = bitmaps[copyAddress].clone();
-            return maskId;
-        }
-
-        @Override
         public int storeMask(RoaringMask mask) {
             ensureCapacity(++maskId);
             bitmaps[maskId] = mask;
@@ -193,18 +186,8 @@ public class RoaringMask implements Mask<RoaringMask> {
         }
 
         @Override
-        public void andNot(int from, int into) {
-            bitmaps[into & (bitmaps.length - 1)].inPlaceAndNot(bitmaps[from & (bitmaps.length - 1)]);
-        }
-
-        @Override
         public void optimise(int id) {
             bitmaps[id & (bitmaps.length - 1)].optimise();
-        }
-
-        @Override
-        public RoaringMask getTemp() {
-            return temp.get();
         }
 
         @Override

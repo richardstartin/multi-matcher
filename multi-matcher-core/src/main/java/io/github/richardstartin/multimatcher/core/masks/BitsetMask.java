@@ -257,13 +257,6 @@ public class BitsetMask implements Mask<BitsetMask> {
         }
 
         @Override
-        public int newMaskId(int copyAddress) {
-            ensureCapacity(++maskId);
-            bitsets[maskId] = bitsets[copyAddress].clone();
-            return maskId;
-        }
-
-        @Override
         public int storeMask(BitsetMask mask) {
             ensureCapacity(++maskId);
             bitsets[maskId] = mask;
@@ -293,18 +286,8 @@ public class BitsetMask implements Mask<BitsetMask> {
         }
 
         @Override
-        public void andNot(int from, int into) {
-            bitsets[into & (bitsets.length - 1)].inPlaceAndNot(bitsets[from & (bitsets.length - 1)]);
-        }
-
-        @Override
         public void optimise(int id) {
             bitsets[id & (bitsets.length - 1)].optimise();
-        }
-
-        @Override
-        public BitsetMask getTemp() {
-            return temp.get();
         }
 
         @Override

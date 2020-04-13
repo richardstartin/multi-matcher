@@ -2,19 +2,14 @@ package io.github.richardstartin.multimatcher.core.matchers;
 
 import io.github.richardstartin.multimatcher.core.*;
 import io.github.richardstartin.multimatcher.core.masks.MaskStore;
-import io.github.richardstartin.multimatcher.core.matchers.nodes.EqualityNode;
-import io.github.richardstartin.multimatcher.core.matchers.nodes.InequalityNode;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 
-import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static io.github.richardstartin.multimatcher.core.Operation.EQ;
 import static io.github.richardstartin.multimatcher.core.Operation.NE;
-import static io.github.richardstartin.multimatcher.core.Utils.newArray;
 
 public class GenericConstraintAccumulator<T, U, MaskType extends Mask<MaskType>>
         implements ConstraintAccumulator<T, MaskType> {

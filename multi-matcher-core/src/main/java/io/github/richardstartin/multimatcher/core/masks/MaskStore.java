@@ -12,8 +12,6 @@ public interface MaskStore<MaskType extends Mask<MaskType>> {
 
     int newMaskId();
 
-    int newMaskId(int copyAddress);
-
     int storeMask(MaskType mask);
 
     MaskType getMask(int id);
@@ -24,11 +22,9 @@ public interface MaskStore<MaskType extends Mask<MaskType>> {
 
     void or(int from, int into);
 
-    void andNot(int from, int into);
-
-    void optimise(int id);
-
-    MaskType getTemp();
+    default void optimise(int id) {
+        
+    }
 
     MaskType getTemp(int copyAddress);
 

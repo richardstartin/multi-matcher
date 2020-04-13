@@ -157,13 +157,6 @@ public class WordMask implements Mask<WordMask> {
         }
 
         @Override
-        public int newMaskId(int copyAddress) {
-            ensureCapacity(++maskId);
-            masks[maskId] = masks[copyAddress];
-            return maskId;
-        }
-
-        @Override
         public int storeMask(WordMask mask) {
             ensureCapacity(++maskId);
             masks[maskId] = mask.mask;
@@ -188,21 +181,6 @@ public class WordMask implements Mask<WordMask> {
         @Override
         public void or(int from, int into) {
             masks[into & (masks.length - 1)] |= masks[from & (masks.length - 1)];
-        }
-
-        @Override
-        public void andNot(int from, int into) {
-            masks[into & (masks.length - 1)] &= ~masks[from & (masks.length - 1)];
-        }
-
-        @Override
-        public void optimise(int id) {
-
-        }
-
-        @Override
-        public WordMask getTemp() {
-            return new WordMask();
         }
 
         @Override

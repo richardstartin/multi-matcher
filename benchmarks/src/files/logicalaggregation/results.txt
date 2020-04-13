@@ -1,0 +1,17 @@
+Benchmark                                              (offset)  (sourceSize)  (targetSize)   Mode  Cnt   Score   Error   Units
+LogicalAggregationBenchmark.intersection                      0          1024           256  thrpt    5   6.118 ± 1.049  ops/us
+LogicalAggregationBenchmark.intersection:·asm                 0          1024           256  thrpt          NaN             ---
+LogicalAggregationBenchmark.intersection                    256          1024           256  thrpt    5   8.025 ± 1.413  ops/us
+LogicalAggregationBenchmark.intersection:·asm               256          1024           256  thrpt          NaN             ---
+LogicalAggregationBenchmark.intersection                    512          1024           256  thrpt    5   6.099 ± 1.363  ops/us
+LogicalAggregationBenchmark.intersection:·asm               512          1024           256  thrpt          NaN             ---
+LogicalAggregationBenchmark.intersection                    768          1024           256  thrpt    5   8.005 ± 1.472  ops/us
+LogicalAggregationBenchmark.intersection:·asm               768          1024           256  thrpt          NaN             ---
+LogicalAggregationBenchmark.intersectionNoOffset              0          1024           256  thrpt    5  13.596 ± 1.724  ops/us
+LogicalAggregationBenchmark.intersectionNoOffset:·asm         0          1024           256  thrpt          NaN             ---
+LogicalAggregationBenchmark.intersectionNoOffset            256          1024           256  thrpt    5  14.256 ± 3.171  ops/us
+LogicalAggregationBenchmark.intersectionNoOffset:·asm       256          1024           256  thrpt          NaN             ---
+LogicalAggregationBenchmark.intersectionNoOffset            512          1024           256  thrpt    5  13.948 ± 4.214  ops/us
+LogicalAggregationBenchmark.intersectionNoOffset:·asm       512          1024           256  thrpt          NaN             ---
+LogicalAggregationBenchmark.intersectionNoOffset            768          1024           256  thrpt    5  14.823 ± 3.453  ops/us
+LogicalAggregationBenchmark.intersectionNoOffset:·asm       768          1024           256  thrpt          NaN             ---

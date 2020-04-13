@@ -1,0 +1,232 @@
+# JMH version: 1.23
+# VM version: JDK 11.0.6, OpenJDK 64-Bit Server VM, 11.0.6+10-post-Ubuntu-1ubuntu118.04.1
+# VM invoker: /usr/lib/jvm/java-11-openjdk-amd64/bin/java
+# VM options: <none>
+# Warmup: 5 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Throughput, ops/time
+# Benchmark: io.github.richardstartin.multimatcher.benchmarks.LogicalAggregationBenchmark.intersection
+# Parameters: (offset = 0, sourceSize = 1024, targetSize = 256)
+
+# Run progress: 0.00% complete, ETA 00:01:20
+# Fork: 1 of 1
+# Preparing profilers: LinuxPerfAsmProfiler
+# Profilers consume stdout and stderr from target VM, use -v EXTRA to copy to console
+# Warmup Iteration   1: 5.262 ops/us
+# Warmup Iteration   2: 5.848 ops/us
+# Warmup Iteration   3: 6.010 ops/us
+# Warmup Iteration   4: 6.256 ops/us
+# Warmup Iteration   5: 6.187 ops/us
+Iteration   1: 6.212 ops/us
+Iteration   2: 6.092 ops/us
+Iteration   3: 6.319 ops/us
+Iteration   4: 6.309 ops/us
+Iteration   5: 5.659 ops/us
+# Processing profiler results: LinuxPerfAsmProfiler
+
+
+Result "io.github.richardstartin.multimatcher.benchmarks.LogicalAggregationBenchmark.intersection":
+  6.118 ±(99.9%) 1.049 ops/us [Average]
+  (min, avg, max) = (5.659, 6.118, 6.319), stdev = 0.273
+  CI (99.9%): [5.069, 7.167] (assumes normal distribution)
+
+Secondary result "io.github.richardstartin.multimatcher.benchmarks.LogicalAggregationBenchmark.intersection:·asm":
+PrintAssembly processed: 80907 total address lines.
+Perf output processed (skipped 8.390 seconds):
+ Column 1: cycles (4973 events)
+
+Hottest code regions (>10.00% "cycles" events):
+
+....[Hottest Region 1]..............................................................................
+c2, level 4, io.github.richardstartin.multimatcher.benchmarks.generated.LogicalAggregationBenchmark_intersection_jmhTest::intersection_thrpt_jmhStub, version 450 (253 bytes)
+
+                                                                 ; - io.github.richardstartin.multimatcher.benchmarks.generated.LogicalAggregationBenchmark_intersection_jmhTest::intersection_thrpt_jmhStub@17 (line 142)
+                   0x00007f5afc3f65b1: add    $0x30,%rsp
+                   0x00007f5afc3f65b5: pop    %rbp
+                   0x00007f5afc3f65b6: mov    0x108(%r15),%r10
+                   0x00007f5afc3f65bd: test   %eax,(%r10)        ;   {poll_return}
+                   0x00007f5afc3f65c0: retq
+                   0x00007f5afc3f65c1: data16 xchg %ax,%ax       ;*aload_0 {reexecute=0 rethrow=0 return_oop=0}
+                                                                 ; - io.github.richardstartin.multimatcher.benchmarks.LogicalAggregationBenchmark::intersection@11 (line 44)
+                                                                 ; - io.github.richardstartin.multimatcher.benchmarks.generated.LogicalAggregationBenchmark_intersection_jmhTest::intersection_thrpt_jmhStub@17 (line 142)
+         ↗     ↗   0x00007f5afc3f65c4: mov    %edx,%r8d
+  0.28%  │     │   0x00007f5afc3f65c7: add    %edi,%r8d
+  0.12%  │     │   0x00007f5afc3f65ca: mov    0x10(%rax,%r8,8),%r10
+         │     │   0x00007f5afc3f65cf: and    %r10,0x10(%r9,%rdx,8)  ;*lastore {reexecute=0 rethrow=0 return_oop=0}
+         │     │                                                 ; - io.github.richardstartin.multimatcher.benchmarks.LogicalAggregationBenchmark::intersection@30 (line 44)
+         │     │                                                 ; - io.github.richardstartin.multimatcher.benchmarks.generated.LogicalAggregationBenchmark_intersection_jmhTest::intersection_thrpt_jmhStub@17 (line 142)
+  0.99%  │     │   0x00007f5afc3f65d4: inc    %edx               ;*iinc {reexecute=0 rethrow=0 return_oop=0}
+         │     │                                                 ; - io.github.richardstartin.multimatcher.benchmarks.LogicalAggregationBenchmark::intersection@31 (line 43)
+         │     │                                                 ; - io.github.richardstartin.multimatcher.benchmarks.generated.LogicalAggregationBenchmark_intersection_jmhTest::intersection_thrpt_jmhStub@17 (line 142)
+         │     │   0x00007f5afc3f65d6: cmp    %r11d,%edx
+         ╰     │   0x00007f5afc3f65d9: jl     0x00007f5afc3f65c4  ;*if_icmpge {reexecute=0 rethrow=0 return_oop=0}
+               │                                                 ; - io.github.richardstartin.multimatcher.benchmarks.LogicalAggregationBenchmark::intersection@8 (line 43)
+               │                                                 ; - io.github.richardstartin.multimatcher.benchmarks.generated.LogicalAggregationBenchmark_intersection_jmhTest::intersection_thrpt_jmhStub@17 (line 142)
+          ↗    │↗  0x00007f5afc3f65db: mov    %rcx,%rdx
+          │    ││  0x00007f5afc3f65de: shl    $0x3,%rdx          ;*getfield target {reexecute=0 rethrow=0 return_oop=0}
+          │    ││                                                ; - io.github.richardstartin.multimatcher.benchmarks.LogicalAggregationBenchmark::intersection@4 (line 43)
+          │    ││                                                ; - io.github.richardstartin.multimatcher.benchmarks.generated.LogicalAggregationBenchmark_intersection_jmhTest::intersection_thrpt_jmhStub@17 (line 142)
+  0.14%   │    ││  0x00007f5afc3f65e2: mov    (%rsp),%rsi
+          │    ││  0x00007f5afc3f65e6: nop
+          │    ││  0x00007f5afc3f65e7: callq  0x00007f5af4936980  ; ImmutableOopMap{[64]=Oop [72]=Oop [80]=Oop [0]=Oop }
+          │    ││                                                ;*invokevirtual consume {reexecute=0 rethrow=0 return_oop=0}
+          │    ││                                                ; - io.github.richardstartin.multimatcher.benchmarks.LogicalAggregationBenchmark::intersection@42 (line 46)
+          │    ││                                                ; - io.github.richardstartin.multimatcher.benchmarks.generated.LogicalAggregationBenchmark_intersection_jmhTest::intersection_thrpt_jmhStub@17 (line 142)
+          │    ││                                                ;   {optimized virtual_call}
+          │    ││  0x00007f5afc3f65ec: mov    0x40(%rsp),%r10
+  0.16%   │    ││  0x00007f5afc3f65f1: movzbl 0x94(%r10),%r11d   ;*goto {reexecute=0 rethrow=0 return_oop=0}
+          │    ││                                                ; - io.github.richardstartin.multimatcher.benchmarks.LogicalAggregationBenchmark::intersection@34 (line 43)
+          │    ││                                                ; - io.github.richardstartin.multimatcher.benchmarks.generated.LogicalAggregationBenchmark_intersection_jmhTest::intersection_thrpt_jmhStub@17 (line 142)
+          │    ││  0x00007f5afc3f65f9: mov    0x108(%r15),%r10
+          │    ││  0x00007f5afc3f6600: add    $0x1,%rbp          ; ImmutableOopMap{[64]=Oop [72]=Oop [80]=Oop [0]=Oop }
+          │    ││                                                ;*ifeq {reexecute=1 rethrow=0 return_oop=0}
+          │    ││                                                ; - io.github.richardstartin.multimatcher.benchmarks.generated.LogicalAggregationBenchmark_intersection_jmhTest::intersection_thrpt_jmhStub@30 (line 144)
+  0.26%   │    ││  0x00007f5afc3f6604: test   %eax,(%r10)        ;   {poll}
+          │    ││  0x00007f5afc3f6607: test   %r11d,%r11d
+          │    ││  0x00007f5afc3f660a: jne    0x00007f5afc3f658f  ;*aload_1 {reexecute=0 rethrow=0 return_oop=0}
+          │    ││                                                ; - io.github.richardstartin.multimatcher.benchmarks.generated.LogicalAggregationBenchmark_intersection_jmhTest::intersection_thrpt_jmhStub@33 (line 145)
+          │    ││  0x00007f5afc3f6610: mov    0x50(%rsp),%r10
+          │    ││  0x00007f5afc3f6615: mov    0x1c(%r10),%ecx    ;*getfield target {reexecute=0 rethrow=0 return_oop=0}
+          │    ││                                                ; - io.github.richardstartin.multimatcher.benchmarks.LogicalAggregationBenchmark::intersection@4 (line 43)
+          │    ││                                                ; - io.github.richardstartin.multimatcher.benchmarks.generated.LogicalAggregationBenchmark_intersection_jmhTest::intersection_thrpt_jmhStub@17 (line 142)
+  0.18%   │    ││  0x00007f5afc3f6619: mov    0xc(%r12,%rcx,8),%r11d  ;*arraylength {reexecute=0 rethrow=0 return_oop=0}
+          │    ││                                                ; - io.github.richardstartin.multimatcher.benchmarks.LogicalAggregationBenchmark::intersection@7 (line 43)
+          │    ││                                                ; - io.github.richardstartin.multimatcher.benchmarks.generated.LogicalAggregationBenchmark_intersection_jmhTest::intersection_thrpt_jmhStub@17 (line 142)
+          │    ││                                                ; implicit exception: dispatches to 0x00007f5afc3f6728
+          │    ││  0x00007f5afc3f661e: test   %r11d,%r11d
+          ╰    ││  0x00007f5afc3f6621: jbe    0x00007f5afc3f65db  ;*if_icmpge {reexecute=0 rethrow=0 return_oop=0}
+               ││                                                ; - io.github.richardstartin.multimatcher.benchmarks.LogicalAggregationBenchmark::intersection@8 (line 43)
+               ││                                                ; - io.github.richardstartin.multimatcher.benchmarks.generated.LogicalAggregationBenchmark_intersection_jmhTest::intersection_thrpt_jmhStub@17 (line 142)
+               ││  0x00007f5afc3f6623: mov    %r11d,%r10d
+               ││  0x00007f5afc3f6626: dec    %r10d
+  0.32%        ││  0x00007f5afc3f6629: cmp    %r11d,%r10d
+           ╭   ││  0x00007f5afc3f662c: jae    0x00007f5afc3f66d7
+           │   ││  0x00007f5afc3f6632: mov    0x50(%rsp),%r10
+           │   ││  0x00007f5afc3f6637: mov    0x18(%r10),%r10d   ;*getfield source {reexecute=0 rethrow=0 return_oop=0}
+           │   ││                                                ; - io.github.richardstartin.multimatcher.benchmarks.LogicalAggregationBenchmark::intersection@19 (line 44)
+           │   ││                                                ; - io.github.richardstartin.multimatcher.benchmarks.generated.LogicalAggregationBenchmark_intersection_jmhTest::intersection_thrpt_jmhStub@17 (line 142)
+           │   ││  0x00007f5afc3f663b: mov    0xc(%r12,%r10,8),%r9d  ;*laload {reexecute=0 rethrow=0 return_oop=0}
+           │   ││                                                ; - io.github.richardstartin.multimatcher.benchmarks.LogicalAggregationBenchmark::intersection@28 (line 44)
+           │   ││                                                ; - io.github.richardstartin.multimatcher.benchmarks.generated.LogicalAggregationBenchmark_intersection_jmhTest::intersection_thrpt_jmhStub@17 (line 142)
+           │   ││                                                ; implicit exception: dispatches to 0x00007f5afc3f66d7
+  0.16%    │   ││  0x00007f5afc3f6640: mov    0x50(%rsp),%r8
+           │   ││  0x00007f5afc3f6645: mov    0x14(%r8),%edi     ;*getfield offset {reexecute=0 rethrow=0 return_oop=0}
+           │   ││                                                ; - io.github.richardstartin.multimatcher.benchmarks.LogicalAggregationBenchmark::intersection@23 (line 44)
+           │   ││                                                ; - io.github.richardstartin.multimatcher.benchmarks.generated.LogicalAggregationBenchmark_intersection_jmhTest::intersection_thrpt_jmhStub@17 (line 142)
+           │   ││  0x00007f5afc3f6649: cmp    %r9d,%edi
+           │╭  ││  0x00007f5afc3f664c: jae    0x00007f5afc3f66d7
+           ││  ││  0x00007f5afc3f6652: movslq %r11d,%r8
+  0.18%    ││  ││  0x00007f5afc3f6655: movslq %edi,%rbx
+           ││  ││  0x00007f5afc3f6658: add    %rbx,%r8
+           ││  ││  0x00007f5afc3f665b: movslq %r9d,%r9
+           ││  ││  0x00007f5afc3f665e: dec    %r8
+  0.12%    ││  ││  0x00007f5afc3f6661: cmp    %r9,%r8
+           ││╭ ││  0x00007f5afc3f6664: jae    0x00007f5afc3f66d7
+           │││ ││  0x00007f5afc3f6666: mov    %r11d,%r8d
+           │││ ││  0x00007f5afc3f6669: add    $0xfffffffd,%r8d
+           │││ ││  0x00007f5afc3f666d: lea    (%r12,%r10,8),%rax
+  0.12%    │││ ││  0x00007f5afc3f6671: mov    0x10(%rax,%rdi,8),%r10
+           │││ ││  0x00007f5afc3f6676: and    %r10,0x10(%r12,%rcx,8)  ;*lastore {reexecute=0 rethrow=0 return_oop=0}
+           │││ ││                                                ; - io.github.richardstartin.multimatcher.benchmarks.LogicalAggregationBenchmark::intersection@30 (line 44)
+           │││ ││                                                ; - io.github.richardstartin.multimatcher.benchmarks.generated.LogicalAggregationBenchmark_intersection_jmhTest::intersection_thrpt_jmhStub@17 (line 142)
+  0.04%    │││ ││  0x00007f5afc3f667b: lea    (%r12,%rcx,8),%r9
+           │││ ││  0x00007f5afc3f667f: cmp    $0x1,%r8d
+           │││ ││  0x00007f5afc3f6683: jle    0x00007f5afc3f66ea
+           │││ ││  0x00007f5afc3f6685: mov    $0x1,%edx
+           │││ ││  0x00007f5afc3f668a: nopw   0x0(%rax,%rax,1)   ;*aload_0 {reexecute=0 rethrow=0 return_oop=0}
+           │││ ││                                                ; - io.github.richardstartin.multimatcher.benchmarks.LogicalAggregationBenchmark::intersection@11 (line 44)
+           │││ ││                                                ; - io.github.richardstartin.multimatcher.benchmarks.generated.LogicalAggregationBenchmark_intersection_jmhTest::intersection_thrpt_jmhStub@17 (line 142)
+  0.40%    │││↗││  0x00007f5afc3f6690: movslq %edx,%rsi          ;*laload {reexecute=0 rethrow=0 return_oop=0}
+           ││││││                                                ; - io.github.richardstartin.multimatcher.benchmarks.LogicalAggregationBenchmark::intersection@17 (line 44)
+           ││││││                                                ; - io.github.richardstartin.multimatcher.benchmarks.generated.LogicalAggregationBenchmark_intersection_jmhTest::intersection_thrpt_jmhStub@17 (line 142)
+  0.64%    ││││││  0x00007f5afc3f6693: mov    %rbx,%r13
+ 10.30%    ││││││  0x00007f5afc3f6696: add    %rsi,%r13          ;*laload {reexecute=0 rethrow=0 return_oop=0}
+           ││││││                                                ; - io.github.richardstartin.multimatcher.benchmarks.LogicalAggregationBenchmark::intersection@28 (line 44)
+           ││││││                                                ; - io.github.richardstartin.multimatcher.benchmarks.generated.LogicalAggregationBenchmark_intersection_jmhTest::intersection_thrpt_jmhStub@17 (line 142)
+           ││││││  0x00007f5afc3f6699: mov    0x10(%rax,%r13,8),%r10
+  0.50%    ││││││  0x00007f5afc3f669e: and    %r10,0x10(%r9,%rsi,8)
+ 16.95%    ││││││  0x00007f5afc3f66a3: mov    0x18(%rax,%r13,8),%r10
+  1.01%    ││││││  0x00007f5afc3f66a8: and    %r10,0x18(%r9,%rsi,8)
+ 18.76%    ││││││  0x00007f5afc3f66ad: mov    0x20(%rax,%r13,8),%r10
+  1.83%    ││││││  0x00007f5afc3f66b2: and    %r10,0x20(%r9,%rsi,8)
+ 19.30%    ││││││  0x00007f5afc3f66b7: mov    0x28(%rax,%r13,8),%r10
+  1.63%    ││││││  0x00007f5afc3f66bc: and    %r10,0x28(%r9,%rsi,8)  ;*lastore {reexecute=0 rethrow=0 return_oop=0}
+           ││││││                                                ; - io.github.richardstartin.multimatcher.benchmarks.LogicalAggregationBenchmark::intersection@30 (line 44)
+           ││││││                                                ; - io.github.richardstartin.multimatcher.benchmarks.generated.LogicalAggregationBenchmark_intersection_jmhTest::intersection_thrpt_jmhStub@17 (line 142)
+ 20.47%    ││││││  0x00007f5afc3f66c1: add    $0x4,%edx          ;*iinc {reexecute=0 rethrow=0 return_oop=0}
+           ││││││                                                ; - io.github.richardstartin.multimatcher.benchmarks.LogicalAggregationBenchmark::intersection@31 (line 43)
+           ││││││                                                ; - io.github.richardstartin.multimatcher.benchmarks.generated.LogicalAggregationBenchmark_intersection_jmhTest::intersection_thrpt_jmhStub@17 (line 142)
+  0.04%    ││││││  0x00007f5afc3f66c4: cmp    %r8d,%edx
+           │││╰││  0x00007f5afc3f66c7: jl     0x00007f5afc3f6690  ;*if_icmpge {reexecute=0 rethrow=0 return_oop=0}
+           │││ ││                                                ; - io.github.richardstartin.multimatcher.benchmarks.LogicalAggregationBenchmark::intersection@8 (line 43)
+           │││ ││                                                ; - io.github.richardstartin.multimatcher.benchmarks.generated.LogicalAggregationBenchmark_intersection_jmhTest::intersection_thrpt_jmhStub@17 (line 142)
+           │││ ││  0x00007f5afc3f66c9: cmp    %r11d,%edx
+           │││ ╰│  0x00007f5afc3f66cc: jl     0x00007f5afc3f65c4
+           │││  ╰  0x00007f5afc3f66d2: jmpq   0x00007f5afc3f65db
+           ↘↘↘     0x00007f5afc3f66d7: mov    $0xffffff7e,%esi
+                   0x00007f5afc3f66dc: mov    %r11d,0x18(%rsp)
+....................................................................................................
+ 94.91%  <total for region 1>
+
+....[Hottest Regions]...............................................................................
+ 94.91%         c2, level 4  io.github.richardstartin.multimatcher.benchmarks.generated.LogicalAggregationBenchmark_intersection_jmhTest::intersection_thrpt_jmhStub, version 450 (253 bytes)
+  1.31%         c2, level 4  org.openjdk.jmh.infra.Blackhole::consume, version 398 (65 bytes)
+  0.76%   [kernel.kallsyms]  do_syscall_64 (1 bytes)
+  0.30%   [kernel.kallsyms]  entry_SYSCALL_64 (41 bytes)
+  0.24%   [kernel.kallsyms]  syscall_return_via_sysret (1 bytes)
+  0.08%   [kernel.kallsyms]  syscall_return_via_sysret (28 bytes)
+  0.06%   [kernel.kallsyms]  native_sched_clock (7 bytes)
+  0.06%   [kernel.kallsyms]  switch_fpu_return (0 bytes)
+  0.06%   [kernel.kallsyms]  psi_task_change (26 bytes)
+  0.06%   [kernel.kallsyms]  mutex_lock (0 bytes)
+  0.04%   [kernel.kallsyms]  __task_pid_nr_ns (6 bytes)
+  0.04%   [kernel.kallsyms]  update_cfs_group (10 bytes)
+  0.04%   [kernel.kallsyms]  fput_many (0 bytes)
+  0.04%   [kernel.kallsyms]  pipe_write (0 bytes)
+  0.04%   [kernel.kallsyms]  mutex_unlock (0 bytes)
+  0.04%   [kernel.kallsyms]  _raw_spin_lock_irqsave (0 bytes)
+  0.04%           libjvm.so  [unknown] (8 bytes)
+  0.04%        libc-2.27.so  syscall (0 bytes)
+  0.04%        libc-2.27.so  __memmove_avx_unaligned_erms (0 bytes)
+  0.02%   [kernel.kallsyms]  exit_to_usermode_loop (0 bytes)
+  1.75%  <...other 87 warm regions...>
+....................................................................................................
+ 99.98%  <totals>
+
+....[Hottest Methods (after inlining)]..............................................................
+ 94.91%         c2, level 4  io.github.richardstartin.multimatcher.benchmarks.generated.LogicalAggregationBenchmark_intersection_jmhTest::intersection_thrpt_jmhStub, version 450
+  1.31%         c2, level 4  org.openjdk.jmh.infra.Blackhole::consume, version 398
+  0.76%   [kernel.kallsyms]  do_syscall_64
+  0.58%           libjvm.so  [unknown]
+  0.32%   [kernel.kallsyms]  syscall_return_via_sysret
+  0.30%   [kernel.kallsyms]  entry_SYSCALL_64
+  0.08%   [kernel.kallsyms]  __task_pid_nr_ns
+  0.08%   [kernel.kallsyms]  psi_task_change
+  0.06%        libc-2.27.so  vfprintf
+  0.06%   [kernel.kallsyms]  native_sched_clock
+  0.06%   [kernel.kallsyms]  mutex_lock
+  0.06%      hsdis-amd64.so  print_insn
+  0.06%   [kernel.kallsyms]  switch_fpu_return
+  0.06%   [kernel.kallsyms]  pipe_write
+  0.04%   [kernel.kallsyms]  ksys_write
+  0.04%   [kernel.kallsyms]  update_load_avg
+  0.04%        libc-2.27.so  _IO_file_xsputn@@GLIBC_2.2.5
+  0.04%   [kernel.kallsyms]  fput_many
+  0.04%   [kernel.kallsyms]  update_cfs_group
+  0.04%   [kernel.kallsyms]  mutex_unlock
+  1.03%  <...other 47 warm methods...>
+....................................................................................................
+ 99.98%  <totals>
+
+....[Distribution by Source]........................................................................
+ 96.22%         c2, level 4
+  2.67%   [kernel.kallsyms]
+  0.58%           libjvm.so
+  0.34%        libc-2.27.so
+  0.08%      hsdis-amd64.so
+  0.06%         interpreter
+  0.02%      perf-12146.map
+....................................................................................................
+ 99.98%  <totals>

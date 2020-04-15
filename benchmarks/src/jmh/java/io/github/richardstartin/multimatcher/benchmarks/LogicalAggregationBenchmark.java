@@ -2,9 +2,6 @@ package io.github.richardstartin.multimatcher.benchmarks;
 
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
-import org.openjdk.jol.info.ClassData;
-import org.openjdk.jol.info.ClassLayout;
-import org.openjdk.jol.info.FieldLayout;
 import org.openjdk.jol.info.GraphLayout;
 
 import java.util.concurrent.ThreadLocalRandom;
@@ -26,10 +23,7 @@ public class LogicalAggregationBenchmark {
         @Param("1024")
         int sourceSize;
 
-        @Param({"0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
-                "10", "11", "12", "13", "14", "15", "16", "17", "18",
-                "19", "20", "21", "22", "23", "24", "25", "26", "27", "28",
-                "29", "30", "31", "32"})
+        @Param({"0", "8", "16", "24", "32", "40", "48", "56", "64"})
         int padding;
 
         long[] source;
@@ -43,12 +37,9 @@ public class LogicalAggregationBenchmark {
             target = new long[targetSize];
             fill(source);
             fill(target);
-            System.out.println(ClassLayout.parseInstance(source).toPrintable());
-            System.out.println(GraphLayout.parseInstance(source).toPrintable());
-            System.out.println(ClassLayout.parseInstance(gap).toPrintable());
-            System.out.println(GraphLayout.parseInstance(gap).toPrintable());
-            System.out.println(ClassLayout.parseInstance(target).toPrintable());
-            System.out.println(GraphLayout.parseInstance(target).toPrintable());
+            System.out.println("source:" + Long.toHexString(GraphLayout.parseInstance(source).startAddress()));
+            System.out.println("gap:" + Long.toHexString(GraphLayout.parseInstance(gap).startAddress()));
+            System.out.println("target:" + Long.toHexString(GraphLayout.parseInstance(target).startAddress()));
         }
 
         private static void fill(long[] data) {

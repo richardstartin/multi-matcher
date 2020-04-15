@@ -23,7 +23,8 @@ public class LogicalAggregationBenchmark {
         @Param("1024")
         int sourceSize;
 
-        @Param({"0", "8", "16", "24", "32", "40", "48", "56", "64", "72", "80", "88", "96", "104", "112", "120" })
+        @Param({"0", "8", "16", "24", "32", "40", "48", "56", "64", "72", "80", "88", "96", "104", "112", "120", "128", "136", "144", 
+                "152", "160", "168", "176", "184", "192", "200", "208", "216", "224", "232", "240", "248", "256" })
         int padding;
 
         long[] source;
@@ -59,6 +60,12 @@ public class LogicalAggregationBenchmark {
 
         private static final int offset = 0;
     }
+
+    public static class ConstantOffset512State extends BaseState {
+
+        private static final int offset = 512;
+    }
+
 
     public static class DynamicOffsetState extends BaseState {
         @Param({"0", "256", "512", "768"})
@@ -97,6 +104,19 @@ public class LogicalAggregationBenchmark {
         }
         bh.consume(target);
     }
+
+
+
+    @Benchmark
+    public void intersectionWithConstantOffset512(BaseState state, Blackhole bh) {
+        var target = state.target;
+        var source = state.source;
+        for (int i = 0; i < state.target.length; ++i) {
+            target[i] &= source[ConstantOffset512State.offset + i];
+        }
+        bh.consume(target);
+    }
+
 
 
     @Benchmark

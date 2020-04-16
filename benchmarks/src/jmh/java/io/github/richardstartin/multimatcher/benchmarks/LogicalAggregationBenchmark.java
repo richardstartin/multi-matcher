@@ -322,6 +322,11 @@ public class LogicalAggregationBenchmark {
         private static final int offset = 512;
     }
 
+    public static class ConstantOffset768State extends BaseState {
+
+        private static final int offset = 768;
+    }
+
 
     public static class DynamicOffsetState extends BaseState {
         @Param({"0", "256", "512", "768"})
@@ -372,6 +377,18 @@ public class LogicalAggregationBenchmark {
         }
         bh.consume(target);
     }
+
+
+    @Benchmark
+    public void intersectionWithConstantOffset768(BaseState state, Blackhole bh) {
+        var target = state.target;
+        var source = state.source;
+        for (int i = 0; i < state.target.length; ++i) {
+            target[i] &= source[ConstantOffset768State.offset + i];
+        }
+        bh.consume(target);
+    }
+
 
 
 
